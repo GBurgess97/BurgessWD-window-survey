@@ -301,19 +301,26 @@ async function mondayQuery(query){
 }
 
 async function uploadFileToMonday(itemId,columnId,fileName,blob){
-  // Convert blob to base64 to send through proxy
+  // Convert blob to base64
   const base64=await new Promise((resolve,reject)=>{
     const reader=new FileReader();
     reader.onload=()=>resolve(reader.result.split(',')[1]);
-    reader.onerror=reject;
+    reader.onerror=()=>reject(new Error('Failed to read PDF blob'));
     reader.readAsDataURL(blob);
   });
+  // Use text body to avoid Safari JSON.stringify limits on large strings
+  const payload=JSON.stringify({itemId:String(itemId),columnId:String(columnId),fileName,fileBase64:base64});
   const res=await fetch(PROXY_UPLOAD,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({itemId,columnId,fileName,fileBase64:base64})
+    body:payload
   });
+  if(!res.ok){
+    const txt=await res.text();
+    throw new Error('Upload function error '+res.status+': '+txt.slice(0,200));
+  }
   const data=await res.json();
+  if(data.error)throw new Error(data.error);
   if(data.errors)throw new Error(data.errors[0].message);
   return data;
 }
@@ -476,7 +483,7 @@ function sideStatusBadge(st){if(!st)return '<span class="badge badge-muted">—<
 function isTrickle(t){return TRICKLE_PRODUCTS.includes(t);}
 function isWindow(t){return WINDOW_PRODUCTS.includes(t);}
 function cillHeightDed(cill){return cill.heightEffect==='deduct'?cill.upstand:0;}
-function handlePropImages(e){Array.from(e.target.files).forEach(file=>{const r=new FileReader();r.onload=ev=>{propImages.push({name:file.name,dataUrl:ev.target.result});renderPropImages();};r.readAsDataURL(file);});e.target.value='';}
+function handlePropImages(e){Array.from(e.target.files).forEach(file=>{const r=new FileReader();r.onload=async ev=>{const compressed=await compressImage(ev.target.result,1000,1000,0.65);propImages.push({name:file.name,dataUrl:compressed});renderPropImages();};r.readAsDataURL(file);});e.target.value='';}
 function removePropImage(i){propImages.splice(i,1);renderPropImages();}
 function renderPropImages(){const grid=g('prop-img-grid');if(!grid)return;grid.innerHTML=propImages.map((img,i)=>`<div class="prop-img-thumb"><img src="${img.dataUrl}"><button onclick="removePropImage(${i})">×</button></div>`).join('');}
 function initCanvas(id){
@@ -514,7 +521,8 @@ function restoreItem(id){
 function onTypeChange(id,skipRecalc){const type=v(id+'-type');const openEl=g(id+'-opening');if(openEl){const opts=OPENING_OPTIONS[type]||['N/A'];openEl.innerHTML=opts.map(o=>`<option>${o}</option>`).join('');}const hr=g(id+'-hinge-row');if(hr)hr.style.display=isWindow(type)?'flex':'none';const vs=g(id+'-vent-section');if(vs)vs.style.display=isTrickle(type)?'block':'none';if(!skipRecalc)recalc(id);}
 function onCillChange(id){const cill=CILLS[v(id+'-cill-type')]||CILLS['No cill'];const projEl=g(id+'-cill-proj');if(projEl)projEl.placeholder=cill.projection>0?`Default: ${cill.projection}mm`:'N/A';recalc(id);}
 function setMethod(id,method){const item=items.find(i=>i.id===id);if(item)item.depthMethod=method;['intext','reveal'].forEach(m=>{g(id+'-mtab-'+m)?.classList.toggle('active',m===method);const el=g(id+'-method-'+m);if(el)el.style.display=m===method?'block':'none';});recalc(id);}
-function handleItemImage(id,side,event){const item=items.find(i=>i.id===id);if(!item)return;Array.from(event.target.files).forEach(file=>{const r=new FileReader();r.onload=ev=>{item.images[side].push({name:file.name,dataUrl:ev.target.result});renderItemImages(id);};r.readAsDataURL(file);});event.target.value='';}
+function compressImage(dataUrl,maxW,maxH,quality){return new Promise(resolve=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,maxW/img.width,maxH/img.height);const w=Math.round(img.width*scale),h=Math.round(img.height*scale);const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);resolve(c.toDataURL('image/jpeg',quality));};img.src=dataUrl;});}
+function handleItemImage(id,side,event){const item=items.find(i=>i.id===id);if(!item)return;Array.from(event.target.files).forEach(file=>{const r=new FileReader();r.onload=async ev=>{const compressed=await compressImage(ev.target.result,800,800,0.6);item.images[side].push({name:file.name,dataUrl:compressed});renderItemImages(id);};r.readAsDataURL(file);});event.target.value='';}
 function removeItemImage(id,side,idx){const item=items.find(i=>i.id===id);if(!item)return;item.images[side].splice(idx,1);renderItemImages(id);}
 function renderItemImages(id){const item=items.find(i=>i.id===id);if(!item)return;['inside','outside'].forEach(side=>{const grid=g(id+'-img-'+side);if(!grid)return;grid.innerHTML=(item.images[side]||[]).map((img,i)=>`<div class="img-thumb"><img src="${img.dataUrl}"><button onclick="removeItemImage('${id}','${side}',${i})">×</button></div>`).join('');});}
 function recalc(id){
