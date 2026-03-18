@@ -1,7 +1,21 @@
 // functions/monday-upload.js
-// Cloudflare Pages Function — proxies file uploads to Monday.com
+// Cloudflare Pages Function
 
-export async function onRequestPost(context) {
+export async function onRequest(context) {
+  if (context.request.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
+  }
+
+  if (context.request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+
   const token = context.env.MONDAY_TOKEN;
   if (!token) {
     return new Response(JSON.stringify({ error: 'MONDAY_TOKEN not configured' }), {
@@ -9,6 +23,7 @@ export async function onRequestPost(context) {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   }
+
   try {
     const { itemId, columnId, fileName, fileBase64 } = await context.request.json();
     const fileBuffer = Uint8Array.from(atob(fileBase64), c => c.charCodeAt(0));
@@ -23,10 +38,7 @@ export async function onRequestPost(context) {
     const totalLength = queryPart.length + mapPart.length + filePart.length + fileBuffer.length + endPart.length;
     const body = new Uint8Array(totalLength);
     let offset = 0;
-    [queryPart, mapPart, filePart, fileBuffer, endPart].forEach(part => {
-      body.set(part, offset);
-      offset += part.length;
-    });
+    [queryPart, mapPart, filePart, fileBuffer, endPart].forEach(part => { body.set(part, offset); offset += part.length; });
     const response = await fetch('https://api.monday.com/v2/file', {
       method: 'POST',
       headers: {
@@ -51,14 +63,4 @@ export async function onRequestPost(context) {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   }
-}
-
-export async function onRequestOptions() {
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    }
-  });
 }
