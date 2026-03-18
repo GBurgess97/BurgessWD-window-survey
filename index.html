@@ -371,6 +371,7 @@ function generateFullSurveyPDF(){
       ['Glazing',d.glz||'—','Colour',d.col||'—'],
       ['Cill type',d.cillType||'No cill','Projection',res.projection>0?res.projection+'mm':'—'],
       ['Vent size',d.ventSize&&d.ventSize!=='N/A'?d.ventSize:'N/A','Vent qty',d.ventSize&&d.ventSize!=='N/A'?(d.ventQty||'0'):'—'],
+      ['Internal width',d.iw?d.iw+' mm':'—','Internal height',d.ih?d.ih+' mm':'—'],
       ['Frame status',res.needsAddon?'ADD-ON NEEDED':'All fits','Sill depth',res.sillFrameTotal?res.sillFrameTotal+'mm':'—'],
     ];
     doc.setFontSize(9);
@@ -432,7 +433,7 @@ async function submitSurvey(){
     setStep(2,'active');
     const colData=await mondayQuery(`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`);
     const cols=colData.data.boards[0].columns;
-    const filesCol=cols.find(c=>c.type==='file');
+    const filesCol=cols.find(c=>c.title.toLowerCase().includes('surveyor upload'))||cols.find(c=>c.title.toLowerCase().includes('upload'))||cols.find(c=>c.type==='file');
     if(!filesCol)throw new Error('No Files column on board. Columns: '+cols.map(c=>c.title+'('+c.type+')').join(', '));
     setStep(2,'done',`Column: "${filesCol.title}"`);
     const dateStr=new Date().toISOString().slice(0,10);
