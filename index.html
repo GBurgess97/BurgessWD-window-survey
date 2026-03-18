@@ -267,13 +267,14 @@ function showTokenChange(){
 
 function initApp(){
   const params=new URLSearchParams(window.location.search);
-  mondayItemId=params.get('job')||localStorage.getItem('bwd_last_item')||'';
+  // Always read item ID from URL — never cache it, prevents wrong job uploads on mobile
+  mondayItemId=params.get('job')||'';
   const name=params.get('name')||'';
   const address=params.get('address')||'';
 
   if(name)document.getElementById('jobName').value=decodeURIComponent(name.replace(/\+/g,' '));
   if(address)document.getElementById('address').value=decodeURIComponent(address.replace(/\+/g,' '));
-  if(mondayItemId)localStorage.setItem('bwd_last_item',mondayItemId);
+  // Item ID is never cached — always comes fresh from the URL
 
   if(name||mondayItemId){
     const chip=document.getElementById('job-chip');
