@@ -206,18 +206,31 @@ async function loadJobs(){
   document.getElementById('stat-total').textContent='—';
 
   try{
+    // First fetch column metadata to get IDs by title
+    const colQuery=`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`;
+    const colRes=await fetch(PROXY_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:colQuery})});
+    const colData=await colRes.json();
+    if(colData.errors)throw new Error(colData.errors[0].message);
+    const columns=colData.data?.boards?.[0]?.columns||[];
+
+    // Find column IDs by title
+    const surveyorColId=columns.find(c=>c.title==='Surveyor'||c.type==='people')?.id||'';
+    const statusColId=columns.find(c=>c.title==='Survey Status'||c.title==='Status'||c.type==='color')?.id||'';
+    const dateColId=columns.find(c=>c.title.toLowerCase().includes('date')||c.type==='date')?.id||'';
+
+    // Now fetch items with column values
     const query=`query {
       boards(ids:${BOARD_ID}){
-        items_page(limit:100){
+        items_page(limit:200){
           items {
             id
             name
             column_values {
               id
-              title
               text
               ... on PeopleValue { persons_and_teams { id name } }
               ... on StatusValue { label }
+              ... on DateValue { date }
             }
           }
         }
@@ -238,21 +251,23 @@ async function loadJobs(){
 
     // Filter to jobs assigned to this surveyor
     allJobs=items.filter(item=>{
-      const surveyorCol=item.column_values.find(c=>c.title==='Surveyor');
+      const surveyorCol=item.column_values.find(c=>c.id===surveyorColId);
       if(!surveyorCol)return false;
-      // Check persons_and_teams array or text field
       const persons=surveyorCol.persons_and_teams||[];
-      const nameMatch=persons.some(p=>p.name.toLowerCase().includes(currentUser.toLowerCase())||currentUser.toLowerCase().includes(p.name.toLowerCase()));
-      const textMatch=surveyorCol.text&&surveyorCol.text.toLowerCase().includes(currentUser.toLowerCase());
+      const nameMatch=persons.some(p=>
+        p.name.toLowerCase().includes(currentUser.toLowerCase())||
+        currentUser.toLowerCase().includes(p.name.toLowerCase())
+      );
+      const textMatch=(surveyorCol.text||'').toLowerCase().includes(currentUser.toLowerCase());
       return nameMatch||textMatch;
     }).map(item=>{
-      const statusCol=item.column_values.find(c=>c.title==='Survey Status'||c.title==='Status');
-      const dateCol=item.column_values.find(c=>c.title==='Date'||c.title==='Survey Date'||c.title==='date');
+      const statusCol=item.column_values.find(c=>c.id===statusColId);
+      const dateCol=item.column_values.find(c=>c.id===dateColId);
       return{
         id:item.id,
         name:item.name,
         status:statusCol?.label||statusCol?.text||'—',
-        date:dateCol?.text||'',
+        date:dateCol?.date||dateCol?.text||'',
       };
     });
 
