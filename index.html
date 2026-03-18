@@ -158,6 +158,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   </div>
   <div class="app-header-right">
     <div class="job-chip" id="job-chip" style="display:none"></div>
+    <button id="portal-back-btn" onclick="goBackToPortal()" style="display:none;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">← Portal</button>
     <button class="btn btn-outline" onclick="showTab('survey')" style="background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.3);font-size:12px">Survey</button>
     <button class="btn btn-primary" onclick="generateOrder()" style="background:#fff;color:#1e40af;font-size:12px">Order ↗</button>
   </div>
@@ -275,6 +276,12 @@ function initApp(){
   if(name)document.getElementById('jobName').value=decodeURIComponent(name.replace(/\+/g,' '));
   if(address)document.getElementById('address').value=decodeURIComponent(address.replace(/\+/g,' '));
   // Item ID is never cached — always comes fresh from the URL
+  // Show back to portal button if opened from portal
+  const fromPortal=params.get('portal')||document.referrer.includes('Portal.html')||document.referrer.includes('portal.html');
+  if(fromPortal){
+    const btn=document.getElementById('portal-back-btn');
+    if(btn)btn.style.display='block';
+  }
 
   if(name||mondayItemId){
     const chip=document.getElementById('job-chip');
@@ -618,6 +625,10 @@ function generateOrder(){
   showTab('order');
 }
 function showTab(name){g('tab-survey').style.display=name==='survey'?'block':'none';g('tab-order').style.display=name==='order'?'block':'none';document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',(name==='survey'&&i===0)||(name==='order'&&i===1)));}
+
+function goBackToPortal(){
+  window.location.href='https://burgesswd-window-survey.pages.dev/Portal.html';
+}
 
 g('surveyDate').valueAsDate=new Date();
 initApp();
