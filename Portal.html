@@ -228,7 +228,7 @@ async function loadJobs(){
             column_values {
               id
               text
-              ... on PeopleValue { persons_and_teams { id name } }
+              ... on PeopleValue { persons_and_teams { id } }
               ... on StatusValue { label }
               ... on DateValue { date }
             }
@@ -253,13 +253,9 @@ async function loadJobs(){
     allJobs=items.filter(item=>{
       const surveyorCol=item.column_values.find(c=>c.id===surveyorColId);
       if(!surveyorCol)return false;
-      const persons=surveyorCol.persons_and_teams||[];
-      const nameMatch=persons.some(p=>
-        p.name.toLowerCase().includes(currentUser.toLowerCase())||
-        currentUser.toLowerCase().includes(p.name.toLowerCase())
-      );
+      // Match by text field which contains the person's display name
       const textMatch=(surveyorCol.text||'').toLowerCase().includes(currentUser.toLowerCase());
-      return nameMatch||textMatch;
+      return textMatch;
     }).map(item=>{
       const statusCol=item.column_values.find(c=>c.id===statusColId);
       const dateCol=item.column_values.find(c=>c.id===dateColId);
