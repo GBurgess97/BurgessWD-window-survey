@@ -1,81 +1,64 @@
-// netlify/functions/monday-upload.js
-// Proxies file uploads to Monday.com using form-data
+// functions/monday-upload.js
+// Cloudflare Pages Function — proxies file uploads to Monday.com
 
-exports.handler = async function(event) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
-
-  const token = process.env.MONDAY_TOKEN;
+export async function onRequestPost(context) {
+  const token = context.env.MONDAY_TOKEN;
   if (!token) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'MONDAY_TOKEN not set' })
-    };
+    return new Response(JSON.stringify({ error: 'MONDAY_TOKEN not configured' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
   }
-
   try {
-    const { itemId, columnId, fileName, fileBase64 } = JSON.parse(event.body);
-
-    const fileBuffer = Buffer.from(fileBase64, 'base64');
+    const { itemId, columnId, fileName, fileBase64 } = await context.request.json();
+    const fileBuffer = Uint8Array.from(atob(fileBase64), c => c.charCodeAt(0));
     const boundary = 'X' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
-
     const query = `mutation add_file($file: File!) { add_file_to_column(item_id: ${itemId}, column_id: "${columnId}", file: $file) { id } }`;
-
-    // Build multipart body
     const CRLF = '\r\n';
-    const queryPart = Buffer.from(
-      '--' + boundary + CRLF +
-      'Content-Disposition: form-data; name="query"' + CRLF + CRLF +
-      query + CRLF
-    );
-    const mapPart = Buffer.from(
-      '--' + boundary + CRLF +
-      'Content-Disposition: form-data; name="map"' + CRLF + CRLF +
-      '{"file":"variables.file"}' + CRLF
-    );
-    const filePart = Buffer.from(
-      '--' + boundary + CRLF +
-      'Content-Disposition: form-data; name="file"; filename="' + fileName + '"' + CRLF +
-      'Content-Type: application/pdf' + CRLF + CRLF
-    );
-    const endPart = Buffer.from(CRLF + '--' + boundary + '--' + CRLF);
-
-    const body = Buffer.concat([queryPart, mapPart, filePart, fileBuffer, endPart]);
-
+    const encoder = new TextEncoder();
+    const queryPart = encoder.encode('--' + boundary + CRLF + 'Content-Disposition: form-data; name="query"' + CRLF + CRLF + query + CRLF);
+    const mapPart = encoder.encode('--' + boundary + CRLF + 'Content-Disposition: form-data; name="map"' + CRLF + CRLF + '{"file":"variables.file"}' + CRLF);
+    const filePart = encoder.encode('--' + boundary + CRLF + 'Content-Disposition: form-data; name="file"; filename="' + fileName + '"' + CRLF + 'Content-Type: application/pdf' + CRLF + CRLF);
+    const endPart = encoder.encode(CRLF + '--' + boundary + '--' + CRLF);
+    const totalLength = queryPart.length + mapPart.length + filePart.length + fileBuffer.length + endPart.length;
+    const body = new Uint8Array(totalLength);
+    let offset = 0;
+    [queryPart, mapPart, filePart, fileBuffer, endPart].forEach(part => {
+      body.set(part, offset);
+      offset += part.length;
+    });
     const response = await fetch('https://api.monday.com/v2/file', {
       method: 'POST',
       headers: {
         'Authorization': token,
         'API-Version': '2024-01',
-        'Content-Type': 'multipart/form-data; boundary=' + boundary,
-        'Content-Length': String(body.length)
+        'Content-Type': 'multipart/form-data; boundary=' + boundary
       },
       body: body
     });
-
     const text = await response.text();
     let data;
     try { data = JSON.parse(text); } catch(e) { data = { raw: text }; }
-
-    if (!response.ok) {
-      throw new Error('Monday API returned ' + response.status + ': ' + text.slice(0, 200));
-    }
-    if (data.errors) {
-      throw new Error(data.errors[0].message);
-    }
-
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify(data)
-    };
-
+    if (!response.ok) throw new Error('Monday API returned ' + response.status + ': ' + text.slice(0, 200));
+    if (data.errors) throw new Error(data.errors[0].message);
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
   } catch (err) {
-    return {
-      statusCode: 500,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: err.message })
-    };
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
   }
-};
+}
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }
+  });
+}
