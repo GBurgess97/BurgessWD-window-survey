@@ -340,7 +340,7 @@ function updateStats(){
 
 function openJob(itemId,encodedName,isComplete){
   const name=decodeURIComponent(encodedName);
-  const url=SURVEY_URL+'?job='+itemId+'&name='+encodeURIComponent(name);
+  const url=SURVEY_URL+'?job='+itemId+'&name='+encodeURIComponent(name)+'&portal=1';
   window.location.href=url;
 }
 
