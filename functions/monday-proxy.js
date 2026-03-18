@@ -1,14 +1,30 @@
 // functions/monday-proxy.js
-// Cloudflare Pages Function — proxies Monday.com GraphQL API calls
+// Cloudflare Pages Function
 
-export async function onRequestPost(context) {
+export async function onRequest(context) {
+  // Handle CORS preflight
+  if (context.request.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
+  }
+
+  if (context.request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+
   const token = context.env.MONDAY_TOKEN;
   if (!token) {
-    return new Response(JSON.stringify({ error: 'MONDAY_TOKEN not configured' }), {
+    return new Response(JSON.stringify({ error: 'MONDAY_TOKEN not configured in Cloudflare environment variables' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   }
+
   try {
     const body = await context.request.json();
     const response = await fetch('https://api.monday.com/v2', {
@@ -31,14 +47,4 @@ export async function onRequestPost(context) {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   }
-}
-
-export async function onRequestOptions() {
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    }
-  });
 }
