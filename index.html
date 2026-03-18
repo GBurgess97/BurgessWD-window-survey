@@ -413,8 +413,8 @@ async function submitSurvey(){
   items.forEach(item=>{if(!item.saved)saveItem(item.id);});
   if(items.length===0){alert('Please add at least one survey item.');return;}
   try{localStorage.setItem('bwd_survey_'+Date.now(),JSON.stringify({meta:{jobName:v('jobName'),surveyDate:v('surveyDate'),surveyor:v('surveyor'),address:v('address'),savedAt:new Date().toISOString()},items:items.map(i=>({id:i.id,data:i.data,canvasData:i.canvasData}))}));}catch(e){}
-  const token=getToken();
-  if(!token){document.getElementById('setup-modal').style.display='flex';return;}
+  
+  
   if(!mondayItemId){alert('No Monday item ID found. Please open this page via the survey link from your Monday job.');return;}
   const btn=document.getElementById('submit-btn');btn.disabled=true;btn.textContent='Uploading...';
   const steps=['Generating full survey PDF','Generating clean order sheet PDF','Finding Surveyor Uploads column','Uploading full survey PDF','Uploading order sheet PDF','Adding survey note'];
