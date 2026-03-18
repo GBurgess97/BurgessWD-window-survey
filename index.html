@@ -425,8 +425,8 @@ async function submitSurvey(){
     setStep(2,'active');
     const colData=await mondayQuery(`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`);
     const cols=colData.data.boards[0].columns;
-    const filesCol=cols.find(c=>c.title.toLowerCase().includes('surveyor upload')||c.title.toLowerCase().includes('upload')||c.type==='file');
-    if(!filesCol)throw new Error(`No files column found. Available: ${cols.map(c=>c.title).join(', ')}`);
+    const filesCol=cols.find(c=>c.type==='file');
+    if(!filesCol)throw new Error('No Files column on board. Columns: '+cols.map(c=>c.title+'('+c.type+')').join(', '));
     setStep(2,'done',`Column: "${filesCol.title}"`);
     const dateStr=new Date().toISOString().slice(0,10);
     setStep(3,'active');await uploadFileToMonday(mondayItemId,filesCol.id,`${safeJob}_FullSurvey_${dateStr}.pdf`,fullPdf);setStep(3,'done');
