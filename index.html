@@ -3,16 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Window & Door Survey Tool — Burgess Windows & Doors</title>
+<title>Window & Door Survey — Burgess Windows & Doors</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f3;min-height:100vh}
-.app-header{background:#fff;border-bottom:1px solid #e5e5e5;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.app-title{font-size:16px;font-weight:600}
-.app-subtitle{font-size:12px;color:#888;margin-top:1px}
+.app-header{background:#1e40af;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.app-title{font-size:16px;font-weight:600;color:#fff}
+.app-subtitle{font-size:12px;color:#93c5fd;margin-top:1px}
+.app-header-right{display:flex;align-items:center;gap:10px}
+.job-chip{background:rgba(255,255,255,0.15);color:#fff;font-size:12px;padding:4px 10px;border-radius:6px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .container{max-width:960px;margin:0 auto;padding:20px 16px}
+
+/* First-time setup modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;border-radius:14px;padding:28px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+.modal-logo{width:48px;height:48px;background:#1e40af;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.modal-logo svg{width:28px;height:28px;fill:none;stroke:#fff;stroke-width:2}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:6px}
+.modal-sub{font-size:13px;color:#64748b;margin-bottom:20px;line-height:1.6}
+.modal-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.modal-field label{font-size:12px;font-weight:600;color:#374151}
+.modal-field input{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;transition:border-color 0.15s}
+.modal-field input:focus{border-color:#3b82f6}
+.modal-help{font-size:11px;color:#9ca3af;margin-top:4px}
+.modal-btn{width:100%;padding:12px;background:#1e40af;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.15s}
+.modal-btn:hover{background:#1d4ed8}
+.modal-btn:disabled{background:#93c5fd;cursor:not-allowed}
+.modal-note{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:10px 12px;font-size:12px;color:#166534;margin-top:12px}
+
+/* Token banner — shown when connected, small and unobtrusive */
+.token-banner{background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:8px 14px;margin-bottom:14px;display:none;align-items:center;justify-content:space-between;gap:10px}
+.token-banner-text{font-size:12px;color:#065f46;display:flex;align-items:center;gap:6px}
+.token-banner-change{font-size:11px;color:#059669;background:none;border:none;cursor:pointer;text-decoration:underline;font-family:inherit}
+
 .section{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:16px 18px;margin-bottom:14px}
 .section-title{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:10px}
@@ -31,7 +56,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .btn-danger{background:transparent;border:1px solid #fca5a5;color:#ef4444;padding:5px 10px;font-size:12px}.btn-danger:hover{background:#fef2f2}
 .btn-outline{background:transparent;border:1px solid #e0e0e0;color:#444}.btn-outline:hover{background:#f5f5f5}
 .btn-edit{background:transparent;border:1px solid #e0e0e0;color:#666;font-size:12px;padding:4px 10px}.btn-edit:hover{background:#f5f5f5}
-.btn-warn{background:#f59e0b;color:#fff}.btn-warn:hover{background:#d97706}
 .items-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .items-title{font-size:15px;font-weight:600}
 .item-card{border:1px solid #e5e5e5;border-radius:9px;margin-bottom:10px;overflow:hidden}
@@ -59,11 +83,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .img-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px}
 .img-thumb{position:relative;aspect-ratio:1;border-radius:7px;overflow:hidden;border:1px solid #e5e5e5}
 .img-thumb img{width:100%;height:100%;object-fit:cover}
-.img-thumb button{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center}
+.img-thumb button{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .prop-img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:10px}
 .prop-img-thumb{position:relative;aspect-ratio:4/3;border-radius:8px;overflow:hidden;border:1px solid #e5e5e5}
 .prop-img-thumb img{width:100%;height:100%;object-fit:cover}
-.prop-img-thumb button{position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center}
+.prop-img-thumb button{position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .tab-bar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
 .tab{padding:8px 18px;border:1px solid #e0e0e0;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500}
 .tab.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
@@ -72,7 +96,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .metric-val{font-size:22px;font-weight:700}
 .metric-lbl{font-size:11px;color:#888;margin-top:2px}
 .order-wrap{overflow-x:auto}
-.order-table{width:100%;border-collapse:collapse;font-size:12px;min-width:1200px}
+.order-table{width:100%;border-collapse:collapse;font-size:12px;min-width:1100px}
 .order-table th{text-align:left;padding:8px 10px;border-bottom:2px solid #e5e5e5;color:#666;font-weight:600;font-size:11px;white-space:nowrap;background:#fafafa}
 .order-table td{padding:7px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
 .badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;white-space:nowrap;font-weight:500}
@@ -97,13 +121,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .sketch-thumb{width:80px;height:56px;object-fit:contain;border:1px solid #e5e5e5;border-radius:5px}
 .bottom-bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 .bottom-bar .btn{flex:1;min-width:140px;padding:12px;font-size:14px}
-.config-panel{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:14px 18px;margin-bottom:14px}
-.config-title{font-size:13px;font-weight:600;color:#92400e;margin-bottom:8px}
-.config-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
-.config-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:180px}
-.config-field label{font-size:11px;color:#92400e;font-weight:500}
-.config-field input{padding:7px 10px;border:1px solid #fcd34d;border-radius:7px;font-size:13px;font-family:inherit;background:#fff;outline:none}
-.config-saved{background:#ecfdf5;border:1px solid #6ee7b7;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#065f46;display:none;align-items:center;justify-content:space-between}
 .upload-progress{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-top:10px;display:none}
 .progress-title{font-size:13px;font-weight:500;color:#1e40af;margin-bottom:8px}
 .progress-step{display:flex;align-items:center;gap:8px;font-size:12px;color:#64748b;margin-bottom:4px}
@@ -115,37 +132,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 </style>
 </head>
 <body>
+
+<!-- First-time setup modal -->
+<div class="modal-overlay" id="setup-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-logo">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    </div>
+    <div class="modal-title">Welcome to the Survey Tool</div>
+    <div class="modal-sub">Surveys upload automatically to Monday when you submit. No setup needed.</div>
+    <div class="modal-field">
+      <label>Monday.com API v2 token</label>
+      <input type="password" id="setup-token" placeholder="Paste your token here" oninput="checkSetupReady()">
+      <div class="modal-help">Find it in Monday → profile picture → Administration → API → copy the v2 token</div>
+    </div>
+    <button class="modal-btn" id="setup-save-btn" onclick="completeSetup()" disabled>Save &amp; start survey</button>
+    <div class="modal-note">Your token is saved only on this device and never shared with anyone. It gives the app permission to upload your survey PDFs to Monday.</div>
+  </div>
+</div>
+
 <div class="app-header">
   <div>
     <div class="app-title">Burgess Windows &amp; Doors</div>
     <div class="app-subtitle">Window &amp; Door Survey Tool</div>
   </div>
-  <div style="display:flex;gap:8px">
-    <button class="btn btn-outline" onclick="showTab('survey')">Survey</button>
-    <button class="btn btn-primary" onclick="generateOrder()">View Order ↗</button>
+  <div class="app-header-right">
+    <div class="job-chip" id="job-chip" style="display:none"></div>
+    <button class="btn btn-outline" onclick="showTab('survey')" style="background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.3);font-size:12px">Survey</button>
+    <button class="btn btn-primary" onclick="generateOrder()" style="background:#fff;color:#1e40af;font-size:12px">Order ↗</button>
   </div>
 </div>
+
 <div class="container">
 
-  <div id="config-saved" class="config-saved">
-    <span>Monday.com connected — surveys will upload automatically on submit.</span>
-    <button onclick="resetConfig()" style="background:none;border:none;color:#059669;cursor:pointer;font-size:12px;text-decoration:underline;margin-left:12px">Change</button>
-  </div>
-  <div id="config-panel" class="config-panel">
-    <div class="config-title">Monday.com connection</div>
-    <div style="font-size:12px;color:#92400e;margin-bottom:10px">Enter your API token once — saved on this device only, never sent to GitHub.</div>
-    <div class="config-row">
-      <div class="config-field">
-        <label>Monday.com API v2 token</label>
-        <input type="password" id="mondayToken" placeholder="Paste your token here">
-      </div>
-      <div class="config-field" style="max-width:200px">
-        <label>Monday item ID (from job URL)</label>
-        <input type="text" id="mondayItemId" placeholder="e.g. 1234567890">
-      </div>
-      <button class="btn btn-warn" onclick="saveConfig()" style="align-self:flex-end">Save &amp; connect</button>
+  <!-- Small connected banner -->
+  <div class="token-banner" id="token-banner">
+    <div class="token-banner-text">
+      <span style="color:#10b981">●</span>
+      Monday.com connected — surveys upload automatically on submit
     </div>
-    <div style="font-size:11px;color:#b45309;margin-top:8px">Find token: Monday → profile picture → Administration → API → copy v2 token. Item ID: click job in Monday → number in URL after /pulses/</div>
+    <button class="token-banner-change" onclick="showTokenChange()">Change token</button>
   </div>
 
   <div class="tab-bar">
@@ -198,11 +224,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           <thead><tr>
             <th>#</th><th>Location</th><th>Product</th><th>Qty</th><th>Basis</th>
             <th>Survey W×H</th><th>Order W×H</th><th>W ded.</th><th>H ded.</th>
-            <th>Cill type</th><th>Upstand</th><th>Projection</th>
+            <th>Cill</th><th>Upstand</th><th>Proj.</th>
             <th>Opening</th><th>Hinge</th><th>Glass</th><th>Finish</th>
-            <th>Vent size</th><th>Vent qty</th>
+            <th>Vent</th><th>Qty</th>
             <th>Left</th><th>Right</th><th>Head</th><th>Sill</th>
-            <th>Frame status</th><th>Sketch</th><th>Colour</th><th>Glazing</th><th>Notes</th>
+            <th>Status</th><th>Sketch</th><th>Colour</th><th>Glazing</th><th>Notes</th>
           </tr></thead>
           <tbody id="order-body"></tbody>
         </table>
@@ -216,64 +242,89 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 </div>
 
 <script>
-// ── Config & Monday ─────────────────────────────────────────────
+// ── Monday config ───────────────────────────────────────────────
 const BOARD_ID='18402849501';
-const MONDAY_API='https://api.monday.com/v2';
-const MONDAY_FILE_API='https://api.monday.com/v2/file';
+// Routes through Netlify proxy functions — no CORS issues
+const PROXY_API='/.netlify/functions/monday-proxy';
+const PROXY_UPLOAD='/.netlify/functions/monday-upload';
 
-function saveConfig(){
-  const token=document.getElementById('mondayToken').value.trim();
-  const itemId=document.getElementById('mondayItemId').value.trim();
-  if(!token){alert('Please enter your API token.');return;}
-  localStorage.setItem('bwd_token',token);
-  if(itemId)localStorage.setItem('bwd_item',itemId);
-  document.getElementById('config-panel').style.display='none';
-  document.getElementById('config-saved').style.display='flex';
+let mondayItemId='';
+
+function checkSetupReady(){
+  // No token needed — stored in Netlify env vars
+  document.getElementById('setup-save-btn').disabled=false;
 }
-function resetConfig(){
-  document.getElementById('config-panel').style.display='block';
-  document.getElementById('config-saved').style.display='none';
-  const t=localStorage.getItem('bwd_token');
-  if(t)document.getElementById('mondayToken').value=t;
+
+function completeSetup(){
+  document.getElementById('setup-modal').style.display='none';
+  document.getElementById('token-banner').style.display='flex';
+  localStorage.setItem('bwd_setup_done','1');
 }
-function loadConfig(){
-  const token=localStorage.getItem('bwd_token');
-  const itemId=localStorage.getItem('bwd_item');
-  if(token){document.getElementById('mondayToken').value=token;document.getElementById('config-panel').style.display='none';document.getElementById('config-saved').style.display='flex';}
-  if(itemId)document.getElementById('mondayItemId').value=itemId;
+
+function showTokenChange(){
+  document.getElementById('setup-modal').style.display='flex';
+}
+
+function initApp(){
   const params=new URLSearchParams(window.location.search);
-  if(params.get('job')){
-    document.getElementById('mondayItemId').value=params.get('job');
-    localStorage.setItem('bwd_item',params.get('job'));
-    const name=params.get('name');
-    if(name)document.getElementById('jobName').value=decodeURIComponent(name);
+  mondayItemId=params.get('job')||localStorage.getItem('bwd_last_item')||'';
+  const name=params.get('name')||'';
+  const address=params.get('address')||'';
+
+  if(name)document.getElementById('jobName').value=decodeURIComponent(name.replace(/\+/g,' '));
+  if(address)document.getElementById('address').value=decodeURIComponent(address.replace(/\+/g,' '));
+  if(mondayItemId)localStorage.setItem('bwd_last_item',mondayItemId);
+
+  if(name||mondayItemId){
+    const chip=document.getElementById('job-chip');
+    chip.textContent=name?decodeURIComponent(name.replace(/\+/g,' ')):`Job #${mondayItemId}`;
+    chip.style.display='block';
+  }
+
+  // Show setup modal only on very first visit
+  if(!localStorage.getItem('bwd_setup_done')){
+    document.getElementById('setup-modal').style.display='flex';
+  } else {
+    document.getElementById('token-banner').style.display='flex';
   }
 }
-function getToken(){return localStorage.getItem('bwd_token')||'';}
-function getItemId(){return document.getElementById('mondayItemId').value.trim()||localStorage.getItem('bwd_item')||'';}
 
 async function mondayQuery(query){
-  const res=await fetch(MONDAY_API,{method:'POST',headers:{'Content-Type':'application/json','Authorization':getToken(),'API-Version':'2024-01'},body:JSON.stringify({query})});
+  const res=await fetch(PROXY_API,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({query})
+  });
   const data=await res.json();
   if(data.errors)throw new Error(data.errors[0].message);
   return data;
 }
+
 async function uploadFileToMonday(itemId,columnId,fileName,blob){
-  const formData=new FormData();
-  formData.append('query',`mutation add_file($file: File!) { add_file_to_column(item_id: ${itemId}, column_id: "${columnId}", file: $file) { id } }`);
-  formData.append('variables[file]',blob,fileName);
-  const res=await fetch(MONDAY_FILE_API,{method:'POST',headers:{'Authorization':getToken(),'API-Version':'2024-01'},body:formData});
+  // Convert blob to base64 to send through proxy
+  const base64=await new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result.split(',')[1]);
+    reader.onerror=reject;
+    reader.readAsDataURL(blob);
+  });
+  const res=await fetch(PROXY_UPLOAD,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({itemId,columnId,fileName,fileBase64:base64})
+  });
   const data=await res.json();
   if(data.errors)throw new Error(data.errors[0].message);
   return data;
 }
+
 async function addUpdate(itemId,text){
   return mondayQuery(`mutation { create_update(item_id: ${itemId}, body: "${text.replace(/"/g,'\\"').replace(/\n/g,'\\n')}") { id } }`);
 }
 
 // Progress UI
 function showProgress(steps){
-  const box=document.getElementById('upload-progress');box.style.display='block';
+  document.getElementById('upload-progress').style.display='block';
   document.getElementById('progress-steps').innerHTML=steps.map((s,i)=>`<div class="progress-step wait" id="ps${i}"><div class="step-icon wait" id="pi${i}">○</div><span id="pt${i}">${s}</span></div>`).join('');
 }
 function setStep(i,status,text){
@@ -289,7 +340,7 @@ function generateFullSurveyPDF(){
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   const jobName=v('jobName')||'Survey',surveyDate=v('surveyDate')||'',surveyor=v('surveyor')||'—',address=v('address')||'—';
-  doc.setFillColor(37,99,235);doc.rect(0,0,210,28,'F');
+  doc.setFillColor(30,64,175);doc.rect(0,0,210,28,'F');
   doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont('helvetica','bold');
   doc.text('Burgess Windows & Doors',14,12);
   doc.setFontSize(10);doc.setFont('helvetica','normal');doc.text('Window & Door Survey Report',14,20);
@@ -323,18 +374,13 @@ function generateFullSurveyPDF(){
       doc.setFont('helvetica','bold');doc.setTextColor(100,100,100);doc.text(row[2]+':',110,y);
       doc.setFont('helvetica','normal');doc.setTextColor(30,30,30);doc.text(String(row[3]),150,y);y+=5.5;
     });
-    if(d.iw||d.ih){
-      doc.setFont('helvetica','italic');doc.setFontSize(8.5);doc.setTextColor(120,120,120);
-      doc.text(`Wall: L=${res.wallLeft||'—'}mm  R=${res.wallRight||'—'}mm  Head=${res.wallHead||'—'}mm  Sill=${res.wallSill||'—'}mm`,14,y);y+=5;
-    }
+    if(d.iw||d.ih){doc.setFont('helvetica','italic');doc.setFontSize(8.5);doc.setTextColor(120,120,120);doc.text(`Wall: L=${res.wallLeft||'—'}mm  R=${res.wallRight||'—'}mm  Head=${res.wallHead||'—'}mm  Sill=${res.wallSill||'—'}mm`,14,y);y+=5;}
     if(item.canvasData){try{if(y>220){doc.addPage();y=20;}doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(100,100,100);doc.text('Design sketch:',14,y);y+=3;doc.addImage(item.canvasData,'PNG',14,y,80,45);y+=48;}catch(e){}}
     const allPhotos=[...item.images.inside,...item.images.outside];
     if(allPhotos.length>0){
       if(y>220){doc.addPage();y=20;}
       doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(100,100,100);doc.text('Photos:',14,y);y+=3;
-      let px=14;
-      allPhotos.slice(0,4).forEach(photo=>{try{if(px+42>200){px=14;y+=35;}if(y>240){doc.addPage();y=20;px=14;}doc.addImage(photo.dataUrl,'JPEG',px,y,38,30);px+=42;}catch(e){}});
-      y+=33;
+      let px=14;allPhotos.slice(0,4).forEach(photo=>{try{if(px+42>200){px=14;y+=35;}if(y>240){doc.addPage();y=20;px=14;}doc.addImage(photo.dataUrl,'JPEG',px,y,38,30);px+=42;}catch(e){}});y+=33;
     }
     if(d.notes){doc.setFont('helvetica','italic');doc.setFontSize(8.5);doc.setTextColor(120,120,120);doc.text('Notes: '+d.notes,14,y);y+=5;}
     doc.setDrawColor(230,230,230);doc.line(10,y,200,y);y+=6;
@@ -348,7 +394,7 @@ function generateOrderSheetPDF(){
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
   const jobName=v('jobName')||'Survey';
-  doc.setFillColor(37,99,235);doc.rect(0,0,297,20,'F');
+  doc.setFillColor(30,64,175);doc.rect(0,0,297,20,'F');
   doc.setTextColor(255,255,255);doc.setFontSize(14);doc.setFont('helvetica','bold');
   doc.text('Burgess Windows & Doors — Order Sheet',14,13);
   doc.setFontSize(9);doc.setFont('helvetica','normal');
@@ -357,9 +403,8 @@ function generateOrderSheetPDF(){
     const d=item.data,res=computeItemResults(d);
     return[idx+1,d.loc||'—',d.type||'—',d.qty||1,d.sw&&d.sh?`${d.sw}×${d.sh}`:'-',res.ow&&res.oh?`${res.ow}×${res.oh}`:'-',d.cillType||'No cill',res.upstandNote,d.opening||'—',isWindow(d.type)?(d.hingeType||'—'):'—',d.glassType||'—',d.glassFinish||'—',d.ventSize&&d.ventSize!=='N/A'?`${d.ventSize}×${d.ventQty||0}`:'N/A',res.needsAddon?'ADD-ON':'OK',d.col||'—',d.glz||'—'];
   });
-  doc.autoTable({startY:25,head:[['#','Location','Product','Qty','Survey','Order','Cill','Upstand','Opening','Hinge','Glass','Finish','Vent','Frame','Colour','Glazing']],body:tableData,styles:{fontSize:7.5,cellPadding:2},headStyles:{fillColor:[37,99,235],textColor:255,fontStyle:'bold'},alternateRowStyles:{fillColor:[248,250,252]},columnStyles:{0:{cellWidth:8},1:{cellWidth:22},2:{cellWidth:28},3:{cellWidth:8},4:{cellWidth:20},5:{cellWidth:20},6:{cellWidth:22},7:{cellWidth:18},8:{cellWidth:18},9:{cellWidth:16},10:{cellWidth:16},11:{cellWidth:12},12:{cellWidth:14},13:{cellWidth:14},14:{cellWidth:14},15:{cellWidth:14}},didParseCell:function(data){if(data.section==='body'&&data.column.index===13){if(data.cell.raw==='ADD-ON'){data.cell.styles.textColor=[220,38,38];data.cell.styles.fontStyle='bold';}else{data.cell.styles.textColor=[5,150,105];}}}});
-  const pc=doc.getNumberOfPages();
-  for(let i=1;i<=pc;i++){doc.setPage(i);doc.setFontSize(7);doc.setTextColor(150,150,150);doc.text(`${jobName} — Order Sheet — Page ${i} of ${pc}`,14,207);}
+  doc.autoTable({startY:25,head:[['#','Location','Product','Qty','Survey','Order','Cill','Upstand','Opening','Hinge','Glass','Finish','Vent','Frame','Colour','Glazing']],body:tableData,styles:{fontSize:7.5,cellPadding:2},headStyles:{fillColor:[30,64,175],textColor:255,fontStyle:'bold'},alternateRowStyles:{fillColor:[248,250,252]},columnStyles:{0:{cellWidth:8},1:{cellWidth:22},2:{cellWidth:28},3:{cellWidth:8},4:{cellWidth:20},5:{cellWidth:20},6:{cellWidth:22},7:{cellWidth:18},8:{cellWidth:18},9:{cellWidth:16},10:{cellWidth:16},11:{cellWidth:12},12:{cellWidth:14},13:{cellWidth:14},14:{cellWidth:14},15:{cellWidth:14}},didParseCell:function(data){if(data.section==='body'&&data.column.index===13){if(data.cell.raw==='ADD-ON'){data.cell.styles.textColor=[220,38,38];data.cell.styles.fontStyle='bold';}else{data.cell.styles.textColor=[5,150,105];}}}});
+  const pc=doc.getNumberOfPages();for(let i=1;i<=pc;i++){doc.setPage(i);doc.setFontSize(7);doc.setTextColor(150,150,150);doc.text(`${jobName} — Order Sheet — Page ${i} of ${pc}`,14,207);}
   return doc.output('blob');
 }
 
@@ -367,53 +412,38 @@ function generateOrderSheetPDF(){
 async function submitSurvey(){
   items.forEach(item=>{if(!item.saved)saveItem(item.id);});
   if(items.length===0){alert('Please add at least one survey item.');return;}
-  // Local save
   try{localStorage.setItem('bwd_survey_'+Date.now(),JSON.stringify({meta:{jobName:v('jobName'),surveyDate:v('surveyDate'),surveyor:v('surveyor'),address:v('address'),savedAt:new Date().toISOString()},items:items.map(i=>({id:i.id,data:i.data,canvasData:i.canvasData}))}));}catch(e){}
-  const token=getToken(),itemId=getItemId();
-  if(!token){alert('Survey saved locally.\n\nTo upload to Monday.com, enter your API token in the connection panel at the top.');return;}
-  if(!itemId){alert('Survey saved locally.\n\nTo upload to Monday.com, enter the Monday item ID in the connection panel, or open this page via the survey link from your Monday job item.');return;}
-  const btn=document.getElementById('submit-btn');
-  btn.disabled=true;btn.textContent='Uploading...';
-  const steps=['Generating full survey PDF','Generating clean order sheet PDF','Finding Surveyor Uploads column','Uploading full survey PDF','Uploading order sheet PDF','Adding survey note to item'];
+  const token=getToken();
+  if(!token){document.getElementById('setup-modal').style.display='flex';return;}
+  if(!mondayItemId){alert('No Monday item ID found. Please open this page via the survey link from your Monday job.');return;}
+  const btn=document.getElementById('submit-btn');btn.disabled=true;btn.textContent='Uploading...';
+  const steps=['Generating full survey PDF','Generating clean order sheet PDF','Finding Surveyor Uploads column','Uploading full survey PDF','Uploading order sheet PDF','Adding survey note'];
   showProgress(steps);
   try{
-    setStep(0,'active');
-    const jobName=v('jobName')||'Survey';
-    const safeJob=jobName.replace(/[^a-z0-9]/gi,'_');
-    const fullPdf=generateFullSurveyPDF();
-    setStep(0,'done');
-    setStep(1,'active');
-    const orderPdf=generateOrderSheetPDF();
-    setStep(1,'done');
+    setStep(0,'active');const jobName=v('jobName')||'Survey';const safeJob=jobName.replace(/[^a-z0-9]/gi,'_');const fullPdf=generateFullSurveyPDF();setStep(0,'done');
+    setStep(1,'active');const orderPdf=generateOrderSheetPDF();setStep(1,'done');
     setStep(2,'active');
     const colData=await mondayQuery(`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`);
     const cols=colData.data.boards[0].columns;
-    const filesCol=cols.find(c=>c.title.toLowerCase().includes('surveyor upload')||c.title.toLowerCase().includes('upload')||(c.type==='file'&&c.title.toLowerCase().includes('survey'))||c.type==='file');
-    if(!filesCol)throw new Error(`No files column found. Columns available: ${cols.map(c=>c.title).join(', ')}`);
-    setStep(2,'done',`Using column: "${filesCol.title}"`);
+    const filesCol=cols.find(c=>c.title.toLowerCase().includes('surveyor upload')||c.title.toLowerCase().includes('upload')||c.type==='file');
+    if(!filesCol)throw new Error(`No files column found. Available: ${cols.map(c=>c.title).join(', ')}`);
+    setStep(2,'done',`Column: "${filesCol.title}"`);
     const dateStr=new Date().toISOString().slice(0,10);
-    setStep(3,'active');
-    await uploadFileToMonday(itemId,filesCol.id,`${safeJob}_FullSurvey_${dateStr}.pdf`,fullPdf);
-    setStep(3,'done');
-    setStep(4,'active');
-    await uploadFileToMonday(itemId,filesCol.id,`${safeJob}_OrderSheet_${dateStr}.pdf`,orderPdf);
-    setStep(4,'done');
+    setStep(3,'active');await uploadFileToMonday(mondayItemId,filesCol.id,`${safeJob}_FullSurvey_${dateStr}.pdf`,fullPdf);setStep(3,'done');
+    setStep(4,'active');await uploadFileToMonday(mondayItemId,filesCol.id,`${safeJob}_OrderSheet_${dateStr}.pdf`,orderPdf);setStep(4,'done');
     setStep(5,'active');
     const totalUnits=items.reduce((a,i)=>a+(parseInt(i.data.qty)||1),0);
     const addonCount=items.filter(i=>computeItemResults(i.data).needsAddon).length;
-    await addUpdate(itemId,`Survey completed by ${v('surveyor')||'surveyor'} on ${v('surveyDate')||dateStr}. Items: ${items.length} lines / ${totalUnits} total units. Add-ons flagged: ${addonCount}. Full survey PDF and clean order sheet uploaded.`);
+    await addUpdate(mondayItemId,`Survey completed by ${v('surveyor')||'surveyor'} on ${v('surveyDate')||dateStr}. Items: ${items.length} lines / ${totalUnits} total units. Add-ons flagged: ${addonCount}. Full survey PDF and clean order sheet uploaded.`);
     setStep(5,'done');
-    document.getElementById('progress-title').textContent='Upload complete!';
-    document.getElementById('progress-title').style.color='#059669';
+    document.getElementById('progress-title').textContent='Upload complete!';document.getElementById('progress-title').style.color='#059669';
     btn.textContent='Uploaded ✓';btn.style.background='#10b981';
     setTimeout(()=>{btn.disabled=false;btn.textContent='Submit & upload to Monday';btn.style.background='';document.getElementById('upload-progress').style.display='none';},5000);
   }catch(err){
     const fi=[0,1,2,3,4,5].find(i=>document.getElementById('ps'+i)?.classList.contains('active'));
     if(fi!==undefined)setStep(fi,'error',err.message);
-    document.getElementById('progress-title').textContent='Upload failed';
-    document.getElementById('progress-title').style.color='#dc2626';
-    btn.disabled=false;btn.textContent='Submit & upload to Monday';
-    console.error('Monday error:',err);
+    document.getElementById('progress-title').textContent='Upload failed — see error above';document.getElementById('progress-title').style.color='#dc2626';
+    btn.disabled=false;btn.textContent='Submit & upload to Monday';console.error(err);
   }
 }
 
@@ -446,11 +476,9 @@ function sideStatusBadge(st){if(!st)return '<span class="badge badge-muted">—<
 function isTrickle(t){return TRICKLE_PRODUCTS.includes(t);}
 function isWindow(t){return WINDOW_PRODUCTS.includes(t);}
 function cillHeightDed(cill){return cill.heightEffect==='deduct'?cill.upstand:0;}
-
 function handlePropImages(e){Array.from(e.target.files).forEach(file=>{const r=new FileReader();r.onload=ev=>{propImages.push({name:file.name,dataUrl:ev.target.result});renderPropImages();};r.readAsDataURL(file);});e.target.value='';}
 function removePropImage(i){propImages.splice(i,1);renderPropImages();}
-function renderPropImages(){const grid=g('prop-img-grid');if(!grid)return;grid.innerHTML=propImages.map((img,i)=>`<div class="prop-img-thumb"><img src="${img.dataUrl}" alt="${img.name}"><button onclick="removePropImage(${i})">×</button></div>`).join('');}
-
+function renderPropImages(){const grid=g('prop-img-grid');if(!grid)return;grid.innerHTML=propImages.map((img,i)=>`<div class="prop-img-thumb"><img src="${img.dataUrl}"><button onclick="removePropImage(${i})">×</button></div>`).join('');}
 function initCanvas(id){
   const canvas=g(id+'-canvas');if(!canvas||canvasState[id])return;
   const state={tool:'pen',color:'#1a1a1a',stroke:2,drawing:false,startX:0,startY:0,snapshot:null};canvasState[id]=state;
@@ -467,7 +495,6 @@ function setColor(id,color){const s=canvasState[id];if(!s)return;s.color=color;d
 function setStroke(id,size){const s=canvasState[id];if(!s)return;s.stroke=size;document.querySelectorAll(`#${id}-toolbar .stroke-btn`).forEach(b=>b.classList.toggle('active',parseInt(b.dataset.size)===size));}
 function clearCanvas(id){const canvas=g(id+'-canvas');if(!canvas)return;canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);const item=items.find(i=>i.id===id);if(item)item.canvasData=null;}
 function restoreCanvas(id){const item=items.find(i=>i.id===id);if(!item||!item.canvasData)return;const canvas=g(id+'-canvas');if(!canvas)return;const img=new Image();img.onload=()=>{const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0);};img.src=item.canvasData;}
-
 function addItem(){itemCount++;const id='item-'+itemCount;items.push({id,depthMethod:'intext',saved:false,data:{},images:{inside:[],outside:[]},canvasData:null});renderItems();setTimeout(()=>g(id+'-card')?.scrollIntoView({behavior:'smooth',block:'nearest'}),50);}
 function removeItem(id){items=items.filter(i=>i.id!==id);renderItems();}
 function editItem(id){const item=items.find(i=>i.id===id);if(!item)return;item.saved=false;renderItems();setTimeout(()=>{restoreItem(id);g(id+'-card')?.scrollIntoView({behavior:'smooth',block:'nearest'});},30);}
@@ -484,19 +511,12 @@ function restoreItem(id){
   if(d.depthMethod){item.depthMethod=d.depthMethod;['intext','reveal'].forEach(m=>{g(id+'-mtab-'+m)?.classList.toggle('active',m===d.depthMethod);const el=g(id+'-method-'+m);if(el)el.style.display=m===d.depthMethod?'block':'none';});}
   onCillChange(id);recalc(id);renderItemImages(id);setTimeout(()=>{initCanvas(id);restoreCanvas(id);},60);
 }
-function onTypeChange(id,skipRecalc){
-  const type=v(id+'-type');const openEl=g(id+'-opening');
-  if(openEl){const opts=OPENING_OPTIONS[type]||['N/A'];openEl.innerHTML=opts.map(o=>`<option>${o}</option>`).join('');}
-  const hr=g(id+'-hinge-row');if(hr)hr.style.display=isWindow(type)?'flex':'none';
-  const vs=g(id+'-vent-section');if(vs)vs.style.display=isTrickle(type)?'block':'none';
-  if(!skipRecalc)recalc(id);
-}
+function onTypeChange(id,skipRecalc){const type=v(id+'-type');const openEl=g(id+'-opening');if(openEl){const opts=OPENING_OPTIONS[type]||['N/A'];openEl.innerHTML=opts.map(o=>`<option>${o}</option>`).join('');}const hr=g(id+'-hinge-row');if(hr)hr.style.display=isWindow(type)?'flex':'none';const vs=g(id+'-vent-section');if(vs)vs.style.display=isTrickle(type)?'block':'none';if(!skipRecalc)recalc(id);}
 function onCillChange(id){const cill=CILLS[v(id+'-cill-type')]||CILLS['No cill'];const projEl=g(id+'-cill-proj');if(projEl)projEl.placeholder=cill.projection>0?`Default: ${cill.projection}mm`:'N/A';recalc(id);}
 function setMethod(id,method){const item=items.find(i=>i.id===id);if(item)item.depthMethod=method;['intext','reveal'].forEach(m=>{g(id+'-mtab-'+m)?.classList.toggle('active',m===method);const el=g(id+'-method-'+m);if(el)el.style.display=m===method?'block':'none';});recalc(id);}
 function handleItemImage(id,side,event){const item=items.find(i=>i.id===id);if(!item)return;Array.from(event.target.files).forEach(file=>{const r=new FileReader();r.onload=ev=>{item.images[side].push({name:file.name,dataUrl:ev.target.result});renderItemImages(id);};r.readAsDataURL(file);});event.target.value='';}
 function removeItemImage(id,side,idx){const item=items.find(i=>i.id===id);if(!item)return;item.images[side].splice(idx,1);renderItemImages(id);}
-function renderItemImages(id){const item=items.find(i=>i.id===id);if(!item)return;['inside','outside'].forEach(side=>{const grid=g(id+'-img-'+side);if(!grid)return;grid.innerHTML=(item.images[side]||[]).map((img,i)=>`<div class="img-thumb"><img src="${img.dataUrl}" alt="${img.name}"><button onclick="removeItemImage('${id}','${side}',${i})">×</button></div>`).join('');});}
-
+function renderItemImages(id){const item=items.find(i=>i.id===id);if(!item)return;['inside','outside'].forEach(side=>{const grid=g(id+'-img-'+side);if(!grid)return;grid.innerHTML=(item.images[side]||[]).map((img,i)=>`<div class="img-thumb"><img src="${img.dataUrl}"><button onclick="removeItemImage('${id}','${side}',${i})">×</button></div>`).join('');});}
 function recalc(id){
   const item=items.find(i=>i.id===id);if(!item)return;
   const sw=n(id+'-sw'),sh=n(id+'-sh'),type=v(id+'-type'),ded=DEDUCTIONS[type]||{w:10,h:10};
@@ -516,24 +536,12 @@ function recalc(id){
   const ewEl=g(id+'-ew-display');if(ewEl)ewEl.value=sw!==null?sw+'mm (from survey)':'—';
   const ehEl=g(id+'-eh-display');if(ehEl)ehEl.value=sh!==null?sh+'mm (from survey)':'—';
   const bd=g(id+'-cill-breakdown');
-  if(bd&&sh!==null){
-    bd.style.display='block';let rows=`<div class="brow"><span style="color:#666">Survey height</span><span class="mono">${sh}mm</span></div><div class="brow"><span style="color:#666">Base deduction</span><span class="mono">− ${ded.h}mm</span></div>`;
-    if(extraH>0)rows+=`<div class="brow"><span style="color:#666">Frame adj. (plaster)</span><span class="mono">− ${extraH}mm</span></div>`;
-    if(cill.upstand>0){if(cill.heightEffect==='deduct')rows+=`<div class="brow"><span style="color:#666">Internorm packer (deducted)</span><span class="mono" style="color:#d97706">− ${cill.upstand}mm</span></div>`;else rows+=`<div class="brow"><span style="color:#666">Cill upstand (${cillType})</span><span class="mono">Included in product</span></div>`;}
-    rows+=`<div class="brow-total"><span>Order height</span><span class="mono">${oh!==null?oh+'mm':'—'}</span></div>`;bd.innerHTML=rows;
-  }else if(bd)bd.style.display='none';
-  const wbd=g(id+'-width-breakdown');
-  if(wbd&&sw!==null){wbd.style.display='block';wbd.innerHTML=`<div class="brow"><span style="color:#666">Survey width</span><span class="mono">${sw}mm</span></div><div class="brow"><span style="color:#666">Base deduction</span><span class="mono">− ${ded.w}mm</span></div>${extraW>0?`<div class="brow"><span style="color:#666">Frame adj. (plaster)</span><span class="mono">− ${extraW}mm</span></div>`:''}<div class="brow-total"><span>Order width</span><span class="mono">${ow!==null?ow+'mm':'—'}</span></div>`;}else if(wbd)wbd.style.display='none';
+  if(bd&&sh!==null){bd.style.display='block';let rows=`<div class="brow"><span style="color:#666">Survey height</span><span class="mono">${sh}mm</span></div><div class="brow"><span style="color:#666">Base deduction</span><span class="mono">− ${ded.h}mm</span></div>`;if(extraH>0)rows+=`<div class="brow"><span style="color:#666">Frame adj. (plaster)</span><span class="mono">− ${extraH}mm</span></div>`;if(cill.upstand>0){if(cill.heightEffect==='deduct')rows+=`<div class="brow"><span style="color:#666">Internorm packer</span><span class="mono" style="color:#d97706">− ${cill.upstand}mm</span></div>`;else rows+=`<div class="brow"><span style="color:#666">Cill upstand</span><span class="mono">Included in product</span></div>`;}rows+=`<div class="brow-total"><span>Order height</span><span class="mono">${oh!==null?oh+'mm':'—'}</span></div>`;bd.innerHTML=rows;}else if(bd)bd.style.display='none';
+  const wbd=g(id+'-width-breakdown');if(wbd&&sw!==null){wbd.style.display='block';wbd.innerHTML=`<div class="brow"><span style="color:#666">Survey width</span><span class="mono">${sw}mm</span></div><div class="brow"><span style="color:#666">Base deduction</span><span class="mono">− ${ded.w}mm</span></div>${extraW>0?`<div class="brow"><span style="color:#666">Frame adj.</span><span class="mono">− ${extraW}mm</span></div>`:''}<div class="brow-total"><span>Order width</span><span class="mono">${ow!==null?ow+'mm':'—'}</span></div>`;}else if(wbd)wbd.style.display='none';
   const splitEl=g(id+'-split-display');
-  if(splitEl){
-    const sides=[{label:'Left jamb',wall:wallLeft,frame:frameJamb,fLabel:frameJamb?frameJamb+'mm':'—',st:stL,ov:n(id+'-ov-left')!==null},{label:'Right jamb',wall:wallRight,frame:frameJamb,fLabel:frameJamb?frameJamb+'mm':'—',st:stR,ov:n(id+'-ov-right')!==null},{label:'Head',wall:wallHead,frame:frameHS,fLabel:frameHS?frameHS+'mm':'—',st:stH,ov:n(id+'-ov-head')!==null},{label:'Sill',wall:wallSill,frame:sillFrameTotal,fLabel:frameHS?(frameHS+'mm'+(cill.upstand>0?' + '+cill.upstand+'mm cill = '+sillFrameTotal+'mm':'')):'—',st:stS,ov:n(id+'-ov-sill')!==null}];
-    splitEl.style.display=sides.some(s=>s.wall!==null)?'grid':'none';
-    splitEl.innerHTML=sides.map(s=>`<div class="side-box"><div class="side-label">${s.label}${s.ov?' <span style="color:#f59e0b;font-size:10px">(override)</span>':''}</div>${s.wall!==null?`<div class="side-row"><span style="color:#888">Wall</span><span class="mono">${s.wall}mm</span></div>`:''}<div class="side-row"><span style="color:#888">Frame</span><span class="mono" style="font-size:10px">${s.fLabel}</span></div>${s.st?`<div class="side-row"><span style="color:#888">Status</span><span style="font-size:11px;color:${s.st.ok?'#059669':'#d97706'}">${s.st.ok?'Fits':'+'+addonSize(s.st.gap)+'mm add-on'}</span></div>`:''}</div>`).join('');
-  }
-  const ventAlert=g(id+'-vent-alert');
-  if(ventAlert&&isTrickle(type)){const ventReq=v(id+'-vent-req'),hc=n(id+'-vent-head');if(ventReq==='Yes'&&hc!==null){if(hc<TRICKLE_MIN){ventAlert.className='alert alert-danger';ventAlert.style.display='block';ventAlert.innerHTML=`<strong>Insufficient head clearance</strong> — ${hc}mm available, ${TRICKLE_MIN}mm minimum.`;}else{ventAlert.className='alert alert-ok';ventAlert.style.display='block';ventAlert.textContent=`Head clearance OK — ${hc}mm`;}}else ventAlert.style.display='none';}else if(ventAlert)ventAlert.style.display='none';
+  if(splitEl){const sides=[{label:'Left jamb',wall:wallLeft,frame:frameJamb,fLabel:frameJamb?frameJamb+'mm':'—',st:stL,ov:n(id+'-ov-left')!==null},{label:'Right jamb',wall:wallRight,frame:frameJamb,fLabel:frameJamb?frameJamb+'mm':'—',st:stR,ov:n(id+'-ov-right')!==null},{label:'Head',wall:wallHead,frame:frameHS,fLabel:frameHS?frameHS+'mm':'—',st:stH,ov:n(id+'-ov-head')!==null},{label:'Sill',wall:wallSill,frame:sillFrameTotal,fLabel:frameHS?(frameHS+'mm'+(cill.upstand>0?' + '+cill.upstand+'mm = '+sillFrameTotal+'mm':'')):'—',st:stS,ov:n(id+'-ov-sill')!==null}];splitEl.style.display=sides.some(s=>s.wall!==null)?'grid':'none';splitEl.innerHTML=sides.map(s=>`<div class="side-box"><div class="side-label">${s.label}${s.ov?' <span style="color:#f59e0b;font-size:10px">(override)</span>':''}</div>${s.wall!==null?`<div class="side-row"><span style="color:#888">Wall</span><span class="mono">${s.wall}mm</span></div>`:''}<div class="side-row"><span style="color:#888">Frame</span><span class="mono" style="font-size:10px">${s.fLabel}</span></div>${s.st?`<div class="side-row"><span style="color:#888">Status</span><span style="font-size:11px;color:${s.st.ok?'#059669':'#d97706'}">${s.st.ok?'Fits':'+'+addonSize(s.st.gap)+'mm add-on'}</span></div>`:''}</div>`).join('');}
+  const ventAlert=g(id+'-vent-alert');if(ventAlert&&isTrickle(type)){const ventReq=v(id+'-vent-req'),hc=n(id+'-vent-head');if(ventReq==='Yes'&&hc!==null){if(hc<TRICKLE_MIN){ventAlert.className='alert alert-danger';ventAlert.style.display='block';ventAlert.innerHTML=`<strong>Insufficient head clearance</strong> — ${hc}mm available, ${TRICKLE_MIN}mm minimum.`;}else{ventAlert.className='alert alert-ok';ventAlert.style.display='block';ventAlert.textContent=`Head clearance OK — ${hc}mm`;}}else ventAlert.style.display='none';}else if(ventAlert)ventAlert.style.display='none';
 }
-
 function computeItemResults(d){
   const type=d.type||'',ded=DEDUCTIONS[type]||{w:10,h:10},cill=CILLS[d.cillType]||CILLS['No cill'];
   const projOverride=d.cillProjOverride?parseFloat(d.cillProjOverride):null,projection=projOverride!==null?projOverride:cill.projection;
@@ -551,30 +559,22 @@ function computeItemResults(d){
   const upstandNote=cill.upstand>0?(cill.heightEffect==='deduct'?`− ${cill.upstand}mm (deducted)`:`${cill.upstand}mm (included)`):'—';
   return{wallLeft,wallRight,wallHead,wallSill,stL,stR,stH,stS,ow,oh,needsAddon:[stL,stR,stH,stS].some(s=>s&&!s.ok),projection,cillType:d.cillType||'No cill',totalDedW:ded.w+extraW,totalDedH:ded.h+extraH+cillHeightDed(cill),upstandNote,sillFrameTotal};
 }
-
-function buildCanvasSection(id){return `<div class="sub-section"><div class="sub-title">Design sketch</div><div style="font-size:12px;color:#888;margin-bottom:8px">Sketch the window or door layout — panes, opening directions, fixed sections etc.</div><div class="canvas-toolbar" id="${id}-toolbar"><button class="tool-btn active" data-tool="pen" onclick="setTool('${id}','pen')">Pen</button><button class="tool-btn" data-tool="rect" onclick="setTool('${id}','rect')">Rectangle</button><button class="tool-btn" data-tool="line" onclick="setTool('${id}','line')">Line</button><button class="tool-btn" data-tool="arrow" onclick="setTool('${id}','arrow')">Arrow</button><button class="tool-btn" data-tool="eraser" onclick="setTool('${id}','eraser')">Eraser</button><div class="tool-sep"></div>${SWATCHES.map((c,i)=>`<div class="color-swatch${i===0?' active':''}" data-color="${c}" style="background:${c};${c==='#ffffff'?'border:2px solid #ddd':''}" onclick="setColor('${id}','${c}')"></div>`).join('')}<div class="tool-sep"></div><button class="stroke-btn active" data-size="2" onclick="setStroke('${id}',2)">Thin</button><button class="stroke-btn" data-size="4" onclick="setStroke('${id}',4)">Mid</button><button class="stroke-btn" data-size="7" onclick="setStroke('${id}',7)">Thick</button><div class="tool-sep"></div><button class="tool-btn" onclick="clearCanvas('${id}')" style="color:#ef4444">Clear</button></div><canvas class="drawing-canvas" id="${id}-canvas" height="280"></canvas></div>`;}
-
+function buildCanvasSection(id){return `<div class="sub-section"><div class="sub-title">Design sketch</div><div style="font-size:12px;color:#888;margin-bottom:8px">Sketch the window or door layout — panes, opening directions, fixed sections etc.</div><div class="canvas-toolbar" id="${id}-toolbar"><button class="tool-btn active" data-tool="pen" onclick="setTool('${id}','pen')">Pen</button><button class="tool-btn" data-tool="rect" onclick="setTool('${id}','rect')">Rect</button><button class="tool-btn" data-tool="line" onclick="setTool('${id}','line')">Line</button><button class="tool-btn" data-tool="arrow" onclick="setTool('${id}','arrow')">Arrow</button><button class="tool-btn" data-tool="eraser" onclick="setTool('${id}','eraser')">Eraser</button><div class="tool-sep"></div>${SWATCHES.map((c,i)=>`<div class="color-swatch${i===0?' active':''}" data-color="${c}" style="background:${c};${c==='#ffffff'?'border:2px solid #ddd':''}" onclick="setColor('${id}','${c}')"></div>`).join('')}<div class="tool-sep"></div><button class="stroke-btn active" data-size="2" onclick="setStroke('${id}',2)">Thin</button><button class="stroke-btn" data-size="4" onclick="setStroke('${id}',4)">Mid</button><button class="stroke-btn" data-size="7" onclick="setStroke('${id}',7)">Thick</button><div class="tool-sep"></div><button class="tool-btn" onclick="clearCanvas('${id}')" style="color:#ef4444">Clear</button></div><canvas class="drawing-canvas" id="${id}-canvas" height="280"></canvas></div>`;}
 function renderItems(){
-  const list=g('items-list');
-  if(items.length===0){list.innerHTML='<p style="color:#999;font-size:13px;text-align:center;padding:20px 0">No items yet — click "+ Add item" to start</p>';return;}
+  const list=g('items-list');if(items.length===0){list.innerHTML='<p style="color:#999;font-size:13px;text-align:center;padding:20px 0">No items yet — click "+ Add item" to start</p>';return;}
   list.innerHTML=items.map((item,idx)=>{
-    if(item.saved){
-      const d=item.data,res=computeItemResults(d);
-      const ventIssue=isTrickle(d.type)&&d.ventReq==='Yes'&&d.ventHead&&parseFloat(d.ventHead)<TRICKLE_MIN;
-      const imgCount=item.images.inside.length+item.images.outside.length;
-      return `<div class="item-card saved${ventIssue?' has-issue':''}" id="${item.id}-card"><div style="background:#fff;padding:10px 14px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:11px;color:#999;min-width:50px">Item ${idx+1}</span><span class="badge badge-blue">${d.type||'—'}</span><span style="font-weight:600">${d.loc||'—'}</span><span class="mono" style="font-size:12px;color:#888">${d.sw&&d.sh?`${d.sw}×${d.sh}mm`:'—'}</span>${res.ow&&res.oh?`<span class="mono" style="font-size:12px;font-weight:600;color:#2563eb">→ ${res.ow}×${res.oh}mm</span>`:''}${d.opening?`<span class="badge badge-muted">${d.opening}</span>`:''}${d.glassType?`<span class="badge badge-muted">${d.glassType} / ${d.glassFinish}</span>`:''}${imgCount>0?`<span class="badge badge-muted">${imgCount} photo${imgCount>1?'s':''}</span>`:''}${item.canvasData?'<span class="badge badge-purple">Sketch</span>':''}${res.needsAddon?'<span class="badge badge-warn">Add-on needed</span>':''}${ventIssue?'<span class="badge badge-danger">Vent issue</span>':'<span class="badge badge-green">Saved</span>'}<button class="btn btn-edit" style="margin-left:auto" onclick="editItem('${item.id}')">Edit</button></div></div></div>`;
-    }
+    if(item.saved){const d=item.data,res=computeItemResults(d);const ventIssue=isTrickle(d.type)&&d.ventReq==='Yes'&&d.ventHead&&parseFloat(d.ventHead)<TRICKLE_MIN;const imgCount=item.images.inside.length+item.images.outside.length;return `<div class="item-card saved${ventIssue?' has-issue':''}" id="${item.id}-card"><div style="background:#fff;padding:10px 14px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:11px;color:#999;min-width:50px">Item ${idx+1}</span><span class="badge badge-blue">${d.type||'—'}</span><span style="font-weight:600">${d.loc||'—'}</span><span class="mono" style="font-size:12px;color:#888">${d.sw&&d.sh?`${d.sw}×${d.sh}mm`:'—'}</span>${res.ow&&res.oh?`<span class="mono" style="font-size:12px;font-weight:600;color:#2563eb">→ ${res.ow}×${res.oh}mm</span>`:''}${d.opening?`<span class="badge badge-muted">${d.opening}</span>`:''}${d.glassType?`<span class="badge badge-muted">${d.glassType}/${d.glassFinish}</span>`:''}${imgCount>0?`<span class="badge badge-muted">${imgCount} photo${imgCount>1?'s':''}</span>`:''}${item.canvasData?'<span class="badge badge-purple">Sketch</span>':''}${res.needsAddon?'<span class="badge badge-warn">Add-on</span>':''}${ventIssue?'<span class="badge badge-danger">Vent issue</span>':'<span class="badge badge-green">Saved</span>'}<button class="btn btn-edit" style="margin-left:auto" onclick="editItem('${item.id}')">Edit</button></div></div></div>`;}
     return `<div class="item-card" id="${item.id}-card"><div class="item-form">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="item-num">Item ${idx+1}</div><button class="btn btn-danger" onclick="removeItem('${item.id}')">Remove</button></div>
       <div class="row"><div class="field"><label>Room / location</label><input placeholder="e.g. Lounge front" id="${item.id}-loc"></div><div class="field"><label>Product type</label><select id="${item.id}-type" onchange="onTypeChange('${item.id}')">${PRODUCTS.map(p=>`<option>${p}</option>`).join('')}</select></div><div class="field"><label>Qty</label><input type="number" value="1" min="1" id="${item.id}-qty"></div><div class="field"><label>Measurement basis</label><select id="${item.id}-basis" onchange="recalc('${item.id}')"><option value="brick">Brick-to-brick</option><option value="plaster">Plaster-to-plaster</option></select></div></div>
       <div class="row"><div class="field"><label>Survey width (mm)</label><input type="number" placeholder="e.g. 1200" id="${item.id}-sw" oninput="recalc('${item.id}')"></div><div class="field"><label>Survey height (mm)</label><input type="number" placeholder="e.g. 1050" id="${item.id}-sh" oninput="recalc('${item.id}')"></div><div class="field"><label>Frame colour</label><select id="${item.id}-col">${COLOURS.map(c=>`<option>${c}</option>`).join('')}</select></div><div class="field"><label>Glazing unit</label><select id="${item.id}-glz">${GLAZING.map(g=>`<option>${g}</option>`).join('')}</select></div></div>
       <div class="sub-section"><div class="sub-title">Opening &amp; hardware</div><div class="row"><div class="field"><label>Opening / handing</label><select id="${item.id}-opening">${(OPENING_OPTIONS[PRODUCTS[0]]||['N/A']).map(o=>`<option>${o}</option>`).join('')}</select></div><div class="field" id="${item.id}-hinge-row" style="display:flex;flex-direction:column;gap:5px"><label style="font-size:11px;color:#666;font-weight:500">Hinge type</label><select id="${item.id}-hinge">${HINGE_TYPES.map(h=>`<option>${h}</option>`).join('')}</select></div></div></div>
       <div class="sub-section"><div class="sub-title">Glass specification</div><div class="row"><div class="field"><label>Glass type</label><select id="${item.id}-glass-type">${GLASS_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div><div class="field"><label>Glass finish</label><select id="${item.id}-glass-finish">${GLASS_FINISH.map(f=>`<option>${f}</option>`).join('')}</select></div></div></div>
-      <div class="sub-section"><div class="sub-title">Trickle vents</div><div class="row"><div class="field"><label>Vent size</label><select id="${item.id}-vent-size">${VENT_SIZES.map(s=>`<option>${s}</option>`).join('')}</select></div><div class="field"><label>Vent quantity</label><input type="number" min="0" value="0" id="${item.id}-vent-qty"></div></div></div>
+      <div class="sub-section"><div class="sub-title">Trickle vents</div><div class="row"><div class="field"><label>Vent size</label><select id="${item.id}-vent-size">${VENT_SIZES.map(s=>`<option>${s}</option>`).join('')}</select></div><div class="field"><label>Quantity</label><input type="number" min="0" value="0" id="${item.id}-vent-qty"></div></div></div>
       <div class="sub-section"><div class="sub-title">Cill specification</div><div class="row"><div class="field"><label>Cill type</label><select id="${item.id}-cill-type" onchange="onCillChange('${item.id}')">${CILL_NAMES.map(c=>`<option>${c}</option>`).join('')}</select></div><div class="field"><label>Cill projection (mm)</label><input type="number" placeholder="Default" id="${item.id}-cill-proj" oninput="recalc('${item.id}')"><span class="help-text">Leave blank for default</span></div></div><div id="${item.id}-cill-breakdown" class="breakdown-box" style="display:none"></div></div>
       <div class="sub-section"><div class="sub-title">Frame depths &amp; wall thickness</div>
         <div class="row"><div class="field"><label>Jamb frame depth — L &amp; R (mm)</label><input type="number" placeholder="e.g. 38.5" id="${item.id}-frame-jamb" oninput="recalc('${item.id}')"></div><div class="field"><label>Head &amp; sill frame depth (mm)</label><input type="number" placeholder="e.g. 38.5" id="${item.id}-frame-headsill" oninput="recalc('${item.id}')"></div><div class="field"><label>Internal finish</label><select id="${item.id}-finish"><option>Plaster (~13mm)</option><option>Dot &amp; dab (~25mm)</option><option>Tile (~15mm)</option><option>Dry lining (~30mm)</option><option>Bare brick</option><option>Other</option></select></div></div>
-        <div style="font-size:12px;color:#888;margin-bottom:8px">External sizes taken from survey above. Enter internal sizes below.</div>
+        <div style="font-size:12px;color:#888;margin-bottom:8px">External sizes taken from survey. Enter internal sizes below.</div>
         <div class="row"><div class="field"><label>External width <span class="auto-tag">from survey</span></label><input id="${item.id}-ew-display" readonly placeholder="Enter survey width above"></div><div class="field"><label>Internal width (mm)</label><input type="number" placeholder="e.g. 1100" id="${item.id}-iw" oninput="recalc('${item.id}')"></div><div class="field"><label>External height <span class="auto-tag">from survey</span></label><input id="${item.id}-eh-display" readonly placeholder="Enter survey height above"></div><div class="field"><label>Internal height (mm)</label><input type="number" placeholder="e.g. 980" id="${item.id}-ih" oninput="recalc('${item.id}')"></div></div>
         <div style="display:flex;align-items:center;gap:10px;margin:8px 0 6px"><span class="sub-title" style="margin-bottom:0">Per-side override</span><span style="font-size:11px;color:#999">Leave blank for 50/50 split</span></div>
         <div class="row"><div class="field"><label>Left jamb (mm)</label><input type="number" placeholder="Auto" id="${item.id}-ov-left" oninput="recalc('${item.id}')"></div><div class="field"><label>Right jamb (mm)</label><input type="number" placeholder="Auto" id="${item.id}-ov-right" oninput="recalc('${item.id}')"></div><div class="field"><label>Head (mm)</label><input type="number" placeholder="Auto" id="${item.id}-ov-head" oninput="recalc('${item.id}')"></div><div class="field"><label>Sill (mm)</label><input type="number" placeholder="Auto" id="${item.id}-ov-sill" oninput="recalc('${item.id}')"></div></div>
@@ -590,7 +590,6 @@ function renderItems(){
   }).join('');
   setTimeout(()=>{items.forEach(item=>{if(!item.saved){initCanvas(item.id);if(item.canvasData)restoreCanvas(item.id);}});},80);
 }
-
 function generateOrder(){
   if(items.length===0){alert('Please add at least one survey item.');return;}
   items.forEach(item=>{if(!item.saved)saveItem(item.id);});
@@ -602,17 +601,16 @@ function generateOrder(){
     typeCounts[type]=(typeCounts[type]||0)+qty;totalUnits+=qty;if(res.needsAddon)addonCount++;
     const ventIssue=isTrickle(type)&&d.ventReq==='Yes'&&d.ventHead&&parseFloat(d.ventHead)<TRICKLE_MIN;if(ventIssue)ventWarnCount++;
     const sketchCell=item.canvasData?`<img src="${item.canvasData}" class="sketch-thumb">`:'-';
-    rows+=`<tr><td>${idx+1}</td><td>${d.loc||'—'}</td><td><span class="badge badge-blue">${type}</span></td><td style="text-align:center">${qty}</td><td><span class="badge badge-muted">${d.basis==='brick'?'Brick':'Plaster'}</span></td><td class="mono">${sw&&sh?`${sw}×${sh}mm`:'—'}</td><td class="mono"><strong>${res.ow&&res.oh?`${res.ow}×${res.oh}mm`:'—'}</strong></td><td class="mono">−${res.totalDedW}mm</td><td class="mono">−${res.totalDedH}mm</td><td>${res.cillType}</td><td style="font-size:11px">${res.upstandNote}</td><td class="mono">${res.projection>0?res.projection+'mm':'—'}</td><td>${d.opening||'—'}</td><td>${isWindow(type)?(d.hingeType||'—'):'—'}</td><td>${d.glassType||'—'}</td><td>${d.glassFinish||'—'}</td><td>${d.ventSize&&d.ventSize!=='N/A'?d.ventSize:'N/A'}</td><td>${d.ventSize&&d.ventSize!=='N/A'?(d.ventQty||'0'):'—'}</td><td>${sideStatusBadge(res.stL)}</td><td>${sideStatusBadge(res.stR)}</td><td>${sideStatusBadge(res.stH)}</td><td>${sideStatusBadge(res.stS)}<span style="font-size:10px;color:#999;display:block">${res.sillFrameTotal?res.sillFrameTotal+'mm total':''}</span></td><td>${res.needsAddon?'<span class="badge badge-warn">Add-on needed</span>':'<span class="badge badge-green">All fits</span>'}</td><td>${sketchCell}</td><td>${d.col||'—'}</td><td>${d.glz||'—'}</td><td style="font-size:12px;color:#888">${d.notes||'—'}</td></tr>`;
+    rows+=`<tr><td>${idx+1}</td><td>${d.loc||'—'}</td><td><span class="badge badge-blue">${type}</span></td><td>${qty}</td><td><span class="badge badge-muted">${d.basis==='brick'?'Brick':'Plaster'}</span></td><td class="mono">${sw&&sh?`${sw}×${sh}mm`:'—'}</td><td class="mono"><strong>${res.ow&&res.oh?`${res.ow}×${res.oh}mm`:'—'}</strong></td><td class="mono">−${res.totalDedW}mm</td><td class="mono">−${res.totalDedH}mm</td><td>${res.cillType}</td><td style="font-size:11px">${res.upstandNote}</td><td class="mono">${res.projection>0?res.projection+'mm':'—'}</td><td>${d.opening||'—'}</td><td>${isWindow(type)?(d.hingeType||'—'):'—'}</td><td>${d.glassType||'—'}</td><td>${d.glassFinish||'—'}</td><td>${d.ventSize&&d.ventSize!=='N/A'?d.ventSize:'N/A'}</td><td>${d.ventSize&&d.ventSize!=='N/A'?(d.ventQty||'0'):'—'}</td><td>${sideStatusBadge(res.stL)}</td><td>${sideStatusBadge(res.stR)}</td><td>${sideStatusBadge(res.stH)}</td><td>${sideStatusBadge(res.stS)}</td><td>${res.needsAddon?'<span class="badge badge-warn">Add-on</span>':'<span class="badge badge-green">OK</span>'}</td><td>${sketchCell}</td><td>${d.col||'—'}</td><td>${d.glz||'—'}</td><td style="font-size:12px;color:#888">${d.notes||'—'}</td></tr>`;
   });
   g('order-body').innerHTML=rows;
   g('summary-grid').innerHTML=`<div class="metric"><div class="metric-val">${items.length}</div><div class="metric-lbl">Survey lines</div></div><div class="metric"><div class="metric-val">${totalUnits}</div><div class="metric-lbl">Total units</div></div><div class="metric"><div class="metric-val" style="color:${addonCount>0?'#d97706':'#059669'}">${addonCount}</div><div class="metric-lbl">Add-ons needed</div></div><div class="metric"><div class="metric-val" style="color:${ventWarnCount>0?'#ef4444':'#059669'}">${ventWarnCount}</div><div class="metric-lbl">Vent issues</div></div>${Object.entries(typeCounts).map(([t,c])=>`<div class="metric"><div class="metric-val">${c}</div><div class="metric-lbl">${t}</div></div>`).join('')}`;
   showTab('order');
 }
-
 function showTab(name){g('tab-survey').style.display=name==='survey'?'block':'none';g('tab-order').style.display=name==='order'?'block':'none';document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',(name==='survey'&&i===0)||(name==='order'&&i===1)));}
 
 g('surveyDate').valueAsDate=new Date();
-loadConfig();
+initApp();
 addItem();
 </script>
 </body>
