@@ -101,6 +101,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div style="display:flex;gap:8px;margin-bottom:14px">
       <button id="tab-surveyor" onclick="switchRole('surveyor')" style="padding:8px 20px;border:1px solid #1e40af;border-radius:8px;background:#1e40af;color:#fff;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">Surveyors</button>
       <button id="tab-installer" onclick="switchRole('installer')" style="padding:8px 20px;border:1px solid #e0e0e0;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">Installers</button>
+      <button id="tab-sales" onclick="switchRole('sales')" style="padding:8px 20px;border:1px solid #e0e0e0;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">Sales</button>
     </div>
 
     <!-- Add user -->
@@ -173,8 +174,13 @@ function switchRole(role){
   document.getElementById('tab-installer').style.background=role==='installer'?'#065f46':'transparent';
   document.getElementById('tab-installer').style.color=role==='installer'?'#fff':'#888';
   document.getElementById('tab-installer').style.borderColor=role==='installer'?'#065f46':'#e0e0e0';
-  document.getElementById('add-title').textContent=role==='installer'?'➕ Add new installer':'➕ Add new surveyor';
-  document.getElementById('list-title').textContent=role==='installer'?'🔧 Installer accounts':'👥 Surveyor accounts';
+  document.getElementById('tab-sales').style.background=role==='sales'?'#1e3a5f':'transparent';
+  document.getElementById('tab-sales').style.color=role==='sales'?'#fff':'#888';
+  document.getElementById('tab-sales').style.borderColor=role==='sales'?'#1e3a5f':'#e0e0e0';
+  const titles={'surveyor':'➕ Add new surveyor','installer':'➕ Add new installer','sales':'➕ Add new salesperson'};
+  const listTitles={'surveyor':'👥 Surveyor accounts','installer':'🔧 Installer accounts','sales':'💼 Sales accounts'};
+  document.getElementById('add-title').textContent=titles[role]||titles.surveyor;
+  document.getElementById('list-title').textContent=listTitles[role]||listTitles.surveyor;
   loadUsers();
 }
 
@@ -184,7 +190,8 @@ async function loadUsers(){
   const data=await authCall({action:'list_users',token:adminToken,role:currentRole});
   if(data.error){list.innerHTML='<div class="empty-users">'+data.error+'</div>';return;}
   if(!data.users||data.users.length===0){
-    list.innerHTML='<div class="empty-users">No '+(currentRole==='installer'?'installers':'surveyors')+' added yet — add one above</div>';
+    const roleNames={'surveyor':'surveyors','installer':'installers','sales':'salespeople'};
+    list.innerHTML='<div class="empty-users">No '+(roleNames[currentRole]||'users')+' added yet — add one above</div>';
     return;
   }
   const icon=currentRole==='installer'?'🔧':'👤';
