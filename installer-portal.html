@@ -374,6 +374,7 @@ const PROXY_API='/monday-proxy';
 const AUTH_API='/auth';
 const COMPLETION_URL='https://burgesswd-window-survey.pages.dev/installer-completion.html';
 const UPLOAD_API='/monday-upload';
+const PARTS_BOARD_ID='10007384262';
 
 let currentUser='';
 let allJobs=[];
@@ -927,8 +928,44 @@ async function submitPartsRequest(){
   const btn=document.querySelector('.modal-submit');
   btn.disabled=true;btn.textContent='Submitting...';
   try{
+    // Add update to existing job item
     const message=`🔧 PARTS REQUEST from ${currentUser}\\n\\nJob: ${selectedJob.name}\\nPart: ${desc}\\nQuantity: ${qty}\\nUrgency: ${urgency}${notes?'\\nNotes: '+notes:''}`;
     await mondayQuery(`mutation { create_update(item_id:${selectedJob.id}, body:"${message.replace(/"/g,'\\"')}") { id } }`);
+    // Create new item on Replacement Parts Required board
+    try{
+      // Get column IDs on parts board
+      const partsColData=await mondayQuery(`query { boards(ids:${PARTS_BOARD_ID}){ columns{ id title type } } }`);
+      const partsCols=partsColData.data?.boards?.[0]?.columns||[];
+      const findCol=(name)=>partsCols.find(c=>c.title.toLowerCase()===name.toLowerCase())?.id||'';
+      const projectColId=findCol('Project');
+      const installerColId=findCol('Installer');
+      const partsNeededColId=findCol('Parts Needed');
+      const notesColId=findCol('Notes');
+      const dateColId=findCol('Date Requested');
+      const statusColId=findCol('Status');
+      // Build column values
+      const colVals={};
+      if(projectColId) colVals[projectColId]=selectedJob.name;
+      if(installerColId) colVals[installerColId]=currentUser;
+      if(partsNeededColId) colVals[partsNeededColId]=`${desc} (x${qty}) — ${urgency}`;
+      if(notesColId&&notes) colVals[notesColId]=notes;
+      if(dateColId) colVals[dateColId]={date:new Date().toISOString().slice(0,10)};
+      const colValsStr=JSON.stringify(JSON.stringify(colVals));
+      const newItemData=await mondayQuery(`mutation { create_item(board_id:${PARTS_BOARD_ID}, item_name:"${(desc).replace(/"/g,'\"')}", column_values:${colValsStr}) { id } }`);
+      const newItem=newItemData.data?.create_item?.id;
+      // Upload photos to the parts board item's files column
+      if(partsPhotos.length>0){
+        const filesCol=partsCols.find(c=>c.type==='file');
+        if(filesCol&&newItem){
+          for(const photo of partsPhotos){
+            try{
+              const base64=photo.dataUrl.split(',')[1];
+              await fetch('/monday-upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:String(newItem),columnId:filesCol.id,fileName:photo.name,fileBase64:base64})});
+            }catch(e){console.warn('Parts photo upload failed:',e);}
+          }
+        }
+      }
+    }catch(partsErr){console.warn('Could not create parts board item:',partsErr);}
     // Also update status to Parts Required
     if(selectedJob.statusColId){
       const statusVal=JSON.stringify(JSON.stringify({label:'Parts Required'}));
