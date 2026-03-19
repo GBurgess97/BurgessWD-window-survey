@@ -433,7 +433,7 @@ async function submitSurvey(){
   
   if(!mondayItemId){alert('No Monday item ID found. Please open this page via the survey link from your Monday job.');return;}
   const btn=document.getElementById('submit-btn');btn.disabled=true;btn.textContent='Uploading...';
-  const steps=['Generating full survey PDF','Generating clean order sheet PDF','Finding Surveyor Uploads column','Uploading full survey PDF','Uploading order sheet PDF','Adding survey note'];
+  const steps=['Generating full survey PDF','Generating clean order sheet PDF','Finding Surveyor Uploads column','Uploading full survey PDF','Uploading order sheet PDF','Updating Monday status to Survey Complete'];
   showProgress(steps);
   try{
     setStep(0,'active');const jobName=v('jobName')||'Survey';const safeJob=jobName.replace(/[^a-z0-9]/gi,'_');const fullPdf=generateFullSurveyPDF();setStep(0,'done');
@@ -451,6 +451,13 @@ async function submitSurvey(){
     const totalUnits=items.reduce((a,i)=>a+(parseInt(i.data.qty)||1),0);
     const addonCount=items.filter(i=>computeItemResults(i.data).needsAddon).length;
     await addUpdate(mondayItemId,`Survey completed by ${v('surveyor')||'surveyor'} on ${v('surveyDate')||dateStr}. Items: ${items.length} lines / ${totalUnits} total units. Add-ons flagged: ${addonCount}. Full survey PDF and clean order sheet uploaded.`);
+    // Update Survey Status to Survey Complete
+    try{
+      const statusCol=cols.find(c=>c.title==='Survey Stage')||cols.find(c=>c.type==='color');
+      if(statusCol){
+        await mondayQuery(`mutation { change_column_value(board_id: ${BOARD_ID}, item_id: ${mondayItemId}, column_id: "${statusCol.id}", value: "{\"label\":\"Complete\"}") { id } }`);
+      }
+    }catch(e){console.warn('Could not update status:',e);}
     setStep(5,'done');
     document.getElementById('progress-title').textContent='Upload complete!';document.getElementById('progress-title').style.color='#059669';
     btn.textContent='Uploaded ✓';btn.style.background='#10b981';
