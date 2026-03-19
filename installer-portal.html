@@ -791,8 +791,8 @@ async function showHSModal(job){
         });
       }catch(e){}
     }
-    // If we found asset IDs filter to those, otherwise show all assets as fallback
-    const files=assetIds.size>0?allAssets.filter(a=>assetIds.has(String(a.id))):allAssets;
+    // Only show files strictly from the Health and Safety column
+    const files=allAssets.filter(a=>assetIds.has(String(a.id)));
     document.getElementById('hs-file-loading').style.display='none';
     if(files.length===0){
       document.getElementById('hs-file-list').innerHTML='<div style="padding:14px;text-align:center;color:#888;font-size:13px">No H&S document uploaded for this job yet.<br><span style="font-size:11px">You may still sign and proceed.</span></div>';
