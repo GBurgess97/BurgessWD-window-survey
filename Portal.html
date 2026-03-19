@@ -572,31 +572,39 @@ async function loadJobFiles(itemId){
     // Fetch assets for this item
     const data=await mondayQuery(`query {
       items(ids:${itemId}){
-        assets { id name url file_extension public_url }
+        assets { id name public_url file_extension }
         column_values(ids:${JSON.stringify(colIds)}){
           id
-          ... on FileValue { files { asset_id name url file_extension } }
+          ... on FileValue {
+            files {
+              ... on FileAssetValue { asset_id created_at }
+              ... on FileAssetInvalidValue { invalid_reason }
+            }
+          }
         }
       }
     }`);
     const item=data.data?.items?.[0];
     if(!item){loading.textContent='Could not load files.';return;}
-    // Collect all files from both columns
-    const files=[];
+    // Get valid asset IDs from file columns
+    const validAssetIds=new Set();
     (item.column_values||[]).forEach(col=>{
-      (col.files||[]).forEach(f=>files.push(f));
+      (col.files||[]).forEach(f=>{
+        if(f.asset_id)validAssetIds.add(String(f.asset_id));
+      });
     });
-    // Fallback to assets if column files empty
-    if(files.length===0&&item.assets){
-      item.assets.forEach(a=>files.push({name:a.name,url:a.public_url||a.url,file_extension:a.file_extension}));
-    }
+    // Match against item assets
+    const allAssets=item.assets||[];
+    const files=validAssetIds.size>0
+      ? allAssets.filter(a=>validAssetIds.has(String(a.id)))
+      : allAssets;
     loading.style.display='none';
     if(files.length===0){loading.textContent='No files uploaded yet.';loading.style.display='block';return;}
     const imgExts=['jpg','jpeg','png','gif','webp','heic'];
     grid.innerHTML=files.map(f=>{
       const ext=(f.file_extension||'').toLowerCase().replace('.','');
       const isImg=imgExts.includes(ext);
-      const url=f.public_url||f.url||'';
+      const url=f.public_url||'';
       return `<div class="file-thumb" onclick="window.open('${url}','_blank')">
         ${isImg?`<img src="${url}" alt="${f.name}" onerror="this.parentElement.querySelector('.file-thumb-pdf').style.display='flex';this.style.display='none'">
         <div class="file-thumb-pdf" style="display:none">🖼️</div>`:
