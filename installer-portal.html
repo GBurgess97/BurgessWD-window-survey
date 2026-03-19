@@ -520,7 +520,7 @@ function renderJobs(){
   list.innerHTML=jobs.map(job=>{
     const sc=getStatusClass(job.status);
     const dateStr=job.dateFrom?(job.dateFrom+(job.dateTo&&job.dateTo!==job.dateFrom?' → '+job.dateTo:'')):'No date set';
-    return `<div class="job-item" onclick="showHSModal(${JSON.stringify(job)})">
+    return `<div class="job-item" onclick="showHSModalById('${job.id}')">
       <div class="job-dot ${sc.dot}"></div>
       <div class="job-main">
         <div class="job-name">${job.name}</div>
@@ -712,6 +712,11 @@ function clearHSSig(){
   document.getElementById('hs-confirm-btn').disabled=true;
 }
 
+function showHSModalById(jobId){
+  const job=allJobs.find(j=>j.id===jobId);
+  if(job)showHSModal(job);
+}
+
 async function showHSModal(job){
   pendingJobId=job.id;
   document.getElementById('hs-overlay').style.display='flex';
@@ -853,7 +858,7 @@ function renderDiary(){
         <div class="diary-job-meta">${job.address||'No address'}</div>
         <span class="diary-range">📅 ${dateRange}</span>
       </div>
-      <button class="diary-open-btn" onclick="showHSModal(${JSON.stringify(job)})">View →</button>
+      <button class="diary-open-btn" onclick="showHSModalById('${job.id}')">View →</button>
     </div>`;
   }).join('');
 }
