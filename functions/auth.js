@@ -66,7 +66,8 @@ export async function onRequest(context) {
     // ── Admin: list users ──────────────────────────────────
     if (action === 'list_users') {
       if (!await isAdmin(token, KV)) return json({ error: 'Unauthorized' }, corsHeaders);
-      const list = await KV.list({ prefix: 'user:' });
+      const pfx = (role === 'installer') ? 'installer:' : 'user:';
+      const list = await KV.list({ prefix: pfx });
       const users = await Promise.all(list.keys.map(async k => {
         const data = await KV.get(k.name);
         const user = JSON.parse(data);
@@ -79,7 +80,7 @@ export async function onRequest(context) {
     if (action === 'add_user') {
       if (!await isAdmin(token, KV)) return json({ error: 'Unauthorized' }, corsHeaders);
       if (!name || !password) return json({ error: 'Name and password required' }, corsHeaders);
-      const userKey = 'user:' + name.toLowerCase().trim();
+      const userKey = ((role === 'installer') ? 'installer:' : 'user:') + name.toLowerCase().trim();
       await KV.put(userKey, JSON.stringify({ name: name.trim(), password: hashPassword(password) }));
       return json({ success: true }, corsHeaders);
     }
@@ -87,7 +88,8 @@ export async function onRequest(context) {
     // ── Admin: delete user ─────────────────────────────────
     if (action === 'delete_user') {
       if (!await isAdmin(token, KV)) return json({ error: 'Unauthorized' }, corsHeaders);
-      const userKey = 'user:' + name.toLowerCase().trim();
+      const delPrefix = (role === 'installer') ? 'installer:' : 'user:';
+      const userKey = delPrefix + name.toLowerCase().trim();
       await KV.delete(userKey);
       return json({ success: true }, corsHeaders);
     }
@@ -95,7 +97,8 @@ export async function onRequest(context) {
     // ── Admin: change password ─────────────────────────────
     if (action === 'change_password') {
       if (!await isAdmin(token, KV)) return json({ error: 'Unauthorized' }, corsHeaders);
-      const userKey = 'user:' + name.toLowerCase().trim();
+      const chgPrefix = (role === 'installer') ? 'installer:' : 'user:';
+      const userKey = chgPrefix + name.toLowerCase().trim();
       const userData = await KV.get(userKey);
       if (!userData) return json({ error: 'User not found' }, corsHeaders);
       const user = JSON.parse(userData);
