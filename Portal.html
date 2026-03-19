@@ -11,8 +11,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .app-title{font-size:16px;font-weight:600;color:#fff}
 .app-subtitle{font-size:12px;color:#93c5fd;margin-top:1px}
 .container{max-width:800px;margin:0 auto;padding:20px 16px}
-
-/* Login screen */
 .login-screen{display:flex;align-items:center;justify-content:center;min-height:80vh}
 .login-card{background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:32px;max-width:400px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
 .login-logo{width:56px;height:56px;background:#1e40af;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
@@ -26,16 +24,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .login-btn{width:100%;padding:12px;background:#1e40af;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.15s}
 .login-btn:hover{background:#1d4ed8}
 .login-btn:disabled{background:#93c5fd;cursor:not-allowed}
-
-/* Dashboard */
 .dashboard{display:none}
 .welcome-bar{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .welcome-name{font-size:16px;font-weight:600}
 .welcome-sub{font-size:12px;color:#64748b;margin-top:2px}
 .btn-signout{background:transparent;border:1px solid #e0e0e0;color:#64748b;padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
 .btn-signout:hover{background:#f5f5f5}
-
-/* Stats */
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
 .stat-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px;text-align:center}
 .stat-val{font-size:28px;font-weight:700;margin-bottom:2px}
@@ -43,15 +37,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .stat-card.outstanding .stat-val{color:#d97706}
 .stat-card.complete .stat-val{color:#059669}
 .stat-card.total .stat-val{color:#1e40af}
-
-/* Jobs list */
 .jobs-section{background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:16px}
 .jobs-header{padding:14px 18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .jobs-title{font-size:15px;font-weight:600}
 .filter-tabs{display:flex;gap:4px}
 .ftab{padding:5px 12px;border:1px solid #e0e0e0;border-radius:6px;background:transparent;color:#888;font-size:12px;cursor:pointer;font-family:inherit}
 .ftab.active{background:#1e40af;color:#fff;border-color:#1e40af}
-
 .job-item{padding:14px 18px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s}
 .job-item:last-child{border-bottom:none}
 .job-item:hover{background:#f8fafc}
@@ -68,26 +59,68 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .status-confirmed{background:#dbeafe;color:#1e40af}
 .status-complete{background:#d1fae5;color:#065f46}
 .job-arrow{color:#cbd5e1;font-size:16px}
-.job-date{font-size:11px;color:#9ca3af}
-
-/* Empty state */
 .empty-state{padding:40px 20px;text-align:center;color:#9ca3af}
 .empty-icon{font-size:40px;margin-bottom:10px}
 .empty-title{font-size:15px;font-weight:600;color:#64748b;margin-bottom:4px}
 .empty-sub{font-size:13px}
-
-/* Loading */
 .loading{padding:40px 20px;text-align:center;color:#9ca3af}
 .spinner{width:28px;height:28px;border:3px solid #e5e5e5;border-top-color:#1e40af;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* Refresh btn */
 .btn-refresh{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500}
 .btn-refresh:hover{background:#dbeafe}
-
 .error-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin-bottom:14px}
 
-@media(max-width:500px){.stats-grid{grid-template-columns:repeat(3,1fr)}.stat-val{font-size:22px}}
+/* Job detail panel */
+.job-detail{display:none;background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:16px}
+.job-detail-header{background:#1e40af;padding:14px 18px;display:flex;align-items:center;gap:12px}
+.job-detail-back{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+.job-detail-back:hover{background:rgba(255,255,255,0.25)}
+.job-detail-title{font-size:15px;font-weight:600;color:#fff;flex:1}
+.job-detail-status{font-size:11px;font-weight:500;padding:3px 10px;border-radius:5px}
+.job-detail-body{padding:18px}
+.detail-section{margin-bottom:16px}
+.detail-section-title{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-field{display:flex;flex-direction:column;gap:4px}
+.detail-label{font-size:11px;color:#888;font-weight:500}
+.detail-value{font-size:14px;font-weight:500;color:#1a1a1a}
+.detail-value.empty{color:#ccc;font-style:italic;font-weight:400}
+.contact-reveal{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;margin-bottom:16px;display:none}
+.contact-reveal-title{font-size:12px;font-weight:600;color:#1e40af;margin-bottom:8px}
+.contact-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #dbeafe;font-size:14px}
+.contact-item:last-child{border-bottom:none}
+.contact-item a{color:#1e40af;text-decoration:none;font-weight:500}
+.contact-item a:hover{text-decoration:underline}
+
+/* Appointment scheduling */
+.appt-section{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:14px;margin-bottom:16px}
+.appt-title{font-size:12px;font-weight:600;color:#92400e;margin-bottom:10px}
+.appt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.appt-field{display:flex;flex-direction:column;gap:4px}
+.appt-field label{font-size:11px;color:#92400e;font-weight:500}
+.appt-field input{padding:8px 10px;border:1px solid #fcd34d;border-radius:7px;font-size:13px;font-family:inherit;background:#fff;outline:none}
+.appt-field input:focus{border-color:#f59e0b}
+.btn-appt{background:#f59e0b;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+.btn-appt:hover{background:#d97706}
+.btn-appt:disabled{background:#fcd34d;cursor:not-allowed}
+.appt-saved{background:#ecfdf5;border:1px solid #6ee7b7;border-radius:7px;padding:8px 12px;font-size:12px;color:#065f46;display:none;margin-top:8px}
+
+/* Action buttons */
+.action-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.btn-action{padding:14px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit;text-align:center;transition:all 0.15s}
+.btn-view-client{background:#eff6ff;color:#1e40af;border:1.5px solid #bfdbfe}
+.btn-view-client:hover{background:#dbeafe}
+.btn-survey{background:#10b981;color:#fff}
+.btn-survey:hover{background:#059669}
+.btn-survey.complete{background:#6b7280;cursor:default}
+
+@media(max-width:500px){
+  .stats-grid{grid-template-columns:repeat(3,1fr)}
+  .stat-val{font-size:22px}
+  .detail-grid{grid-template-columns:1fr}
+  .appt-grid{grid-template-columns:1fr}
+  .action-btns{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -109,10 +142,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </div>
       <div class="login-title">Surveyor Portal</div>
-      <div class="login-sub">Enter your name to see your assigned jobs and manage your surveys.</div>
+      <div class="login-sub">Enter your name to see your assigned jobs.</div>
       <div class="login-field">
         <label>Your name</label>
-        <input type="text" id="login-name" placeholder="e.g. George Burgess" oninput="checkLogin()" onkeydown="if(event.key==='Enter')doLogin()">
+        <input type="text" id="login-name" placeholder="e.g. Paul Burgess" oninput="checkLogin()" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
       <button class="login-btn" id="login-btn" onclick="doLogin()" disabled>View my jobs</button>
     </div>
@@ -139,7 +172,66 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="stat-card total"><div class="stat-val" id="stat-total">—</div><div class="stat-lbl">Total jobs</div></div>
     </div>
 
-    <div class="jobs-section">
+    <!-- Job detail panel -->
+    <div class="job-detail" id="job-detail">
+      <div class="job-detail-header">
+        <button class="job-detail-back" onclick="closeJobDetail()">← Back</button>
+        <div class="job-detail-title" id="detail-title"></div>
+        <span class="job-detail-status" id="detail-status-badge"></span>
+      </div>
+      <div class="job-detail-body">
+
+        <!-- Job info -->
+        <div class="detail-section">
+          <div class="detail-section-title">Job details</div>
+          <div class="detail-grid">
+            <div class="detail-field"><div class="detail-label">Customer</div><div class="detail-value" id="detail-name">—</div></div>
+            <div class="detail-field"><div class="detail-label">Site address</div><div class="detail-value" id="detail-address">—</div></div>
+            <div class="detail-field"><div class="detail-label">Survey date</div><div class="detail-value" id="detail-date">—</div></div>
+            <div class="detail-field"><div class="detail-label">Survey time</div><div class="detail-value" id="detail-time">—</div></div>
+          </div>
+        </div>
+
+        <!-- Contact details reveal -->
+        <div style="margin-bottom:16px">
+          <button class="btn-action btn-view-client" style="width:100%;padding:10px" onclick="toggleContact()">👤 View client contact details</button>
+          <div class="contact-reveal" id="contact-reveal">
+            <div class="contact-reveal-title">Client contact details</div>
+            <div class="contact-item" id="contact-phone">
+              <span style="color:#888;font-size:18px">📞</span>
+              <span id="contact-phone-val">Not available</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appointment scheduling -->
+        <div class="appt-section" id="appt-section">
+          <div class="appt-title">📅 Schedule / update survey appointment</div>
+          <div style="font-size:12px;color:#92400e;margin-bottom:10px">Setting the date and time will trigger the Monday automation to confirm the appointment and email the client.</div>
+          <div class="appt-grid">
+            <div class="appt-field">
+              <label>Survey date</label>
+              <input type="date" id="appt-date">
+            </div>
+            <div class="appt-field">
+              <label>Survey time</label>
+              <input type="time" id="appt-time">
+            </div>
+          </div>
+          <button class="btn-appt" id="appt-save-btn" onclick="saveAppointment()">Save &amp; update Monday</button>
+          <div class="appt-saved" id="appt-saved">✓ Appointment saved and Monday updated successfully</div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="action-btns">
+          <button class="btn-action btn-survey" id="undertake-btn" onclick="undertakeSurvey()">Start survey →</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Jobs list -->
+    <div class="jobs-section" id="jobs-section">
       <div class="jobs-header">
         <div class="jobs-title">Your jobs</div>
         <div class="filter-tabs">
@@ -164,12 +256,13 @@ const SURVEY_URL='https://burgesswd-window-survey.pages.dev/';
 let currentUser='';
 let allJobs=[];
 let currentFilter='all';
+let selectedJob=null;
+let boardColumns=[];
 
 function checkLogin(){
   const val=document.getElementById('login-name').value.trim();
   document.getElementById('login-btn').disabled=val.length<2;
 }
-
 function doLogin(){
   const name=document.getElementById('login-name').value.trim();
   if(name.length<2)return;
@@ -177,18 +270,15 @@ function doLogin(){
   localStorage.setItem('bwd_portal_user',name);
   showDashboard();
 }
-
 function signOut(){
   localStorage.removeItem('bwd_portal_user');
-  currentUser='';
-  allJobs=[];
+  currentUser='';allJobs=[];
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('dashboard').style.display='none';
   document.getElementById('header-name').style.display='none';
   document.getElementById('login-name').value='';
   document.getElementById('login-btn').disabled=true;
 }
-
 function showDashboard(){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('dashboard').style.display='block';
@@ -198,36 +288,40 @@ function showDashboard(){
   loadJobs();
 }
 
+async function mondayQuery(query){
+  const res=await fetch(PROXY_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query})});
+  if(!res.ok)throw new Error('Server error '+res.status);
+  const data=await res.json();
+  if(data.errors)throw new Error(data.errors[0].message);
+  return data;
+}
+
 async function loadJobs(){
   document.getElementById('jobs-list').innerHTML='<div class="loading"><div class="spinner"></div>Loading your jobs...</div>';
   document.getElementById('error-box').style.display='none';
   document.getElementById('stat-outstanding').textContent='—';
   document.getElementById('stat-complete').textContent='—';
   document.getElementById('stat-total').textContent='—';
-
   try{
-    // First fetch column metadata to get IDs by title
-    const colQuery=`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`;
-    const colRes=await fetch(PROXY_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:colQuery})});
-    const colData=await colRes.json();
-    if(colData.errors)throw new Error(colData.errors[0].message);
-    const columns=colData.data?.boards?.[0]?.columns||[];
+    // Fetch column metadata
+    const colData=await mondayQuery(`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`);
+    boardColumns=colData.data?.boards?.[0]?.columns||[];
 
-    // Find column IDs by title
-    const surveyorColId=columns.find(c=>c.title==='Surveyor'||c.type==='people')?.id||'';
-    const statusColId=columns.find(c=>c.title==='Survey Status'||c.title==='Status'||c.type==='color')?.id||'';
-    const dateColId=columns.find(c=>c.title.toLowerCase().includes('date')||c.type==='date')?.id||'';
+    const surveyorColId=boardColumns.find(c=>c.title==='Surveyor')?.id||'';
+    const statusColId=boardColumns.find(c=>c.title==='Survey Stage')?.id||boardColumns.find(c=>c.type==='color')?.id||'';
+    const dateColId=boardColumns.find(c=>c.title==='Survey Date')?.id||'';
+    const timeColId=boardColumns.find(c=>c.title==='Survey Time')?.id||'';
+    const addressColId=boardColumns.find(c=>c.title==='Site Address')?.id||'';
+    const phoneColId=boardColumns.find(c=>c.title.toLowerCase().includes('phone')||c.title.toLowerCase().includes('contact')||c.title.toLowerCase().includes('number'))?.id||'';
 
-    // Now fetch items with column values
-    const query=`query {
+    // Fetch items
+    const data=await mondayQuery(`query {
       boards(ids:${BOARD_ID}){
         items_page(limit:200){
           items {
-            id
-            name
+            id name
             column_values {
-              id
-              text
+              id text
               ... on PeopleValue { persons_and_teams { id } }
               ... on StatusValue { label }
               ... on DateValue { date }
@@ -235,41 +329,30 @@ async function loadJobs(){
           }
         }
       }
-    }`;
-
-    const res=await fetch(PROXY_API,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({query})
-    });
-
-    if(!res.ok)throw new Error('Server error '+res.status);
-    const data=await res.json();
-    if(data.errors)throw new Error(data.errors[0].message);
+    }`);
 
     const items=data.data?.boards?.[0]?.items_page?.items||[];
 
-    // Filter to jobs assigned to this surveyor
     allJobs=items.filter(item=>{
-      const surveyorCol=item.column_values.find(c=>c.id===surveyorColId);
-      if(!surveyorCol)return false;
-      // Match by text field which contains the person's display name
-      const textMatch=(surveyorCol.text||'').toLowerCase().includes(currentUser.toLowerCase());
-      return textMatch;
+      const col=item.column_values.find(c=>c.id===surveyorColId);
+      return col&&(col.text||'').toLowerCase().includes(currentUser.toLowerCase());
     }).map(item=>{
-      const statusCol=item.column_values.find(c=>c.id===statusColId);
-      const dateCol=item.column_values.find(c=>c.id===dateColId);
+      const cv=id=>item.column_values.find(c=>c.id===id);
+      const statusCol=cv(statusColId);
       return{
         id:item.id,
         name:item.name,
         status:statusCol?.label||statusCol?.text||'—',
-        date:dateCol?.date||dateCol?.text||'',
+        date:cv(dateColId)?.date||cv(dateColId)?.text||'',
+        time:cv(timeColId)?.text||'',
+        address:cv(addressColId)?.text||'',
+        phone:cv(phoneColId)?.text||'',
+        surveyorColId,statusColId,dateColId,timeColId,addressColId,phoneColId
       };
     });
 
     renderJobs();
     updateStats();
-
   }catch(err){
     document.getElementById('jobs-list').innerHTML='<div class="empty-state"><div class="empty-title">Could not load jobs</div><div class="empty-sub">'+err.message+'</div></div>';
     const eb=document.getElementById('error-box');
@@ -280,78 +363,141 @@ async function loadJobs(){
 
 function getStatusClass(status){
   const s=(status||'').toLowerCase();
-  if(s.includes('complete'))return{dot:'complete',badge:'status-complete',label:status};
-  if(s.includes('confirmed')||s.includes('confirm'))return{dot:'confirmed',badge:'status-confirmed',label:status};
-  return{dot:'booked',badge:'status-booked',label:status};
+  if(s.includes('complete'))return{dot:'complete',badge:'status-complete'};
+  if(s.includes('confirm'))return{dot:'confirmed',badge:'status-confirmed'};
+  return{dot:'booked',badge:'status-booked'};
 }
-
-function isComplete(status){
-  return(status||'').toLowerCase().includes('complete');
-}
-
+function isComplete(status){return(status||'').toLowerCase().includes('complete');}
 function filterJobs(filter,btn){
   currentFilter=filter;
   document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
   renderJobs();
 }
-
 function renderJobs(){
   const list=document.getElementById('jobs-list');
   let jobs=allJobs;
   if(currentFilter==='outstanding')jobs=allJobs.filter(j=>!isComplete(j.status));
   if(currentFilter==='complete')jobs=allJobs.filter(j=>isComplete(j.status));
-
   if(jobs.length===0){
-    list.innerHTML=`<div class="empty-state">
-      <div class="empty-icon">📋</div>
-      <div class="empty-title">${currentFilter==='all'?'No jobs assigned to you':'No '+currentFilter+' jobs'}</div>
-      <div class="empty-sub">${currentFilter==='all'?'Jobs assigned to you in Monday will appear here':'Check another filter'}</div>
-    </div>`;
+    list.innerHTML=`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">${currentFilter==='all'?'No jobs assigned to you':'No '+currentFilter+' jobs'}</div><div class="empty-sub">${currentFilter==='all'?'Jobs assigned to you in Monday will appear here':'Check another filter'}</div></div>`;
     return;
   }
-
   list.innerHTML=jobs.map(job=>{
     const sc=getStatusClass(job.status);
-    const surveyUrl=SURVEY_URL+'?job='+job.id+'&name='+encodeURIComponent(job.name);
-    return `<div class="job-item" onclick="openJob('${job.id}','${encodeURIComponent(job.name)}','${isComplete(job.status)}')">
+    return `<div class="job-item" onclick="openJobDetail('${job.id}')">
       <div class="job-dot ${sc.dot}"></div>
       <div class="job-main">
         <div class="job-name">${job.name}</div>
-        <div class="job-meta">Job #${job.id}${job.date?' · '+job.date:''}</div>
+        <div class="job-meta">${job.address||'No address'}${job.date?' · '+job.date:''}</div>
       </div>
       <div class="job-right">
-        <span class="job-status ${sc.badge}">${sc.label}</span>
-        <span class="job-date">${isComplete(job.status)?'Completed':'Outstanding'}</span>
+        <span class="job-status ${sc.badge}">${job.status}</span>
+        <span style="font-size:11px;color:#9ca3af">${isComplete(job.status)?'Completed':'Outstanding'}</span>
       </div>
       <div class="job-arrow">›</div>
     </div>`;
   }).join('');
 }
-
 function updateStats(){
   const total=allJobs.length;
   const complete=allJobs.filter(j=>isComplete(j.status)).length;
-  const outstanding=total-complete;
   document.getElementById('stat-total').textContent=total;
   document.getElementById('stat-complete').textContent=complete;
-  document.getElementById('stat-outstanding').textContent=outstanding;
+  document.getElementById('stat-outstanding').textContent=total-complete;
 }
 
-function openJob(itemId,encodedName,isComplete){
-  const name=decodeURIComponent(encodedName);
-  const url=SURVEY_URL+'?job='+itemId+'&name='+encodeURIComponent(name)+'&portal=1';
+function openJobDetail(jobId){
+  selectedJob=allJobs.find(j=>j.id===jobId);
+  if(!selectedJob)return;
+  const sc=getStatusClass(selectedJob.status);
+  document.getElementById('detail-title').textContent=selectedJob.name;
+  const badge=document.getElementById('detail-status-badge');
+  badge.textContent=selectedJob.status;
+  badge.className='job-detail-status '+sc.badge;
+  document.getElementById('detail-name').textContent=selectedJob.name||'—';
+  document.getElementById('detail-address').textContent=selectedJob.address||'—';
+  document.getElementById('detail-date').textContent=selectedJob.date||'Not scheduled';
+  document.getElementById('detail-time').textContent=selectedJob.time||'Not scheduled';
+  // Phone
+  const phoneVal=document.getElementById('contact-phone-val');
+  if(selectedJob.phone){
+    phoneVal.innerHTML=`<a href="tel:${selectedJob.phone}">${selectedJob.phone}</a>`;
+  }else{
+    phoneVal.textContent='Not available (mirrored column)';
+  }
+  // Pre-fill appointment fields
+  if(selectedJob.date)document.getElementById('appt-date').value=selectedJob.date;
+  if(selectedJob.time){
+    // Convert time text to HH:MM format
+    const t=selectedJob.time.replace(/\s*(am|pm)/i,'');
+    document.getElementById('appt-time').value=t;
+  }
+  document.getElementById('appt-saved').style.display='none';
+  document.getElementById('contact-reveal').style.display='none';
+  // Hide complete survey btn if already done
+  const btn=document.getElementById('undertake-btn');
+  if(isComplete(selectedJob.status)){
+    btn.textContent='Survey completed ✓';
+    btn.className='btn-action btn-survey complete';
+    btn.onclick=null;
+  }else{
+    btn.textContent='Start survey →';
+    btn.className='btn-action btn-survey';
+    btn.onclick=undertakeSurvey;
+  }
+  document.getElementById('jobs-section').style.display='none';
+  document.getElementById('job-detail').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function closeJobDetail(){
+  document.getElementById('job-detail').style.display='none';
+  document.getElementById('jobs-section').style.display='block';
+  selectedJob=null;
+}
+
+function toggleContact(){
+  const reveal=document.getElementById('contact-reveal');
+  reveal.style.display=reveal.style.display==='none'?'block':'none';
+}
+
+async function saveAppointment(){
+  if(!selectedJob)return;
+  const date=document.getElementById('appt-date').value;
+  const time=document.getElementById('appt-time').value;
+  if(!date&&!time){alert('Please enter at least a date or time.');return;}
+  const btn=document.getElementById('appt-save-btn');
+  btn.disabled=true;btn.textContent='Saving...';
+  try{
+    // Update date column
+    if(date&&selectedJob.dateColId){
+      await mondayQuery(`mutation { change_column_value(board_id:${BOARD_ID}, item_id:${selectedJob.id}, column_id:"${selectedJob.dateColId}", value:"{\\"date\\":\\"${date}\\"}") { id } }`);
+    }
+    // Update time column
+    if(time&&selectedJob.timeColId){
+      await mondayQuery(`mutation { change_column_value(board_id:${BOARD_ID}, item_id:${selectedJob.id}, column_id:"${selectedJob.timeColId}", value:${JSON.stringify(JSON.stringify(time))}) { id } }`);
+    }
+    document.getElementById('appt-saved').style.display='block';
+    document.getElementById('detail-date').textContent=date||selectedJob.date||'—';
+    document.getElementById('detail-time').textContent=time||selectedJob.time||'—';
+    btn.textContent='Saved ✓';btn.style.background='#10b981';
+    setTimeout(()=>{btn.disabled=false;btn.textContent='Save & update Monday';btn.style.background='';},3000);
+  }catch(err){
+    alert('Could not save appointment: '+err.message);
+    btn.disabled=false;btn.textContent='Save & update Monday';
+  }
+}
+
+function undertakeSurvey(){
+  if(!selectedJob)return;
+  const url=SURVEY_URL+'?job='+selectedJob.id+'&name='+encodeURIComponent(selectedJob.name)+'&portal=1';
   window.location.href=url;
 }
 
-// Init
 window.addEventListener('load',()=>{
   const saved=localStorage.getItem('bwd_portal_user');
-  if(saved){
-    currentUser=saved;
-    document.getElementById('login-name').value=saved;
-    showDashboard();
-  }
+  if(saved){currentUser=saved;document.getElementById('login-name').value=saved;showDashboard();}
 });
 </script>
 </body>
