@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Sign-off — Burgess Windows & Doors</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f3;min-height:100vh}
+.app-header{background:#065f46;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.app-title{font-size:16px;font-weight:600;color:#fff}
+.app-subtitle{font-size:12px;color:#6ee7b7;margin-top:1px}
+.btn-back{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+.container{max-width:700px;margin:0 auto;padding:20px 16px}
+.section{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.sec-title{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:12px;font-weight:500;color:#666}
+.field input,.field select,.field textarea{padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#059669}
+.field textarea{resize:vertical;min-height:80px}
+
+/* Completion status */
+.completion-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.completion-opt{border:2px solid #e5e5e5;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all 0.15s}
+.completion-opt.selected.complete{border-color:#059669;background:#f0fdf4}
+.completion-opt.selected.partial{border-color:#f59e0b;background:#fffbeb}
+.completion-opt-icon{font-size:32px;margin-bottom:6px}
+.completion-opt-label{font-size:13px;font-weight:600}
+.completion-opt-sub{font-size:11px;color:#888;margin-top:2px}
+
+/* Snag list */
+.snag-item{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px;margin-bottom:8px;position:relative}
+.snag-remove{position:absolute;top:8px;right:8px;background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px}
+.add-snag-btn{background:#fffbeb;border:1.5px dashed #fcd34d;color:#92400e;width:100%;padding:10px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500}
+.add-snag-btn:hover{background:#fef3c7}
+
+/* Photos */
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:10px}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid #e5e5e5}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-thumb button{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer}
+.upload-area{border:1.5px dashed #d0d0d0;border-radius:8px;padding:16px;text-align:center;cursor:pointer;font-size:13px;color:#888}
+.upload-area:hover{border-color:#059669;color:#059669;background:#f0fdf4}
+
+/* Signature */
+.sig-canvas-wrap{border:1.5px solid #e5e5e5;border-radius:8px;overflow:hidden;background:#fff;touch-action:none}
+.sig-canvas{display:block;width:100%;height:180px;cursor:crosshair;touch-action:none}
+.sig-toolbar{display:flex;gap:8px;margin-top:8px}
+.sig-clear{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:7px 16px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+.sig-label{font-size:12px;color:#888;margin-top:6px}
+
+/* Submit */
+.submit-section{background:#f0fdf4;border:1px solid #6ee7b7;border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.btn-submit{width:100%;padding:14px;background:#065f46;color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-submit:hover{background:#047857}
+.btn-submit:disabled{background:#6ee7b7;cursor:not-allowed}
+.progress-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-top:10px;display:none}
+.progress-step{display:flex;align-items:center;gap:8px;font-size:12px;color:#64748b;margin-bottom:4px}
+.progress-step.done{color:#059669}
+.progress-step.active{color:#1e40af;font-weight:500}
+.progress-step.error{color:#dc2626}
+.step-icon{width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
+.step-icon.done{background:#d1fae5;color:#059669}
+.step-icon.active{background:#dbeafe;color:#1e40af}
+.step-icon.error{background:#fee2e2;color:#dc2626}
+.step-icon.wait{background:#f3f4f6;color:#9ca3af}
+
+@media(max-width:500px){
+  .completion-options{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div>
+    <div class="app-title">Burgess Windows &amp; Doors</div>
+    <div class="app-subtitle" id="page-subtitle">Job Sign-off</div>
+  </div>
+  <button class="btn-back" onclick="goBack()">← Back</button>
+</div>
+
+<div class="container">
+
+  <!-- Job info -->
+  <div class="section">
+    <div class="sec-title">📋 Job details</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><div style="font-size:11px;color:#888;margin-bottom:3px">Job</div><div style="font-weight:600" id="job-name-display">—</div></div>
+      <div><div style="font-size:11px;color:#888;margin-bottom:3px">Installer</div><div style="font-weight:600" id="installer-display">—</div></div>
+      <div><div style="font-size:11px;color:#888;margin-bottom:3px">Date</div><div style="font-weight:600" id="date-display">—</div></div>
+    </div>
+  </div>
+
+  <!-- Completion status -->
+  <div class="section">
+    <div class="sec-title">✅ Completion status</div>
+    <div class="completion-options">
+      <div class="completion-opt" id="opt-complete" onclick="selectCompletion('complete')">
+        <div class="completion-opt-icon">✅</div>
+        <div class="completion-opt-label">Job complete</div>
+        <div class="completion-opt-sub">All items installed</div>
+      </div>
+      <div class="completion-opt" id="opt-partial" onclick="selectCompletion('partial')">
+        <div class="completion-opt-icon">⚠️</div>
+        <div class="completion-opt-label">Partially complete</div>
+        <div class="completion-opt-sub">Some items outstanding</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Snag list — shown when partial -->
+  <div class="section" id="snag-section" style="display:none">
+    <div class="sec-title">⚠️ Snag list — outstanding items</div>
+    <div id="snag-list"></div>
+    <button class="add-snag-btn" onclick="addSnagItem()">+ Add outstanding item</button>
+  </div>
+
+  <!-- Completion photos -->
+  <div class="section">
+    <div class="sec-title">📸 Completion photos</div>
+    <div style="font-size:12px;color:#888;margin-bottom:10px">Upload photos of completed work</div>
+    <div class="upload-area" onclick="document.getElementById('photo-input').click()">Tap to upload completion photos</div>
+    <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
+    <div class="photo-grid" id="photo-grid"></div>
+  </div>
+
+  <!-- Customer sign-off -->
+  <div class="section">
+    <div class="sec-title">✍️ Customer sign-off</div>
+    <div class="field">
+      <label>Customer name</label>
+      <input type="text" id="customer-name" placeholder="Customer's full name">
+    </div>
+    <div style="font-size:12px;color:#888;margin-bottom:8px">Customer signature</div>
+    <div class="sig-canvas-wrap">
+      <canvas class="sig-canvas" id="sig-canvas"></canvas>
+    </div>
+    <div class="sig-toolbar">
+      <button class="sig-clear" onclick="clearSignature()">Clear signature</button>
+    </div>
+    <div class="sig-label">By signing above, the customer confirms the installation has been completed to their satisfaction.</div>
+  </div>
+
+  <!-- Notes -->
+  <div class="section">
+    <div class="sec-title">📝 Additional notes</div>
+    <div class="field">
+      <textarea id="completion-notes" placeholder="Any additional notes about the installation..."></textarea>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-section">
+    <div style="font-size:13px;color:#065f46;margin-bottom:12px;font-weight:500">Ready to submit? This will generate a completion report PDF and upload it to Monday, and mark the job as Done.</div>
+    <button class="btn-submit" id="submit-btn" onclick="submitCompletion()">Submit completion report</button>
+    <div class="progress-box" id="progress-box">
+      <div style="font-size:13px;font-weight:500;color:#1e40af;margin-bottom:8px" id="progress-title">Submitting...</div>
+      <div id="progress-steps"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const BOARD_ID='18402849501';
+const PROXY_API='/monday-proxy';
+const MONDAY_FILE_API_PROXY='/monday-upload';
+
+let completionStatus='';
+let snagItems=[];
+let photos=[];
+let sigDrawing=false;
+let sigCanvas,sigCtx;
+let jobId='',jobName='',installerName='';
+
+// Init
+window.addEventListener('load',()=>{
+  const params=new URLSearchParams(window.location.search);
+  jobId=params.get('job')||'';
+  jobName=decodeURIComponent((params.get('name')||'').replace(/\+/g,' '));
+  installerName=decodeURIComponent((params.get('installer')||'').replace(/\+/g,' '));
+  document.getElementById('job-name-display').textContent=jobName||'—';
+  document.getElementById('installer-display').textContent=installerName||'—';
+  document.getElementById('date-display').textContent=new Date().toLocaleDateString('en-GB');
+  document.getElementById('page-subtitle').textContent=jobName?'Sign-off: '+jobName:'Job Sign-off';
+  initSignature();
+});
+
+function goBack(){
+  window.history.back();
+}
+
+function selectCompletion(type){
+  completionStatus=type;
+  document.getElementById('opt-complete').classList.toggle('selected',type==='complete');
+  document.getElementById('opt-complete').classList.toggle('complete',type==='complete');
+  document.getElementById('opt-partial').classList.toggle('selected',type==='partial');
+  document.getElementById('opt-partial').classList.toggle('partial',type==='partial');
+  document.getElementById('snag-section').style.display=type==='partial'?'block':'none';
+}
+
+let snagCount=0;
+function addSnagItem(){
+  snagCount++;
+  const id='snag-'+snagCount;
+  snagItems.push({id,item:'',reason:''});
+  const div=document.createElement('div');
+  div.className='snag-item';
+  div.id=id;
+  div.innerHTML=`<button class="snag-remove" onclick="removeSnag('${id}')">×</button>
+    <div class="field" style="margin-bottom:8px"><label>Item / location</label><input type="text" placeholder="e.g. Kitchen window — handle" oninput="updateSnag('${id}','item',this.value)"></div>
+    <div class="field" style="margin-bottom:0"><label>Reason not completed</label><input type="text" placeholder="e.g. Wrong size handle supplied" oninput="updateSnag('${id}','reason',this.value)"></div>`;
+  document.getElementById('snag-list').appendChild(div);
+}
+function removeSnag(id){
+  snagItems=snagItems.filter(s=>s.id!==id);
+  document.getElementById(id)?.remove();
+}
+function updateSnag(id,field,value){
+  const snag=snagItems.find(s=>s.id===id);
+  if(snag)snag[field]=value;
+}
+
+function handlePhotos(e){
+  Array.from(e.target.files).forEach(file=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      photos.push({name:file.name,dataUrl:ev.target.result});
+      renderPhotos();
+    };
+    r.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+function removePhoto(i){photos.splice(i,1);renderPhotos();}
+function renderPhotos(){
+  document.getElementById('photo-grid').innerHTML=photos.map((p,i)=>`
+    <div class="photo-thumb"><img src="${p.dataUrl}" alt="${p.name}">
+    <button onclick="removePhoto(${i})">×</button></div>`).join('');
+}
+
+function initSignature(){
+  sigCanvas=document.getElementById('sig-canvas');
+  sigCtx=sigCanvas.getContext('2d');
+  sigCanvas.width=sigCanvas.offsetWidth||600;
+  sigCanvas.height=180;
+  sigCtx.strokeStyle='#1a1a1a';
+  sigCtx.lineWidth=2;
+  sigCtx.lineCap='round';
+  function getPos(e){
+    const rect=sigCanvas.getBoundingClientRect();
+    const scaleX=sigCanvas.width/rect.width,scaleY=sigCanvas.height/rect.height;
+    const src=e.touches?e.touches[0]:e;
+    return{x:(src.clientX-rect.left)*scaleX,y:(src.clientY-rect.top)*scaleY};
+  }
+  sigCanvas.addEventListener('mousedown',e=>{sigDrawing=true;const{x,y}=getPos(e);sigCtx.beginPath();sigCtx.moveTo(x,y);});
+  sigCanvas.addEventListener('mousemove',e=>{if(!sigDrawing)return;const{x,y}=getPos(e);sigCtx.lineTo(x,y);sigCtx.stroke();});
+  sigCanvas.addEventListener('mouseup',()=>sigDrawing=false);
+  sigCanvas.addEventListener('mouseleave',()=>sigDrawing=false);
+  sigCanvas.addEventListener('touchstart',e=>{e.preventDefault();sigDrawing=true;const{x,y}=getPos(e);sigCtx.beginPath();sigCtx.moveTo(x,y);},{passive:false});
+  sigCanvas.addEventListener('touchmove',e=>{e.preventDefault();if(!sigDrawing)return;const{x,y}=getPos(e);sigCtx.lineTo(x,y);sigCtx.stroke();},{passive:false});
+  sigCanvas.addEventListener('touchend',()=>sigDrawing=false);
+}
+function clearSignature(){sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);}
+function isSignatureEmpty(){
+  const data=sigCtx.getImageData(0,0,sigCanvas.width,sigCanvas.height).data;
+  return!Array.from(data).some(v=>v!==0);
+}
+
+function showProgress(steps){
+  document.getElementById('progress-box').style.display='block';
+  document.getElementById('progress-steps').innerHTML=steps.map((s,i)=>`<div class="progress-step wait" id="ps${i}"><div class="step-icon wait" id="pi${i}">○</div><span id="pt${i}">${s}</span></div>`).join('');
+}
+function setStep(i,status,text){
+  const step=document.getElementById('ps'+i),icon=document.getElementById('pi'+i),txt=document.getElementById('pt'+i);
+  if(!step)return;
+  step.className='progress-step '+status;icon.className='step-icon '+status;
+  icon.textContent=status==='done'?'✓':status==='error'?'✗':'…';
+  if(text&&txt)txt.textContent=text;
+}
+
+async function mondayQuery(query){
+  const res=await fetch(PROXY_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query})});
+  const data=await res.json();
+  if(data.errors)throw new Error(data.errors[0].message);
+  return data;
+}
+
+async function uploadFileToMonday(itemId,columnId,fileName,blob){
+  const base64=await new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result.split(',')[1]);
+    reader.onerror=()=>reject(new Error('Failed to read file'));
+    reader.readAsDataURL(blob);
+  });
+  const res=await fetch(MONDAY_FILE_API_PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:String(itemId),columnId,fileName,fileBase64:base64})});
+  if(!res.ok)throw new Error('Upload error '+res.status);
+  const data=await res.json();
+  if(data.error)throw new Error(data.error);
+  return data;
+}
+
+function generateCompletionPDF(){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const dateStr=new Date().toLocaleDateString('en-GB');
+
+  // Header
+  doc.setFillColor(6,95,70);doc.rect(0,0,210,28,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont('helvetica','bold');
+  doc.text('Burgess Windows & Doors',14,12);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  doc.text('Installation Completion Report',14,20);
+
+  doc.setTextColor(30,30,30);doc.setFontSize(10);
+  doc.setFont('helvetica','bold');doc.text('Job: '+jobName,14,36);
+  doc.setFont('helvetica','normal');
+  doc.text('Installer: '+installerName+'    Date: '+dateStr,14,42);
+  doc.text('Status: '+(completionStatus==='complete'?'FULLY COMPLETE':'PARTIALLY COMPLETE'),14,48);
+
+  let y=58;
+
+  // Snag items
+  if(completionStatus==='partial'&&snagItems.length>0){
+    doc.setFillColor(255,251,235);doc.rect(10,y,190,8,'F');
+    doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(146,64,14);
+    doc.text('Outstanding items (snag list)',14,y+5.5);
+    doc.setTextColor(30,30,30);y+=11;
+    snagItems.forEach((snag,i)=>{
+      if(y>270){doc.addPage();y=20;}
+      doc.setFont('helvetica','bold');doc.setFontSize(9);
+      doc.text(`${i+1}. ${snag.item||'—'}`,14,y);
+      doc.setFont('helvetica','normal');
+      doc.text('Reason: '+(snag.reason||'—'),20,y+5);
+      y+=12;
+    });
+    y+=4;
+  }
+
+  // Photos
+  if(photos.length>0){
+    if(y>220){doc.addPage();y=20;}
+    doc.setFillColor(240,253,244);doc.rect(10,y,190,8,'F');
+    doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(6,95,70);
+    doc.text('Completion photos',14,y+5.5);
+    doc.setTextColor(30,30,30);y+=12;
+    let px=14;
+    photos.slice(0,6).forEach(photo=>{
+      try{
+        if(px+62>200){px=14;y+=52;}
+        if(y>230){doc.addPage();y=20;px=14;}
+        doc.addImage(photo.dataUrl,'JPEG',px,y,56,42);
+        px+=62;
+      }catch(e){}
+    });
+    y+=50;
+  }
+
+  // Signature
+  if(!isSignatureEmpty()){
+    if(y>220){doc.addPage();y=20;}
+    doc.setFillColor(240,253,244);doc.rect(10,y,190,8,'F');
+    doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(6,95,70);
+    doc.text('Customer sign-off',14,y+5.5);
+    doc.setTextColor(30,30,30);y+=12;
+    doc.setFont('helvetica','normal');doc.setFontSize(9);
+    doc.text('Customer name: '+(document.getElementById('customer-name').value||'—'),14,y);y+=6;
+    try{doc.addImage(sigCanvas.toDataURL(),'PNG',14,y,80,30);y+=34;}catch(e){}
+    doc.setFontSize(8);doc.setTextColor(100,100,100);
+    doc.text('By signing above, the customer confirms the installation has been completed to their satisfaction.',14,y);y+=8;
+  }
+
+  // Notes
+  const notes=document.getElementById('completion-notes').value;
+  if(notes){
+    if(y>250){doc.addPage();y=20;}
+    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(100,100,100);
+    doc.text('Notes:',14,y);y+=5;
+    doc.setFont('helvetica','normal');doc.setTextColor(30,30,30);
+    const lines=doc.splitTextToSize(notes,180);
+    doc.text(lines,14,y);
+  }
+
+  // Footer
+  const pc=doc.getNumberOfPages();
+  for(let i=1;i<=pc;i++){
+    doc.setPage(i);doc.setFontSize(8);doc.setTextColor(150,150,150);doc.setFont('helvetica','normal');
+    doc.text(`Burgess Windows & Doors — ${jobName} — Completion Report — Page ${i} of ${pc}`,14,290);
+    doc.text(dateStr,180,290);
+  }
+  return doc.output('blob');
+}
+
+async function submitCompletion(){
+  if(!completionStatus){alert('Please select a completion status.');return;}
+  if(!jobId){alert('No job ID found. Please open this page from the installer portal.');return;}
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='Submitting...';
+  const steps=['Generating completion PDF','Finding files column','Uploading completion report','Updating job status','Adding completion note'];
+  showProgress(steps);
+  try{
+    setStep(0,'active');
+    const pdfBlob=generateCompletionPDF();
+    setStep(0,'done');
+
+    setStep(1,'active');
+    const colData=await mondayQuery(`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`);
+    const cols=colData.data?.boards?.[0]?.columns||[];
+    // Upload to Installer Files column specifically
+    const filesCol=cols.find(c=>c.title==='Installer Files')||cols.find(c=>c.title==='Spec Sheet')||cols.find(c=>c.type==='file');
+    if(!filesCol)throw new Error('No files column found');
+    setStep(1,'done',`Column: "${filesCol.title}"`);
+
+    setStep(2,'active');
+    const dateStr=new Date().toISOString().slice(0,10);
+    const safeJob=jobName.replace(/[^a-z0-9]/gi,'_');
+    await uploadFileToMonday(jobId,filesCol.id,`${safeJob}_CompletionReport_${dateStr}.pdf`,pdfBlob);
+    setStep(2,'done');
+
+    setStep(3,'active');
+    const installerStatusCol=cols.find(c=>c.title==='Installer Status');
+    if(installerStatusCol){
+      const statusVal=JSON.stringify(JSON.stringify({label:'Done'}));
+      await mondayQuery(`mutation { change_column_value(board_id:${BOARD_ID}, item_id:${jobId}, column_id:"${installerStatusCol.id}", value:${statusVal}) { id } }`);
+    }
+    setStep(3,'done');
+
+    setStep(4,'active');
+    const snagText=completionStatus==='partial'&&snagItems.length>0?'\\n\\nOutstanding items:\\n'+snagItems.map((s,i)=>`${i+1}. ${s.item} — ${s.reason}`).join('\\n'):'';
+    const customerName=document.getElementById('customer-name').value;
+    const notes=document.getElementById('completion-notes').value;
+    const updateText=`✅ Installation ${completionStatus==='complete'?'COMPLETE':'PARTIALLY COMPLETE'} — signed off by ${installerName} on ${new Date().toLocaleDateString('en-GB')}.${customerName?'\\nCustomer: '+customerName:''}${snagText}${notes?'\\n\\nNotes: '+notes:''}\\n\\nCompletion report PDF uploaded.`;
+    await mondayQuery(`mutation { create_update(item_id:${jobId}, body:"${updateText.replace(/"/g,'\\"')}") { id } }`);
+    setStep(4,'done');
+
+    document.getElementById('progress-title').textContent='Completion report submitted!';
+    document.getElementById('progress-title').style.color='#059669';
+    btn.textContent='Submitted ✓';btn.style.background='#10b981';
+    setTimeout(()=>window.history.back(),3000);
+  }catch(err){
+    const fi=[0,1,2,3,4].find(i=>document.getElementById('ps'+i)?.classList.contains('active'));
+    if(fi!==undefined)setStep(fi,'error',err.message);
+    document.getElementById('progress-title').textContent='Submission failed';
+    document.getElementById('progress-title').style.color='#dc2626';
+    btn.disabled=false;btn.textContent='Submit completion report';
+  }
+}
+</script>
+</body>
+</html>
