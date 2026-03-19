@@ -26,7 +26,7 @@ export async function onRequest(context) {
   }
 
   try {
-    const { action, name, password, token, newPassword } = await context.request.json();
+    const { action, name, password, token, newPassword, role } = await context.request.json();
 
     // ── Login ──────────────────────────────────────────────
     if (action === 'login') {
@@ -36,15 +36,16 @@ export async function onRequest(context) {
         await KV.put('session:' + sessionToken, JSON.stringify({ name: 'admin', role: 'admin', loginAt: Date.now() }), { expirationTtl: 86400 });
         return json({ success: true, token: sessionToken, role: 'admin' }, corsHeaders);
       }
-      // Surveyor login
-      const userKey = 'user:' + name.toLowerCase().trim();
+      // Surveyor or installer login
+      const requestedRole = role || 'surveyor';
+      const userKey = (requestedRole === 'installer' ? 'installer:' : 'user:') + name.toLowerCase().trim();
       const userData = await KV.get(userKey);
-      if (!userData) return json({ success: false, error: 'User not found' }, corsHeaders);
+      if (!userData) return json({ success: false, error: 'User not found. Please check your name and try again.' }, corsHeaders);
       const user = JSON.parse(userData);
       if (user.password !== hashPassword(password)) return json({ success: false, error: 'Incorrect password' }, corsHeaders);
       const sessionToken = generateToken();
-      await KV.put('session:' + sessionToken, JSON.stringify({ name: user.name, role: 'surveyor', loginAt: Date.now() }), { expirationTtl: 86400 });
-      return json({ success: true, token: sessionToken, role: 'surveyor', name: user.name }, corsHeaders);
+      await KV.put('session:' + sessionToken, JSON.stringify({ name: user.name, role: requestedRole, loginAt: Date.now() }), { expirationTtl: 86400 });
+      return json({ success: true, token: sessionToken, role: requestedRole, name: user.name }, corsHeaders);
     }
 
     // ── Validate session ───────────────────────────────────
