@@ -219,9 +219,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <!-- Health & Safety Modal -->
 <div class="hs-overlay" id="hs-overlay">
   <div class="hs-card">
-    <div class="hs-header">
-      <div class="hs-header-title">⚠️ Health &amp; Safety — Required</div>
-      <div class="hs-header-sub">You must read and sign the H&amp;S document before accessing this job</div>
+    <div class="hs-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+      <div>
+        <div class="hs-header-title">⚠️ Health &amp; Safety — Required</div>
+        <div class="hs-header-sub">You must read and sign the H&amp;S document before accessing this job</div>
+      </div>
+      <button onclick="closeHSModal()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0">✕ Cancel</button>
     </div>
     <div class="hs-body">
       <div class="hs-alert">
@@ -510,6 +513,14 @@ async function loadJobs(){
   }
 }
 
+function formatDate(dateStr){
+  if(!dateStr)return'';
+  try{
+    const d=new Date(dateStr);
+    return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  }catch(e){return dateStr;}
+}
+
 function getStatusClass(status){
   const s=(status||'').toLowerCase();
   if(s==='done')return{dot:'done',badge:'status-done'};
@@ -538,7 +549,7 @@ function renderJobs(){
   }
   list.innerHTML=jobs.map(job=>{
     const sc=getStatusClass(job.status);
-    const dateStr=job.dateFrom?(job.dateFrom+(job.dateTo&&job.dateTo!==job.dateFrom?' → '+job.dateTo:'')):'No date set';
+    const dateStr=job.dateFrom?(formatDate(job.dateFrom)+(job.dateTo&&job.dateTo!==job.dateFrom?' → '+formatDate(job.dateTo):'')):'No date set';
     return `<div class="job-item" onclick="showHSModalById('${job.id}')">
       <div class="job-dot ${sc.dot}"></div>
       <div class="job-main">
@@ -574,7 +585,7 @@ function openJobDetail(jobId){
   badge.className='job-status '+sc.badge;
   document.getElementById('detail-name').textContent=selectedJob.name;
   document.getElementById('detail-address').textContent=selectedJob.address||'—';
-  const dateStr=selectedJob.dateFrom?(selectedJob.dateFrom+(selectedJob.dateTo&&selectedJob.dateTo!==selectedJob.dateFrom?' to '+selectedJob.dateTo:'')):'Not scheduled';
+  const dateStr=selectedJob.dateFrom?(formatDate(selectedJob.dateFrom)+(selectedJob.dateTo&&selectedJob.dateTo!==selectedJob.dateFrom?' to '+formatDate(selectedJob.dateTo):'')):'Not scheduled';
   document.getElementById('detail-dates').textContent=dateStr;
   document.getElementById('detail-status-text').textContent=selectedJob.status;
   document.getElementById('status-saved').style.display='none';
@@ -723,6 +734,11 @@ function clearHSSig(){
   document.getElementById('hs-confirm-btn').disabled=true;
 }
 
+function closeHSModal(){
+  document.getElementById('hs-overlay').style.display='none';
+  pendingJobId=null;
+}
+
 function showHSModalById(jobId){
   const job=allJobs.find(j=>j.id===jobId);
   if(!job)return;
@@ -748,22 +764,35 @@ async function showHSModal(job){
   // Load H&S files
   try{
     const hsCol=boardColumns.find(c=>c.title==='Health and Safety');
+    // Always fetch assets + column values
+    const colQuery=hsCol?`column_values(ids:["${hsCol.id}"]){ id value }`:'column_values{ id value }';
     const data=await mondayQuery(`query {
       items(ids:${job.id}){
         assets { id name public_url file_extension }
-        ${hsCol?`column_values(ids:["${hsCol.id}"]){ id value }`:''}
+        ${colQuery}
       }
     }`);
     const item=data.data?.items?.[0];
     const allAssets=item?.assets||[];
-    // Strictly only show files from H&S column
+    // Find H&S column value — try by title match if no col found
+    const targetColId=hsCol?.id;
+    const colVals=item?.column_values||[];
+    const hsColVal=targetColId
+      ?colVals.find(c=>c.id===targetColId)
+      :colVals.find(c=>c.value&&(c.value.includes('asset_id')||c.value.includes('assetId')));
     const assetIds=new Set();
-    if(hsCol){
-      (item.column_values||[]).forEach(col=>{
-        try{const val=JSON.parse(col.value||'{}');(val.files||[]).forEach(f=>{if(f.asset_id)assetIds.add(String(f.asset_id));});}catch(e){}
-      });
+    if(hsColVal){
+      try{
+        const val=JSON.parse(hsColVal.value||'{}');
+        (val.files||[]).forEach(f=>{
+          if(f.asset_id)assetIds.add(String(f.asset_id));
+          if(f.assetId)assetIds.add(String(f.assetId));
+          if(f.id)assetIds.add(String(f.id));
+        });
+      }catch(e){}
     }
-    const files=assetIds.size>0?allAssets.filter(a=>assetIds.has(String(a.id))):[];
+    // If we found asset IDs filter to those, otherwise show all assets as fallback
+    const files=assetIds.size>0?allAssets.filter(a=>assetIds.has(String(a.id))):allAssets;
     document.getElementById('hs-file-loading').style.display='none';
     if(files.length===0){
       document.getElementById('hs-file-list').innerHTML='<div style="padding:14px;text-align:center;color:#888;font-size:13px">No H&S document uploaded for this job yet.<br><span style="font-size:11px">You may still sign and proceed.</span></div>';
@@ -957,7 +986,7 @@ function renderDiary(){
   list.innerHTML=scheduled.map(job=>{
     const d=job.dateObj;
     const isToday=job.dateFrom===todayStr;
-    const dateRange=job.dateTo&&job.dateTo!==job.dateFrom?job.dateFrom+' → '+job.dateTo:job.dateFrom;
+    const dateRange=job.dateTo&&job.dateTo!==job.dateFrom?formatDate(job.dateFrom)+' → '+formatDate(job.dateTo):formatDate(job.dateFrom);
     return `<div class="diary-entry${isToday?' today':''}">
       <div class="diary-date-block">
         <div class="diary-day">${d.getDate()}</div>
