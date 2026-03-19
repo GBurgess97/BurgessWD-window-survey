@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Portal — Burgess Windows & Doors</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f3;min-height:100vh}
+.app-header{background:#1e3a5f;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.app-title{font-size:16px;font-weight:600;color:#fff}
+.app-subtitle{font-size:12px;color:#93c5fd;margin-top:1px}
+.header-right{display:flex;align-items:center;gap:10px}
+.header-user{font-size:13px;color:#93c5fd}
+.container{max-width:900px;margin:0 auto;padding:20px 16px}
+
+/* Login */
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:80vh}
+.login-card{background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:32px;max-width:400px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
+.login-logo{width:56px;height:56px;background:#1e3a5f;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px}
+.login-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.login-sub{font-size:13px;color:#64748b;margin-bottom:24px;line-height:1.6}
+.login-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;text-align:left}
+.login-field label{font-size:12px;font-weight:600;color:#374151}
+.login-field input{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none}
+.login-field input:focus{border-color:#1e3a5f}
+.login-btn{width:100%;padding:12px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.login-btn:disabled{background:#93c5fd;cursor:not-allowed}
+
+/* Dashboard */
+.dashboard{display:none}
+.welcome-bar{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.welcome-name{font-size:16px;font-weight:600}
+.welcome-sub{font-size:12px;color:#64748b;margin-top:2px}
+.btn-signout{background:transparent;border:1px solid #e0e0e0;color:#64748b;padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+.btn-new-quote{background:#1e3a5f;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-new-quote:hover{background:#1e40af}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px;text-align:center}
+.stat-val{font-size:24px;font-weight:700;margin-bottom:2px}
+.stat-lbl{font-size:11px;color:#888}
+.stat-card.new .stat-val{color:#f59e0b}
+.stat-card.working .stat-val{color:#3b82f6}
+.stat-card.won .stat-val{color:#059669}
+.stat-card.total .stat-val{color:#1e3a5f}
+
+/* Tabs */
+.main-tabs{display:flex;gap:6px;margin-bottom:14px}
+.main-tab{padding:8px 20px;border:1px solid #e0e0e0;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500}
+.main-tab.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+
+/* Contact list */
+.contacts-section{background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:16px}
+.contacts-header{padding:14px 18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.contacts-title{font-size:15px;font-weight:600}
+.search-bar{padding:7px 12px;border:1px solid #e0e0e0;border-radius:7px;font-size:13px;font-family:inherit;outline:none;width:200px}
+.search-bar:focus{border-color:#1e3a5f}
+.filter-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.ftab{padding:5px 12px;border:1px solid #e0e0e0;border-radius:6px;background:transparent;color:#888;font-size:12px;cursor:pointer;font-family:inherit}
+.ftab.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+.contact-item{padding:14px 18px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s}
+.contact-item:last-child{border-bottom:none}
+.contact-item:hover{background:#eff6ff}
+.contact-avatar{width:38px;height:38px;border-radius:50%;background:#dbeafe;color:#1e40af;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.contact-main{flex:1;min-width:0}
+.contact-name{font-weight:600;font-size:14px}
+.contact-meta{font-size:12px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.contact-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.contact-badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:5px;white-space:nowrap}
+.badge-working{background:#dbeafe;color:#1e40af}
+.badge-won{background:#d1fae5;color:#065f46}
+.badge-lost{background:#fee2e2;color:#991b1b}
+.badge-blowout{background:#fef3c7;color:#92400e}
+.badge-default{background:#f3f4f6;color:#374151}
+.contact-type{font-size:10px;color:#888}
+.contact-arrow{color:#cbd5e1;font-size:16px}
+.loading{padding:40px 20px;text-align:center;color:#9ca3af}
+.spinner{width:28px;height:28px;border:3px solid #e5e5e5;border-top-color:#1e3a5f;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{padding:40px 20px;text-align:center;color:#9ca3af}
+.error-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin-bottom:14px}
+
+/* Quote builder */
+.quote-builder{display:none}
+.qb-header{background:#1e3a5f;padding:14px 18px;display:flex;align-items:center;gap:12px;border-radius:10px 10px 0 0;margin-bottom:0}
+.qb-back{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+.qb-title{font-size:15px;font-weight:600;color:#fff;flex:1}
+.qb-body{background:#fff;border:1px solid #e5e5e5;border-top:none;border-radius:0 0 10px 10px;padding:20px}
+.qb-steps{display:flex;gap:4px;margin-bottom:20px;overflow-x:auto;padding-bottom:4px}
+.qb-step{padding:6px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid #e0e0e0;color:#888;white-space:nowrap;font-family:inherit;background:transparent}
+.qb-step.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+.qb-step.done{background:#d1fae5;color:#065f46;border-color:#6ee7b7}
+.step-panel{display:none}
+.step-panel.active{display:block}
+.section{background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.sec-title{font-size:13px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:12px;font-weight:500;color:#666}
+.field input,.field select,.field textarea{padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:#fff}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#1e3a5f}
+.field textarea{resize:vertical;min-height:80px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* Items */
+.items-list{margin-bottom:12px}
+.item-card{background:#fff;border:1px solid #e5e5e5;border-radius:9px;padding:14px;margin-bottom:8px;position:relative}
+.item-remove{position:absolute;top:10px;right:10px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;width:24px;height:24px;border-radius:5px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.item-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;align-items:end;margin-bottom:8px}
+.item-num{font-size:11px;font-weight:600;color:#888;margin-bottom:8px}
+.add-item-btn{width:100%;padding:10px;border:1.5px dashed #93c5fd;background:transparent;color:#1e3a5f;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500}
+.add-item-btn:hover{background:#eff6ff}
+
+/* Profit calc */
+.profit-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.profit-section{background:#fff;border:1px solid #e5e5e5;border-radius:9px;padding:14px}
+.profit-title{font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f0f0f0}
+.profit-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;border-bottom:1px solid #f8f8f8}
+.profit-row:last-child{border-bottom:none;font-weight:600;font-size:14px;padding-top:8px;margin-top:4px}
+.profit-label{color:#64748b}
+.profit-val{font-weight:500}
+.margin-box{background:#f0fdf4;border:1px solid #6ee7b7;border-radius:9px;padding:14px;text-align:center;margin-bottom:14px}
+.margin-pct{font-size:36px;font-weight:700;color:#059669}
+.margin-lbl{font-size:12px;color:#064e3b;margin-top:4px}
+
+/* AI section */
+.ai-section{background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1px solid #bfdbfe;border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.ai-title{font-size:13px;font-weight:600;color:#1e3a5f;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ai-desc{font-size:12px;color:#64748b;margin-bottom:12px}
+.ai-input{width:100%;padding:10px 12px;border:1.5px solid #bfdbfe;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;resize:vertical;min-height:80px}
+.ai-input:focus{border-color:#1e3a5f}
+.ai-btn{background:#1e3a5f;color:#fff;border:none;padding:9px 20px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:8px}
+.ai-btn:disabled{background:#93c5fd;cursor:not-allowed}
+.ai-response{background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-top:10px;font-size:13px;line-height:1.6;display:none;white-space:pre-wrap}
+
+/* Photos */
+.upload-area{border:1.5px dashed #d0d0d0;border-radius:8px;padding:20px;text-align:center;cursor:pointer;font-size:13px;color:#888;margin-bottom:10px}
+.upload-area:hover{border-color:#1e3a5f;color:#1e3a5f;background:#f8faff}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:8px}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid #e5e5e5}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-thumb button{position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer}
+
+/* Submit */
+.submit-section{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.btn-submit{width:100%;padding:14px;background:#1e3a5f;color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-submit:hover{background:#1e40af}
+.btn-submit:disabled{background:#93c5fd;cursor:not-allowed}
+.progress-box{background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-top:10px;display:none}
+.progress-step{display:flex;align-items:center;gap:8px;font-size:12px;color:#64748b;margin-bottom:4px}
+.progress-step.done{color:#059669}
+.progress-step.active{color:#1e40af;font-weight:500}
+.progress-step.error{color:#dc2626}
+.step-icon{width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;background:#f3f4f6;color:#9ca3af}
+.step-icon.done{background:#d1fae5;color:#059669}
+.step-icon.active{background:#dbeafe;color:#1e40af}
+.step-icon.error{background:#fee2e2;color:#dc2626}
+
+/* Checklist */
+.checklist-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0}
+.checklist-row:last-child{border-bottom:none}
+.checklist-label{font-size:13px;color:#374151;flex:1}
+.checklist-val{flex:1;padding-left:12px}
+.checklist-val select,.checklist-val input{width:100%;padding:6px 10px;border:1px solid #e0e0e0;border-radius:6px;font-size:12px;font-family:inherit;outline:none;background:#fff}
+
+/* Responsive */
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .field-row,.field-row-3{grid-template-columns:1fr}
+  .item-row{grid-template-columns:1fr 1fr}
+  .profit-grid{grid-template-columns:1fr}
+  .qb-steps{gap:3px}
+  .qb-step{padding:5px 10px;font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div>
+    <div class="app-title">Burgess Windows &amp; Doors</div>
+    <div class="app-subtitle">Sales Portal</div>
+  </div>
+  <div class="header-right">
+    <div class="header-user" id="header-user" style="display:none"></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Login -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-card">
+      <div class="login-logo">💼</div>
+      <div class="login-title">Sales Portal</div>
+      <div class="login-sub">Sign in to manage your contacts and build quotes.</div>
+      <div class="login-field"><label>Your name</label><input type="text" id="login-name" placeholder="e.g. George Burgess" oninput="checkLogin()" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="login-field"><label>Password</label><input type="password" id="login-pass" placeholder="Your password" oninput="checkLogin()" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div id="login-error" style="color:#dc2626;font-size:12px;margin-bottom:10px;display:none"></div>
+      <button class="login-btn" id="login-btn" onclick="doLogin()" disabled>Sign in</button>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="dashboard" id="dashboard">
+    <div class="welcome-bar">
+      <div>
+        <div class="welcome-name" id="welcome-name"></div>
+        <div class="welcome-sub">Sales portal</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-new-quote" onclick="startNewQuote()">+ New quote</button>
+        <button class="btn-signout" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+
+    <div id="error-box" class="error-box" style="display:none"></div>
+
+    <div class="stats-grid">
+      <div class="stat-card new"><div class="stat-val" id="stat-new">—</div><div class="stat-lbl">Working on it</div></div>
+      <div class="stat-card working"><div class="stat-val" id="stat-working">—</div><div class="stat-lbl">Quoted</div></div>
+      <div class="stat-card won"><div class="stat-val" id="stat-won">—</div><div class="stat-lbl">Won</div></div>
+      <div class="stat-card total"><div class="stat-val" id="stat-total">—</div><div class="stat-lbl">Total</div></div>
+    </div>
+
+    <div class="main-tabs">
+      <button class="main-tab active" onclick="switchTab('contacts',this)">My contacts</button>
+      <button class="main-tab" onclick="switchTab('all',this)">All contacts</button>
+    </div>
+
+    <div class="contacts-section">
+      <div class="contacts-header">
+        <div class="contacts-title">Contacts</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input class="search-bar" id="search-bar" placeholder="Search..." oninput="renderContacts()">
+          <div class="filter-tabs">
+            <button class="ftab active" onclick="filterContacts('all',this)">All</button>
+            <button class="ftab" onclick="filterContacts('working',this)">Working on it</button>
+            <button class="ftab" onclick="filterContacts('won',this)">Won</button>
+            <button class="ftab" onclick="filterContacts('lost',this)">Lost</button>
+          </div>
+        </div>
+      </div>
+      <div id="contacts-list"><div class="loading"><div class="spinner"></div>Loading contacts...</div></div>
+    </div>
+  </div>
+
+  <!-- Quote builder -->
+  <div class="quote-builder" id="quote-builder">
+    <div class="qb-header">
+      <button class="qb-back" onclick="closeQuoteBuilder()">← Back</button>
+      <div class="qb-title" id="qb-title">New Quote</div>
+    </div>
+    <div class="qb-body">
+      <div class="qb-steps">
+        <button class="qb-step active" onclick="goToStep(0,this)" id="step-btn-0">1. Contact</button>
+        <button class="qb-step" onclick="goToStep(1,this)" id="step-btn-1">2. Site checklist</button>
+        <button class="qb-step" onclick="goToStep(2,this)" id="step-btn-2">3. Items</button>
+        <button class="qb-step" onclick="goToStep(3,this)" id="step-btn-3">4. AI assistant</button>
+        <button class="qb-step" onclick="goToStep(4,this)" id="step-btn-4">5. Profit checker</button>
+        <button class="qb-step" onclick="goToStep(5,this)" id="step-btn-5">6. Photos</button>
+        <button class="qb-step" onclick="goToStep(6,this)" id="step-btn-6">7. Submit</button>
+      </div>
+
+      <!-- Step 0: Contact details -->
+      <div class="step-panel active" id="step-0">
+        <div class="section">
+          <div class="sec-title">👤 Contact details</div>
+          <div class="field-row">
+            <div class="field"><label>Customer name *</label><input type="text" id="q-name" placeholder="Full name"></div>
+            <div class="field"><label>Phone</label><input type="tel" id="q-phone" placeholder="+44..."></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Email</label><input type="email" id="q-email" placeholder="email@example.com"></div>
+            <div class="field"><label>Client type</label>
+              <select id="q-client-type">
+                <option value="Client">Client</option>
+                <option value="Architect">Architect</option>
+                <option value="Contractor">Contractor</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Site address</label><input type="text" id="q-address" placeholder="Full address"></div>
+          <div class="field-row">
+            <div class="field"><label>Salesperson</label>
+              <select id="q-salesperson">
+                <option value="George Burgess">George Burgess</option>
+                <option value="James Munro">James Munro</option>
+                <option value="Lewis Wilks">Lewis Wilks</option>
+              </select>
+            </div>
+            <div class="field"><label>Visit date</label><input type="date" id="q-date"></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="sec-title">📝 Initial notes</div>
+          <div class="field"><label>What is the customer looking for?</label><textarea id="q-initial-notes" placeholder="Brief description of what they need..."></textarea></div>
+          <div class="field"><label>Where did the lead come from?</label>
+            <select id="q-lead-source">
+              <option value="">Select...</option>
+              <option>Website</option><option>Phone</option><option>Walk in</option>
+              <option>Internorm</option><option>VELFAC</option><option>Evolution</option>
+              <option>Manufacturer</option><option>Referral</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-submit" onclick="goToStep(1)">Next: Site checklist →</button>
+      </div>
+
+      <!-- Step 1: Site checklist -->
+      <div class="step-panel" id="step-1">
+        <div class="section">
+          <div class="sec-title">✅ Sales checklist</div>
+          <div class="checklist-row">
+            <div class="checklist-label">Have you been to site?</div>
+            <div class="checklist-val"><select id="cl-site-visit"><option>Yes</option><option>No</option></select></div>
+          </div>
+          <div class="checklist-row">
+            <div class="checklist-label">Contract status</div>
+            <div class="checklist-val"><select id="cl-contract">
+              <option>Live</option><option>On Hold - 8 - 12 Weeks</option><option>On Hold - 3 - 6 Months</option>
+              <option>On Hold - 6 - 9 Months</option><option>On Hold - 9 - 12 Months</option><option>On Hold - 1 Year +</option>
+            </select></div>
+          </div>
+          <div class="checklist-row">
+            <div class="checklist-label">Survey type</div>
+            <div class="checklist-val"><select id="cl-survey-type"><option>Site Survey</option><option>Virtual Survey</option></select></div>
+          </div>
+          <div class="checklist-row">
+            <div class="checklist-label">Survey timeframe</div>
+            <div class="checklist-val"><select id="cl-survey-timeframe">
+              <option>As Soon As Possible</option><option>4 - 6 Weeks</option><option>6 - 8 Weeks</option>
+              <option>Fast Track due to Promotion</option><option>On Hold</option>
+            </select></div>
+          </div>
+          <div class="checklist-row">
+            <div class="checklist-label">Build type</div>
+            <div class="checklist-val"><select id="cl-build-type">
+              <option>Refurb</option><option>New Build</option><option>New Openings</option>
+              <option>Refurb/New Openings</option><option>Other</option>
+            </select></div>
+          </div>
+          <div class="checklist-row">
+            <div class="checklist-label">VAT rate</div>
+            <div class="checklist-val"><select id="cl-vat">
+              <option value="T1 - 20%">T1 - 20% (Refurb)</option>
+              <option value="T0 - 0%">T0 - 0% (New Build)</option>
+              <option value="T5 - 5%">T5 - 5% (Other)</option>
+              <option value="T21 - 20%">T21 - 20% (B2B Refurb)</option>
+            </select></div>
+          </div>
+          <div class="checklist-row">
+            <div class="checklist-label">Builder/Architect required?</div>
+            <div class="checklist-val"><select id="cl-builder"><option>No</option><option>Yes</option></select></div>
+          </div>
+          <div class="checklist-row">
+            <div class="checklist-label">Payment terms</div>
+            <div class="checklist-val"><select id="cl-payment">
+              <option>100/0</option><option>25/50/25</option><option>25/25/40/10</option><option>25/25/45/5</option>
+            </select></div>
+          </div>
+          <div class="checklist-row">
+            <div class="checklist-label">Deposit method</div>
+            <div class="checklist-val"><select id="cl-deposit"><option>BACS</option><option>Card</option><option>Cheque</option><option>Cash</option></select></div>
+          </div>
+          <div class="checklist-row">
+            <div class="checklist-label">Fit days</div>
+            <div class="checklist-val"><input type="number" id="cl-fit-days" min="0" value="0" style="width:80px"></div>
+          </div>
+          <div class="checklist-row">
+            <div class="checklist-label">Level threshold required?</div>
+            <div class="checklist-val"><select id="cl-threshold"><option>No</option><option>Yes</option></select></div>
+          </div>
+          <div class="checklist-row">
+            <div class="checklist-label">Lifting/scaffolding required?</div>
+            <div class="checklist-val"><input type="text" id="cl-lifting" placeholder="Details if yes"></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="sec-title">📝 Site notes</div>
+          <div class="field"><textarea id="q-site-notes" placeholder="Detailed site notes, observations, special requirements..." style="min-height:120px"></textarea></div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-submit" style="background:#6b7280" onclick="goToStep(0)">← Back</button>
+          <button class="btn-submit" onclick="goToStep(2)">Next: Items →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Window/door items -->
+      <div class="step-panel" id="step-2">
+        <div class="section">
+          <div class="sec-title">🪟 Window &amp; door items</div>
+          <div class="items-list" id="items-list"></div>
+          <button class="add-item-btn" onclick="addItem()">+ Add item</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button class="btn-submit" style="background:#6b7280" onclick="goToStep(1)">← Back</button>
+          <button class="btn-submit" onclick="goToStep(3)">Next: AI assistant →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: AI assistant -->
+      <div class="step-panel" id="step-3">
+        <div class="ai-section">
+          <div class="ai-title">🤖 AI quote assistant</div>
+          <div class="ai-desc">Describe the job in plain English and the AI will suggest suitable products, frame suppliers and an estimated price range based on your pricing data.</div>
+          <textarea class="ai-input" id="ai-description" placeholder="e.g. Customer has a 1930s semi-detached house in Buckingham, wants to replace 6 casement windows and a front door. Looking for something modern but sympathetic to the period. Budget conscious but open to aluminium if the price is right..."></textarea>
+          <button class="ai-btn" id="ai-btn" onclick="getAISuggestion()">Get AI suggestion →</button>
+          <div class="ai-response" id="ai-response"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn-submit" style="background:#6b7280" onclick="goToStep(2)">← Back</button>
+          <button class="btn-submit" onclick="goToStep(4)">Next: Profit checker →</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Profit checker -->
+      <div class="step-panel" id="step-4">
+        <div class="section">
+          <div class="sec-title">💰 Estimate — Salesman</div>
+          <div class="field-row">
+            <div class="field"><label>Product type</label>
+              <select id="pc-product" onchange="updateProfit()">
+                <option>UPVC</option><option>Aluminium</option><option>Al-Clad</option>
+                <option>Timber</option><option>Timber-Alternative</option><option>Steel</option>
+                <option>Steel-Look</option><option>Curtain-Walling</option><option>Rooflights</option>
+                <option>Composite Doors</option>
+              </select>
+            </div>
+            <div class="field"><label>Frame supplier</label>
+              <select id="pc-supplier" onchange="updateProfit()">
+                <option>Liniar UPVC Windows</option><option>Emplas</option><option>Affordable Aluminium</option>
+                <option>Allan Brothers</option><option>Aluplast HST</option><option>Aluco</option>
+                <option>AluProf</option><option>Arkay</option><option>ArtSteel</option>
+                <option>Atlas Customade</option><option>Bereco Timber</option><option>Compdoor</option>
+                <option>Crittal Steel</option><option>Everglade Aluminum</option><option>Evolution Timber-Alt</option>
+                <option>Holdens Supaseal</option><option>Hyline Aluminium</option><option>Internorm Al-Clad</option>
+                <option>Masterframe Timber Alt</option><option>Origin Aluminium</option><option>Q4Glass</option>
+                <option>Residence Collection R7</option><option>Residence Collection R9</option>
+                <option>Solarlux Aluminium</option><option>Solidor</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row-3">
+            <div class="field"><label>Frame list price (£)</label><input type="number" id="pc-frame-price" placeholder="0" oninput="updateProfit()"></div>
+            <div class="field"><label>Discount (%)</label><input type="number" id="pc-discount" value="0" min="0" max="100" oninput="updateProfit()"></div>
+            <div class="field"><label>Supplier surcharge (£)</label><input type="number" id="pc-surcharge" value="0" oninput="updateProfit()"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Fit type</label>
+              <select id="pc-fit-type" onchange="updateProfit()">
+                <option>New Build UPVC</option><option>Refurb UPVC</option>
+                <option>New Build Alu</option><option>Refurb Alu</option>
+                <option>New Build Al-Clad</option><option>Refurb Al-Clad</option>
+              </select>
+            </div>
+            <div class="field"><label>Total m² (all items)</label><input type="number" id="pc-sqm" placeholder="0" oninput="updateProfit()"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Delivery fee (£)</label><input type="number" id="pc-delivery" value="0" oninput="updateProfit()"></div>
+            <div class="field"><label>Site distance</label>
+              <select id="pc-distance" onchange="updateProfit()">
+                <option value="0">0 - 25 miles</option><option value="30">26 - 50 miles</option>
+                <option value="60">51 - 79 miles</option><option value="90">80 - 100 miles</option>
+                <option value="120">100+ miles</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Sold value (£) *</label><input type="number" id="pc-sold-value" placeholder="Total quoted to customer" oninput="updateProfit()"></div>
+            <div class="field"><label>Glass cost (£)</label><input type="number" id="pc-glass" value="0" oninput="updateProfit()"></div>
+          </div>
+        </div>
+
+        <!-- Live margin display -->
+        <div class="margin-box" id="margin-box">
+          <div class="margin-pct" id="margin-pct">—</div>
+          <div class="margin-lbl">Estimated gross margin</div>
+        </div>
+
+        <div class="profit-grid">
+          <div class="profit-section">
+            <div class="profit-title">Costs breakdown</div>
+            <div class="profit-row"><span class="profit-label">Frame price</span><span class="profit-val" id="pr-frame">£0</span></div>
+            <div class="profit-row"><span class="profit-label">Fit cost</span><span class="profit-val" id="pr-fit">£0</span></div>
+            <div class="profit-row"><span class="profit-label">Glass cost</span><span class="profit-val" id="pr-glass">£0</span></div>
+            <div class="profit-row"><span class="profit-label">Fuel surcharge</span><span class="profit-val" id="pr-fuel">£0</span></div>
+            <div class="profit-row"><span class="profit-label">Delivery</span><span class="profit-val" id="pr-delivery">£0</span></div>
+            <div class="profit-row"><span class="profit-label">Total cost</span><span class="profit-val" id="pr-total-cost">£0</span></div>
+          </div>
+          <div class="profit-section">
+            <div class="profit-title">Revenue</div>
+            <div class="profit-row"><span class="profit-label">Sold value</span><span class="profit-val" id="pr-sold">£0</span></div>
+            <div class="profit-row"><span class="profit-label">Gross profit</span><span class="profit-val" id="pr-profit">£0</span></div>
+            <div class="profit-row"><span class="profit-label">Target margin</span><span class="profit-val" id="pr-target-margin">—</span></div>
+            <div class="profit-row"><span class="profit-label">Actual margin</span><span class="profit-val" id="pr-actual-margin">—</span></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-submit" style="background:#6b7280" onclick="goToStep(3)">← Back</button>
+          <button class="btn-submit" onclick="goToStep(5)">Next: Photos →</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Photos -->
+      <div class="step-panel" id="step-5">
+        <div class="section">
+          <div class="sec-title">📸 Site photos</div>
+          <div style="font-size:12px;color:#888;margin-bottom:10px">Upload photos of the site, existing windows/doors, and any relevant details</div>
+          <div class="upload-area" onclick="document.getElementById('photo-input').click()">Tap to upload site photos</div>
+          <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
+          <div class="photo-grid" id="photo-grid"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button class="btn-submit" style="background:#6b7280" onclick="goToStep(4)">← Back</button>
+          <button class="btn-submit" onclick="goToStep(6)">Next: Submit →</button>
+        </div>
+      </div>
+
+      <!-- Step 6: Submit -->
+      <div class="step-panel" id="step-6">
+        <div class="submit-section">
+          <div style="font-size:13px;color:#1e3a5f;margin-bottom:4px;font-weight:600">Ready to submit</div>
+          <div style="font-size:12px;color:#64748b;margin-bottom:14px">This will generate a visit report PDF and profit checker PDF, then upload both to the contact record in Monday and update the status to "Working on it".</div>
+          <div style="background:#fff;border:1px solid #e5e5e5;border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#888">Contact</span><span id="submit-name" style="font-weight:500">—</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#888">Address</span><span id="submit-address" style="font-weight:500">—</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#888">Items</span><span id="submit-items" style="font-weight:500">—</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:#888">Sold value</span><span id="submit-value" style="font-weight:600;color:#059669">—</span></div>
+          </div>
+          <button class="btn-submit" id="submit-btn" onclick="submitQuote()">Submit quote to Monday →</button>
+          <div class="progress-box" id="progress-box">
+            <div style="font-size:13px;font-weight:500;color:#1e40af;margin-bottom:8px" id="progress-title">Submitting...</div>
+            <div id="progress-steps"></div>
+          </div>
+        </div>
+        <button class="btn-submit" style="background:#6b7280;margin-top:4px" onclick="goToStep(5)">← Back</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+const BOARD_ID='9998586586';
+const PROXY_API='/monday-proxy';
+const AUTH_API='/auth';
+const UPLOAD_API='/monday-upload';
+
+let currentUser='';
+let allContacts=[];
+let currentFilter='all';
+let currentTab='contacts';
+let selectedContact=null;
+let quoteItems=[];
+let sitePhotos=[];
+let itemCount=0;
+
+// ── Auth ───────────────────────────────────────────────────────
+function checkLogin(){
+  const name=document.getElementById('login-name').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  document.getElementById('login-btn').disabled=name.length<2||pass.length<1;
+}
+
+async function doLogin(){
+  const name=document.getElementById('login-name').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-error');
+  err.style.display='none';
+  const btn=document.getElementById('login-btn');
+  btn.disabled=true;btn.textContent='Signing in...';
+  try{
+    const res=await fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login',name,password:pass,role:'sales'})});
+    const data=await res.json();
+    if(data.success){
+      currentUser=data.name||name;
+      localStorage.setItem('bwd_sales_user',currentUser);
+      localStorage.setItem('bwd_sales_token',data.token);
+      showDashboard();
+    }else{
+      err.textContent=data.error||'Incorrect name or password';
+      err.style.display='block';
+      btn.disabled=false;btn.textContent='Sign in';
+    }
+  }catch(e){
+    err.textContent='Could not connect. Please try again.';
+    err.style.display='block';
+    btn.disabled=false;btn.textContent='Sign in';
+  }
+}
+
+function signOut(){
+  const token=localStorage.getItem('bwd_sales_token');
+  if(token)fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout',token})});
+  localStorage.removeItem('bwd_sales_user');localStorage.removeItem('bwd_sales_token');
+  currentUser='';allContacts=[];
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('header-user').style.display='none';
+  document.getElementById('login-name').value='';document.getElementById('login-pass').value='';
+  document.getElementById('login-btn').disabled=true;
+}
+
+function showDashboard(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  document.getElementById('welcome-name').textContent='Welcome, '+currentUser;
+  document.getElementById('header-user').textContent=currentUser;
+  document.getElementById('header-user').style.display='block';
+  const sel=document.getElementById('q-salesperson');
+  for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===currentUser){sel.selectedIndex=i;break;}}
+  loadContacts();
+}
+
+// ── Monday ─────────────────────────────────────────────────────
+async function mondayQuery(query){
+  const res=await fetch(PROXY_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query})});
+  if(!res.ok)throw new Error('Server error '+res.status);
+  const data=await res.json();
+  if(data.errors)throw new Error(data.errors[0].message);
+  return data;
+}
+
+async function loadContacts(){
+  document.getElementById('contacts-list').innerHTML='<div class="loading"><div class="spinner"></div>Loading contacts...</div>';
+  document.getElementById('error-box').style.display='none';
+  try{
+    const data=await mondayQuery(`query {
+      boards(ids:${BOARD_ID}){
+        columns{ id title type }
+        items_page(limit:300){
+          items{
+            id name
+            column_values{
+              id text
+              ... on StatusValue{ label }
+              ... on PeopleValue{ persons_and_teams{ id } }
+            }
+          }
+        }
+      }
+    }`);
+    const board=data.data?.boards?.[0];
+    const cols=board?.columns||[];
+    const assignedColId=cols.find(c=>c.title==='Assigned')?.id||'';
+    const progressColId=cols.find(c=>c.title.toLowerCase().includes('progress')||c.title.toLowerCase().includes('progression'))?.id||'';
+    const locationColId=cols.find(c=>c.title==='Location')?.id||'';
+    const phoneColId=cols.find(c=>c.title==='Phone')?.id||'';
+    const emailColId=cols.find(c=>c.title==='Email')?.id||'';
+    const clientTypeColId=cols.find(c=>c.title==='Client Type')?.id||'';
+    const commentsColId=cols.find(c=>c.title==='Comments')?.id||'';
+    const cv=(item,id)=>item.column_values.find(c=>c.id===id)?.text||'';
+    const cvLabel=(item,id)=>item.column_values.find(c=>c.id===id)?.label||item.column_values.find(c=>c.id===id)?.text||'';
+    const items=board?.items_page?.items||[];
+    allContacts=items.map(item=>({
+      id:item.id,name:item.name,
+      assigned:cv(item,assignedColId),
+      status:cvLabel(item,progressColId),
+      location:cv(item,locationColId),
+      phone:cv(item,phoneColId),
+      email:cv(item,emailColId),
+      clientType:cvLabel(item,clientTypeColId)||cv(item,clientTypeColId),
+      comments:cv(item,commentsColId),
+      assignedColId,progressColId,locationColId,phoneColId,emailColId,clientTypeColId,commentsColId
+    }));
+    renderContacts();
+    updateStats();
+  }catch(err){
+    document.getElementById('contacts-list').innerHTML='<div class="empty-state">Could not load contacts: '+err.message+'</div>';
+    document.getElementById('error-box').textContent='Error: '+err.message;
+    document.getElementById('error-box').style.display='block';
+  }
+}
+
+function getStatusBadge(status){
+  const s=(status||'').toLowerCase();
+  if(s.includes('working'))return'badge-working';
+  if(s==='won')return'badge-won';
+  if(s==='lost')return'badge-lost';
+  if(s.includes('blow'))return'badge-blowout';
+  return'badge-default';
+}
+
+function renderContacts(){
+  const list=document.getElementById('contacts-list');
+  const search=document.getElementById('search-bar').value.toLowerCase();
+  let contacts=allContacts;
+  if(currentTab==='contacts') contacts=contacts.filter(c=>(c.assigned||'').toLowerCase().includes(currentUser.toLowerCase()));
+  if(currentFilter==='working') contacts=contacts.filter(c=>(c.status||'').toLowerCase().includes('working'));
+  if(currentFilter==='won') contacts=contacts.filter(c=>(c.status||'').toLowerCase()==='won');
+  if(currentFilter==='lost') contacts=contacts.filter(c=>(c.status||'').toLowerCase()==='lost');
+  if(search) contacts=contacts.filter(c=>c.name.toLowerCase().includes(search)||c.location.toLowerCase().includes(search));
+  if(contacts.length===0){list.innerHTML='<div class="empty-state"><div style="font-size:36px;margin-bottom:10px">💼</div><div style="font-weight:600;color:#64748b">No contacts found</div></div>';return;}
+  list.innerHTML=contacts.map(c=>{
+    const initials=c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    return`<div class="contact-item" onclick="openContact('${c.id}')">
+      <div class="contact-avatar">${initials}</div>
+      <div class="contact-main">
+        <div class="contact-name">${c.name}</div>
+        <div class="contact-meta">${c.location||c.phone||'No details'}</div>
+      </div>
+      <div class="contact-right">
+        ${c.status?`<span class="contact-badge ${getStatusBadge(c.status)}">${c.status}</span>`:''}
+        <span class="contact-type">${c.clientType||''}</span>
+      </div>
+      <div class="contact-arrow">›</div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats(){
+  const mine=allContacts.filter(c=>(c.assigned||'').toLowerCase().includes(currentUser.toLowerCase()));
+  document.getElementById('stat-total').textContent=mine.length;
+  document.getElementById('stat-new').textContent=mine.filter(c=>(c.status||'').toLowerCase().includes('working')).length;
+  document.getElementById('stat-working').textContent=mine.filter(c=>(c.status||'').toLowerCase().includes('quot')).length;
+  document.getElementById('stat-won').textContent=mine.filter(c=>(c.status||'').toLowerCase()==='won').length;
+}
+
+function switchTab(tab,btn){
+  currentTab=tab;
+  document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderContacts();
+}
+
+function filterContacts(filter,btn){
+  currentFilter=filter;
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderContacts();
+}
+
+function openContact(id){
+  selectedContact=allContacts.find(c=>c.id===id);
+  if(!selectedContact)return;
+  // Pre-fill quote builder with contact details
+  document.getElementById('q-name').value=selectedContact.name||'';
+  document.getElementById('q-phone').value=selectedContact.phone||'';
+  document.getElementById('q-email').value=selectedContact.email||'';
+  document.getElementById('q-address').value=selectedContact.location||'';
+  document.getElementById('q-date').value=new Date().toISOString().slice(0,10);
+  showQuoteBuilder(selectedContact.name);
+}
+
+function startNewQuote(){
+  selectedContact=null;
+  document.getElementById('q-name').value='';
+  document.getElementById('q-phone').value='';
+  document.getElementById('q-email').value='';
+  document.getElementById('q-address').value='';
+  document.getElementById('q-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('q-initial-notes').value='';
+  showQuoteBuilder('New Quote');
+}
+
+function showQuoteBuilder(title){
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('quote-builder').style.display='block';
+  document.getElementById('qb-title').textContent=title||'New Quote';
+  quoteItems=[];itemCount=0;sitePhotos=[];
+  document.getElementById('items-list').innerHTML='';
+  document.getElementById('photo-grid').innerHTML='';
+  document.getElementById('ai-response').style.display='none';
+  document.getElementById('ai-description').value='';
+  goToStep(0);
+  updateSubmitSummary();
+  window.scrollTo(0,0);
+}
+
+function closeQuoteBuilder(){
+  document.getElementById('quote-builder').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+}
+
+// ── Steps ──────────────────────────────────────────────────────
+function goToStep(n){
+  document.querySelectorAll('.step-panel').forEach((p,i)=>{
+    p.classList.toggle('active',i===n);
+  });
+  document.querySelectorAll('.qb-step').forEach((b,i)=>{
+    b.classList.remove('active');
+    if(i<n)b.classList.add('done');
+    if(i===n)b.classList.add('active');
+  });
+  if(n===6)updateSubmitSummary();
+  window.scrollTo(0,0);
+}
+
+// ── Items ──────────────────────────────────────────────────────
+function addItem(){
+  itemCount++;
+  const id='item-'+itemCount;
+  quoteItems.push({id,location:'',type:'Window',style:'Casement',width:'',height:'',qty:1,notes:''});
+  const div=document.createElement('div');
+  div.className='item-card';
+  div.id=id;
+  div.innerHTML=`<button class="item-remove" onclick="removeItem('${id}')">×</button>
+    <div class="item-num">Item ${itemCount}</div>
+    <div class="item-row">
+      <div class="field" style="margin:0"><label>Location</label><input type="text" placeholder="e.g. Kitchen window" oninput="updateItem('${id}','location',this.value)"></div>
+      <div class="field" style="margin:0"><label>Type</label>
+        <select onchange="updateItem('${id}','type',this.value)">
+          <option>Window</option><option>Door</option><option>Bifold</option>
+          <option>Sliding</option><option>Rooflight</option><option>Curtain Wall</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0"><label>Style</label>
+        <select onchange="updateItem('${id}','style',this.value)">
+          <option>Casement</option><option>Tilt & Turn</option><option>Fixed</option>
+          <option>Sash</option><option>French Door</option><option>Single Door</option>
+          <option>Bifold</option><option>Sliding</option><option>Rooflight</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0"><label>Qty</label><input type="number" value="1" min="1" style="width:70px" oninput="updateItem('${id}','qty',this.value)"></div>
+    </div>
+    <div class="item-row" style="margin-top:8px">
+      <div class="field" style="margin:0"><label>Width (mm)</label><input type="number" placeholder="e.g. 1200" oninput="updateItem('${id}','width',this.value)"></div>
+      <div class="field" style="margin:0"><label>Height (mm)</label><input type="number" placeholder="e.g. 1050" oninput="updateItem('${id}','height',this.value)"></div>
+      <div class="field" style="margin:0;grid-column:span 2"><label>Notes</label><input type="text" placeholder="Colour, finish, special requirements..." oninput="updateItem('${id}','notes',this.value)"></div>
+    </div>`;
+  document.getElementById('items-list').appendChild(div);
+}
+
+function removeItem(id){quoteItems=quoteItems.filter(i=>i.id!==id);document.getElementById(id)?.remove();}
+function updateItem(id,field,value){const item=quoteItems.find(i=>i.id===id);if(item)item[field]=value;}
+
+// ── Pricing data from LC Notes ─────────────────────────────────
+const MARGINS={'Al-Clad':0.4,'Aluminium':0.4,'Curtain-Walling':0.4,'Rooflights':0.4,'Steel':0.4,'Steel-Look':0.4,'Timber':0.4,'Timber-Alternative':0.42,'UPVC':0.42,'Composite Doors':0.4};
+const FIT_RATES={'New Build UPVC':90,'Refurb UPVC':95,'New Build Alu':95,'Refurb Alu':100,'New Build Al-Clad':100,'Refurb Al-Clad':110};
+const SUPPLIER_SURCHARGES={'Hyline Aluminium':0.055,'Q4Glass':0.055,'Solarlux Aluminium':0.068};
+const FUEL={'0':0,'30':30,'60':60,'90':90,'120':120};
+
+function updateProfit(){
+  const product=document.getElementById('pc-product').value;
+  const fitType=document.getElementById('pc-fit-type').value;
+  const sqm=parseFloat(document.getElementById('pc-sqm').value)||0;
+  const frameList=parseFloat(document.getElementById('pc-frame-price').value)||0;
+  const discount=parseFloat(document.getElementById('pc-discount').value)||0;
+  const surcharge=parseFloat(document.getElementById('pc-surcharge').value)||0;
+  const delivery=parseFloat(document.getElementById('pc-delivery').value)||0;
+  const glass=parseFloat(document.getElementById('pc-glass').value)||0;
+  const fuel=parseFloat(document.getElementById('pc-distance').value)||0;
+  const soldValue=parseFloat(document.getElementById('pc-sold-value').value)||0;
+  const supplier=document.getElementById('pc-supplier').value;
+  const supplierSurchargeRate=SUPPLIER_SURCHARGES[supplier]||0;
+  const frameAfterDiscount=frameList*(1-(discount/100));
+  const supplierSurchargeAmt=frameList*supplierSurchargeRate;
+  const framePrice=frameAfterDiscount+surcharge+supplierSurchargeAmt;
+  const fitRate=FIT_RATES[fitType]||90;
+  const fitCost=sqm*fitRate;
+  const totalCost=framePrice+fitCost+glass+fuel+delivery;
+  const grossProfit=soldValue-totalCost;
+  const actualMargin=soldValue>0?(grossProfit/soldValue)*100:0;
+  const targetMargin=(MARGINS[product]||0.4)*100;
+  document.getElementById('pr-frame').textContent='£'+framePrice.toFixed(2);
+  document.getElementById('pr-fit').textContent='£'+fitCost.toFixed(2);
+  document.getElementById('pr-glass').textContent='£'+glass.toFixed(2);
+  document.getElementById('pr-fuel').textContent='£'+fuel.toFixed(2);
+  document.getElementById('pr-delivery').textContent='£'+delivery.toFixed(2);
+  document.getElementById('pr-total-cost').textContent='£'+totalCost.toFixed(2);
+  document.getElementById('pr-sold').textContent='£'+soldValue.toFixed(2);
+  document.getElementById('pr-profit').textContent='£'+grossProfit.toFixed(2);
+  document.getElementById('pr-target-margin').textContent=targetMargin.toFixed(0)+'%';
+  document.getElementById('pr-actual-margin').textContent=actualMargin.toFixed(1)+'%';
+  const marginEl=document.getElementById('margin-pct');
+  marginEl.textContent=soldValue>0?actualMargin.toFixed(1)+'%':'—';
+  const marginBox=document.getElementById('margin-box');
+  if(soldValue>0){
+    if(actualMargin>=targetMargin){marginBox.style.background='#f0fdf4';marginBox.style.borderColor='#6ee7b7';marginEl.style.color='#059669';}
+    else if(actualMargin>=targetMargin*0.8){marginBox.style.background='#fffbeb';marginBox.style.borderColor='#fcd34d';marginEl.style.color='#d97706';}
+    else{marginBox.style.background='#fef2f2';marginBox.style.borderColor='#fca5a5';marginEl.style.color='#dc2626';}
+  }
+}
+
+// ── AI Assistant ───────────────────────────────────────────────
+async function getAISuggestion(){
+  const desc=document.getElementById('ai-description').value.trim();
+  if(!desc){alert('Please describe the job first.');return;}
+  const btn=document.getElementById('ai-btn');
+  btn.disabled=true;btn.textContent='Thinking...';
+  const response=document.getElementById('ai-response');
+  response.style.display='block';
+  response.textContent='Analysing job description...';
+  try{
+    const systemPrompt=`You are a specialist window and door quoting assistant for Burgess Windows & Doors, a premium UK installer. You have access to their product range and pricing data.
+
+Product types available: UPVC, Aluminium, Al-Clad, Timber, Timber-Alternative, Steel, Steel-Look, Curtain-Walling, Rooflights, Composite Doors
+Target margins: UPVC/Timber-Alt: 42%, all others: 40%
+Fit rates per m²: New Build UPVC £90, Refurb UPVC £95, New Build Alu £95, Refurb Alu £100, New Build Al-Clad £100, Refurb Al-Clad £110
+Key suppliers: Liniar/Emplas (UPVC), Origin/Aluco/AluProf (Aluminium), Internorm/Rationel (Al-Clad), Bereco (Timber), Evolution/Masterframe (Timber-Alt), Crittal/ArtSteel (Steel)
+
+Based on the job description, suggest:
+1. Recommended product type(s) and why
+2. 2-3 suitable frame suppliers with brief reasoning
+3. Estimated price range per m² installed
+4. Any important considerations or questions to ask the customer
+5. Rough total estimate if enough info is given
+
+Be concise, practical and commercially minded. Always consider the customer's budget and property type.`;
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:systemPrompt,
+        messages:[{role:'user',content:`Job description: ${desc}\n\nSalesperson: ${currentUser}\nCustomer notes: ${document.getElementById('q-initial-notes').value||'None'}`}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.[0]?.text||'No response received.';
+    response.textContent=text;
+  }catch(e){
+    response.textContent='Could not get AI suggestion: '+e.message;
+  }
+  btn.disabled=false;btn.textContent='Get AI suggestion →';
+}
+
+// ── Photos ─────────────────────────────────────────────────────
+function handlePhotos(e){
+  Array.from(e.target.files).forEach(file=>{
+    const r=new FileReader();
+    r.onload=ev=>{sitePhotos.push({name:file.name,dataUrl:ev.target.result});renderPhotos();};
+    r.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+function renderPhotos(){
+  document.getElementById('photo-grid').innerHTML=sitePhotos.map((p,i)=>`
+    <div class="photo-thumb"><img src="${p.dataUrl}" alt="${p.name}">
+    <button onclick="removePhoto(${i})">×</button></div>`).join('');
+}
+function removePhoto(i){sitePhotos.splice(i,1);renderPhotos();}
+
+// ── Submit summary ─────────────────────────────────────────────
+function updateSubmitSummary(){
+  document.getElementById('submit-name').textContent=document.getElementById('q-name').value||'—';
+  document.getElementById('submit-address').textContent=document.getElementById('q-address').value||'—';
+  document.getElementById('submit-items').textContent=quoteItems.length+' item(s)';
+  const sold=document.getElementById('pc-sold-value').value;
+  document.getElementById('submit-value').textContent=sold?'£'+parseFloat(sold).toLocaleString():'—';
+}
+
+// ── PDF Generation ─────────────────────────────────────────────
+function generateVisitReportPDF(){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const dateStr=new Date().toLocaleDateString('en-GB');
+  const name=document.getElementById('q-name').value||'—';
+  // Header
+  doc.setFillColor(30,58,95);doc.rect(0,0,210,28,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont('helvetica','bold');
+  doc.text('Burgess Windows & Doors',14,12);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  doc.text('Sales Visit Report',14,20);
+  doc.setTextColor(30,30,30);
+  let y=36;
+  // Contact details
+  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text('Contact Details',14,y);y+=6;
+  doc.setFont('helvetica','normal');doc.setFontSize(9);
+  doc.text(`Customer: ${name}`,14,y);doc.text(`Date: ${dateStr}`,120,y);y+=5;
+  doc.text(`Address: ${document.getElementById('q-address').value||'—'}`,14,y);y+=5;
+  doc.text(`Phone: ${document.getElementById('q-phone').value||'—'}`,14,y);
+  doc.text(`Email: ${document.getElementById('q-email').value||'—'}`,80,y);y+=5;
+  doc.text(`Salesperson: ${document.getElementById('q-salesperson').value||currentUser}`,14,y);
+  doc.text(`Lead source: ${document.getElementById('q-lead-source').value||'—'}`,80,y);y+=8;
+  // Checklist
+  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text('Site Checklist',14,y);y+=6;
+  doc.setFont('helvetica','normal');doc.setFontSize(9);
+  const checks=[
+    ['Site visit',document.getElementById('cl-site-visit').value],
+    ['Contract status',document.getElementById('cl-contract').value],
+    ['Survey type',document.getElementById('cl-survey-type').value],
+    ['Survey timeframe',document.getElementById('cl-survey-timeframe').value],
+    ['Build type',document.getElementById('cl-build-type').value],
+    ['VAT rate',document.getElementById('cl-vat').value],
+    ['Payment terms',document.getElementById('cl-payment').value],
+    ['Deposit method',document.getElementById('cl-deposit').value],
+    ['Fit days',document.getElementById('cl-fit-days').value],
+  ];
+  checks.forEach(([label,val])=>{
+    doc.text(label+':',14,y);doc.text(val||'—',80,y);y+=5;
+  });
+  y+=4;
+  // Initial notes
+  const initNotes=document.getElementById('q-initial-notes').value;
+  if(initNotes){
+    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text('Initial Notes',14,y);y+=6;
+    doc.setFont('helvetica','normal');doc.setFontSize(9);
+    const lines=doc.splitTextToSize(initNotes,182);
+    doc.text(lines,14,y);y+=lines.length*4+4;
+  }
+  // Site notes
+  const siteNotes=document.getElementById('q-site-notes').value;
+  if(siteNotes){
+    if(y>240){doc.addPage();y=20;}
+    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text('Site Notes',14,y);y+=6;
+    doc.setFont('helvetica','normal');doc.setFontSize(9);
+    const lines=doc.splitTextToSize(siteNotes,182);
+    doc.text(lines,14,y);y+=lines.length*4+4;
+  }
+  // Items
+  if(quoteItems.length>0){
+    if(y>220){doc.addPage();y=20;}
+    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text('Items',14,y);y+=6;
+    doc.autoTable({startY:y,head:[['#','Location','Type','Style','Width','Height','Qty','Notes']],
+      body:quoteItems.map((item,i)=>[i+1,item.location,item.type,item.style,item.width?item.width+'mm':'—',item.height?item.height+'mm':'—',item.qty,item.notes||'']),
+      styles:{fontSize:8,cellPadding:2},headStyles:{fillColor:[30,58,95]},
+      columnStyles:{0:{cellWidth:8},7:{cellWidth:40}}});
+    y=doc.lastAutoTable.finalY+8;
+  }
+  // Profit summary
+  const soldVal=document.getElementById('pc-sold-value').value;
+  if(soldVal){
+    if(y>240){doc.addPage();y=20;}
+    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text('Quote Summary',14,y);y+=6;
+    doc.setFont('helvetica','normal');doc.setFontSize(9);
+    doc.text(`Product type: ${document.getElementById('pc-product').value}`,14,y);y+=5;
+    doc.text(`Frame supplier: ${document.getElementById('pc-supplier').value}`,14,y);y+=5;
+    doc.text(`Sold value: £${parseFloat(soldVal).toLocaleString()}`,14,y);
+    doc.text(`Margin: ${document.getElementById('pr-actual-margin').textContent}`,80,y);y+=5;
+  }
+  // Photos
+  if(sitePhotos.length>0){
+    doc.addPage();y=20;
+    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text('Site Photos',14,y);y+=8;
+    let px=14;
+    sitePhotos.slice(0,8).forEach(photo=>{
+      try{
+        if(px+62>200){px=14;y+=54;}
+        if(y>220){doc.addPage();y=20;px=14;}
+        doc.addImage(photo.dataUrl,'JPEG',px,y,56,42);
+        px+=62;
+      }catch(e){}
+    });
+  }
+  // Footer
+  const pc=doc.getNumberOfPages();
+  for(let i=1;i<=pc;i++){
+    doc.setPage(i);doc.setFontSize(8);doc.setTextColor(150,150,150);
+    doc.text(`Burgess Windows & Doors — ${name} — Visit Report — ${dateStr} — Page ${i} of ${pc}`,14,290);
+  }
+  return doc.output('blob');
+}
+
+function generateProfitCheckerPDF(){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const name=document.getElementById('q-name').value||'—';
+  const dateStr=new Date().toLocaleDateString('en-GB');
+  doc.setFillColor(30,58,95);doc.rect(0,0,210,28,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont('helvetica','bold');
+  doc.text('Burgess Windows & Doors',14,12);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  doc.text('Profit Analysis — Salesman Estimate',14,20);
+  doc.setTextColor(30,30,30);let y=36;
+  doc.setFontSize(9);
+  doc.text(`Customer: ${name}`,14,y);doc.text(`Salesperson: ${document.getElementById('q-salesperson').value||currentUser}`,120,y);y+=5;
+  doc.text(`Date: ${dateStr}`,14,y);y+=10;
+  const rows=[
+    ['Product Type',document.getElementById('pc-product').value],
+    ['Frame Supplier',document.getElementById('pc-supplier').value],
+    ['Expected Margin',document.getElementById('pr-target-margin').textContent],
+    ['Frame List Price','£'+(document.getElementById('pc-frame-price').value||'0')],
+    ['Discount',document.getElementById('pc-discount').value+'%'],
+    ['Supplier Surcharge','£'+(document.getElementById('pc-surcharge').value||'0')],
+    ['Frame Price',document.getElementById('pr-frame').textContent],
+    ['Fit Type',document.getElementById('pc-fit-type').value],
+    ['Total m²',document.getElementById('pc-sqm').value||'0'],
+    ['Fit Cost',document.getElementById('pr-fit').textContent],
+    ['Glass Cost',document.getElementById('pr-glass').textContent],
+    ['Fuel Surcharge',document.getElementById('pr-fuel').textContent],
+    ['Delivery',document.getElementById('pr-delivery').textContent],
+    ['Total Cost',document.getElementById('pr-total-cost').textContent],
+    ['',''],
+    ['Sold Value',document.getElementById('pr-sold').textContent],
+    ['Gross Profit',document.getElementById('pr-profit').textContent],
+    ['Actual Margin',document.getElementById('pr-actual-margin').textContent],
+  ];
+  doc.autoTable({startY:y,head:[['Item','Value']],body:rows,
+    styles:{fontSize:9,cellPadding:3},headStyles:{fillColor:[30,58,95]},
+    columnStyles:{0:{cellWidth:80},1:{cellWidth:80}}});
+  const pc=doc.getNumberOfPages();
+  for(let i=1;i<=pc;i++){
+    doc.setPage(i);doc.setFontSize(8);doc.setTextColor(150,150,150);
+    doc.text(`Burgess Windows & Doors — ${name} — Profit Checker — ${dateStr}`,14,290);
+  }
+  return doc.output('blob');
+}
+
+// ── Submit ─────────────────────────────────────────────────────
+async function uploadFileToMonday(itemId,columnId,fileName,blob){
+  const base64=await new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result.split(',')[1]);
+    reader.onerror=()=>reject(new Error('Failed to read file'));
+    reader.readAsDataURL(blob);
+  });
+  const res=await fetch(UPLOAD_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:String(itemId),columnId,fileName,fileBase64:base64})});
+  if(!res.ok)throw new Error('Upload error '+res.status);
+  const data=await res.json();
+  if(data.error)throw new Error(data.error);
+  return data;
+}
+
+function showProgress(steps){
+  document.getElementById('progress-box').style.display='block';
+  document.getElementById('progress-steps').innerHTML=steps.map((s,i)=>`<div class="progress-step" id="ps${i}"><div class="step-icon" id="pi${i}">○</div><span id="pt${i}">${s}</span></div>`).join('');
+}
+function setStep(i,status,text){
+  const step=document.getElementById('ps'+i),icon=document.getElementById('pi'+i),txt=document.getElementById('pt'+i);
+  if(!step)return;
+  step.className='progress-step '+status;icon.className='step-icon '+status;
+  icon.textContent=status==='done'?'✓':status==='error'?'✗':'…';
+  if(text&&txt)txt.textContent=text;
+}
+
+async function submitQuote(){
+  const name=document.getElementById('q-name').value.trim();
+  if(!name){alert('Please enter a customer name.');goToStep(0);return;}
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='Submitting...';
+  const steps=['Generating visit report PDF','Generating profit checker PDF','Finding Files column','Uploading visit report','Uploading profit checker','Adding update to Monday'];
+  if(!selectedContact)steps.push('Creating new contact in Monday');
+  showProgress(steps);
+  const dateStr=new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const safeName=name.replace(/[^a-z0-9]/gi,'_');
+  try{
+    setStep(0,'active');
+    const visitPDF=generateVisitReportPDF();
+    setStep(0,'done');
+    setStep(1,'active');
+    const profitPDF=generateProfitCheckerPDF();
+    setStep(1,'done');
+    // Get board columns for Files column ID
+    setStep(2,'active');
+    const colData=await mondayQuery(`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`);
+    const cols=colData.data?.boards?.[0]?.columns||[];
+    const filesCol=cols.find(c=>c.title==='Files')||cols.find(c=>c.type==='file');
+    if(!filesCol)throw new Error('No Files column found on contacts board');
+    setStep(2,'done',`Column: "${filesCol.title}"`);
+    // Get or create item ID
+    let itemId=selectedContact?.id;
+    if(!itemId){
+      // Create new contact
+      const colVals={};
+      const locationCol=cols.find(c=>c.title==='Location');
+      const phoneCol=cols.find(c=>c.title==='Phone');
+      const emailCol=cols.find(c=>c.title==='Email');
+      if(locationCol)colVals[locationCol.id]=document.getElementById('q-address').value;
+      if(phoneCol)colVals[phoneCol.id]=document.getElementById('q-phone').value;
+      const colValsStr=JSON.stringify(JSON.stringify(colVals));
+      const newItem=await mondayQuery(`mutation { create_item(board_id:${BOARD_ID}, item_name:"${name.replace(/"/g,'\\"')}", column_values:${colValsStr}) { id } }`);
+      itemId=newItem.data?.create_item?.id;
+      if(!itemId)throw new Error('Could not create contact in Monday');
+    }
+    setStep(3,'active');
+    await uploadFileToMonday(itemId,filesCol.id,`${safeName}_VisitReport_${dateStr}.pdf`,visitPDF);
+    setStep(3,'done');
+    setStep(4,'active');
+    await uploadFileToMonday(itemId,filesCol.id,`${safeName}_ProfitChecker_${dateStr}.pdf`,profitPDF);
+    setStep(4,'done');
+    setStep(5,'active');
+    const soldVal=document.getElementById('pc-sold-value').value;
+    const margin=document.getElementById('pr-actual-margin').textContent;
+    const updateText=`💼 Sales visit completed by ${currentUser} on ${new Date().toLocaleDateString('en-GB')}.\\n\\nProduct: ${document.getElementById('pc-product').value}\\nSupplier: ${document.getElementById('pc-supplier').value}\\nItems: ${quoteItems.length}\\n${soldVal?'Sold value: £'+parseFloat(soldVal).toLocaleString()+'\\nMargin: '+margin:''}\\n\\nVisit report and profit checker PDF uploaded.`;
+    await mondayQuery(`mutation { create_update(item_id:${itemId}, body:"${updateText.replace(/"/g,'\\"')}") { id } }`);
+    // Update progression status
+    const progressCol=cols.find(c=>c.title.toLowerCase().includes('progress'));
+    if(progressCol){
+      const statusVal=JSON.stringify(JSON.stringify({label:'Working on it'}));
+      await mondayQuery(`mutation { change_column_value(board_id:${BOARD_ID}, item_id:${itemId}, column_id:"${progressCol.id}", value:${statusVal}) { id } }`);
+    }
+    setStep(5,'done');
+    document.getElementById('progress-title').textContent='Quote submitted successfully!';
+    document.getElementById('progress-title').style.color='#059669';
+    btn.textContent='Submitted ✓';btn.style.background='#10b981';
+    setTimeout(()=>{closeQuoteBuilder();loadContacts();},3000);
+  }catch(err){
+    const fi=[0,1,2,3,4,5].find(i=>document.getElementById('ps'+i)?.classList.contains('active'));
+    if(fi!==undefined)setStep(fi,'error',err.message);
+    document.getElementById('progress-title').textContent='Submission failed';
+    document.getElementById('progress-title').style.color='#dc2626';
+    btn.disabled=false;btn.textContent='Submit quote to Monday →';
+  }
+}
+
+// ── Auto-login ─────────────────────────────────────────────────
+window.addEventListener('load',async()=>{
+  document.getElementById('q-date').value=new Date().toISOString().slice(0,10);
+  const savedToken=localStorage.getItem('bwd_sales_token');
+  const savedUser=localStorage.getItem('bwd_sales_user');
+  if(savedToken&&savedUser){
+    try{
+      const res=await fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'validate',token:savedToken})});
+      const data=await res.json();
+      if(data.valid){currentUser=data.name||savedUser;showDashboard();return;}
+    }catch(e){}
+    localStorage.removeItem('bwd_sales_token');localStorage.removeItem('bwd_sales_user');
+  }
+});
+</script>
+</body>
+</html>
