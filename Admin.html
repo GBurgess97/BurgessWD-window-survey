@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Burgess Windows & Doors</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f3;min-height:100vh}
+.app-header{background:#1e40af;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.app-title{font-size:16px;font-weight:600;color:#fff}
+.app-subtitle{font-size:12px;color:#93c5fd;margin-top:1px}
+.container{max-width:600px;margin:0 auto;padding:24px 16px}
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:80vh}
+.login-card{background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:32px;max-width:380px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
+.login-logo{width:52px;height:52px;background:#dc2626;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px}
+.login-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.login-sub{font-size:13px;color:#64748b;margin-bottom:24px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;text-align:left}
+.field label{font-size:12px;font-weight:600;color:#374151}
+.field input{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none}
+.field input:focus{border-color:#3b82f6}
+.btn{width:100%;padding:11px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-primary{background:#1e40af;color:#fff}.btn-primary:hover{background:#1d4ed8}
+.btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-sm{width:auto;padding:5px 12px;font-size:12px;border-radius:6px}
+.admin-panel{display:none}
+.section{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.sec-title{font-size:13px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.user-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.user-row:last-child{border-bottom:none}
+.user-name{flex:1;font-weight:500}
+.user-actions{display:flex;gap:6px}
+.btn-edit{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
+.btn-del{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
+.add-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-top:12px}
+.add-form input{padding:8px 10px;border:1px solid #e0e0e0;border-radius:7px;font-size:13px;font-family:inherit;outline:none}
+.add-form input:focus{border-color:#3b82f6}
+.add-btn{background:#10b981;color:#fff;border:none;border-radius:7px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap}
+.add-btn:hover{background:#059669}
+.success-msg{background:#ecfdf5;color:#065f46;border:1px solid #6ee7b7;border-radius:7px;padding:8px 12px;font-size:12px;margin-top:10px;display:none}
+.error-msg{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:7px;padding:8px 12px;font-size:12px;margin-top:10px;display:none}
+.welcome-bar{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.welcome-text{font-size:14px;font-weight:600}
+.btn-signout{background:transparent;border:1px solid #e0e0e0;color:#64748b;padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;border-radius:12px;padding:24px;max-width:360px;width:100%}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:14px}
+.modal-btns{display:flex;gap:8px;margin-top:16px}
+.modal-btns button{flex:1;padding:10px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;border:none}
+.empty-users{padding:20px;text-align:center;color:#9ca3af;font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div>
+    <div class="app-title">Burgess Windows &amp; Doors</div>
+    <div class="app-subtitle">Admin Panel</div>
+  </div>
+  <div id="admin-badge" style="background:rgba(220,38,38,0.2);color:#fca5a5;font-size:11px;padding:3px 10px;border-radius:5px;display:none">ADMIN</div>
+</div>
+
+<!-- Change password modal -->
+<div class="modal-overlay" id="change-modal">
+  <div class="modal">
+    <div class="modal-title" id="change-modal-title">Change password</div>
+    <div class="field"><label>New password</label><input type="password" id="new-password" placeholder="Enter new password"></div>
+    <div class="field"><label>Confirm password</label><input type="password" id="confirm-password" placeholder="Confirm new password"></div>
+    <div id="change-error" style="color:#dc2626;font-size:12px;margin-top:4px;display:none"></div>
+    <div class="modal-btns">
+      <button onclick="closeChangeModal()" style="background:#f3f4f6;color:#374151">Cancel</button>
+      <button onclick="confirmChangePassword()" style="background:#1e40af;color:#fff">Save password</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Login -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-card">
+      <div class="login-logo">🔒</div>
+      <div class="login-title">Admin login</div>
+      <div class="login-sub">Burgess Windows &amp; Doors portal admin</div>
+      <div class="field"><label>Username</label><input type="text" id="login-user" value="admin" readonly style="background:#f3f4f6"></div>
+      <div class="field"><label>Password</label><input type="password" id="login-pass" placeholder="Admin password" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
+      <div id="login-error" style="color:#dc2626;font-size:12px;margin-bottom:10px;display:none"></div>
+      <button class="btn btn-primary" onclick="doAdminLogin()">Sign in</button>
+    </div>
+  </div>
+
+  <!-- Admin panel -->
+  <div class="admin-panel" id="admin-panel">
+    <div class="welcome-bar">
+      <div class="welcome-text">👋 Welcome, Admin</div>
+      <button class="btn-signout" onclick="adminSignOut()">Sign out</button>
+    </div>
+
+    <!-- Add surveyor -->
+    <div class="section">
+      <div class="sec-title">➕ Add new surveyor</div>
+      <div class="add-form">
+        <div>
+          <div style="font-size:11px;color:#666;margin-bottom:4px;font-weight:500">Full name</div>
+          <input type="text" id="new-name" placeholder="e.g. Paul Burgess">
+        </div>
+        <div>
+          <div style="font-size:11px;color:#666;margin-bottom:4px;font-weight:500">Password</div>
+          <input type="password" id="new-pass" placeholder="Set password">
+        </div>
+        <button class="add-btn" onclick="addUser()">Add user</button>
+      </div>
+      <div class="success-msg" id="add-success">✓ Surveyor added successfully</div>
+      <div class="error-msg" id="add-error"></div>
+    </div>
+
+    <!-- Surveyor list -->
+    <div class="section">
+      <div class="sec-title">👥 Surveyor accounts</div>
+      <div id="users-list"><div class="empty-users">Loading...</div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const AUTH_API='/auth';
+let adminToken='';
+let changingUser='';
+
+async function authCall(body){
+  const res=await fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  return res.json();
+}
+
+async function doAdminLogin(){
+  const pass=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-error');
+  err.style.display='none';
+  if(!pass){err.textContent='Please enter password';err.style.display='block';return;}
+  const data=await authCall({action:'login',name:'admin',password:pass});
+  if(data.success&&data.role==='admin'){
+    adminToken=data.token;
+    sessionStorage.setItem('bwd_admin_token',adminToken);
+    showAdminPanel();
+  }else{
+    err.textContent=data.error||'Incorrect password';
+    err.style.display='block';
+  }
+}
+
+function showAdminPanel(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('admin-panel').style.display='block';
+  document.getElementById('admin-badge').style.display='block';
+  loadUsers();
+}
+
+async function loadUsers(){
+  const list=document.getElementById('users-list');
+  list.innerHTML='<div class="empty-users">Loading...</div>';
+  const data=await authCall({action:'list_users',token:adminToken});
+  if(data.error){list.innerHTML='<div class="empty-users">'+data.error+'</div>';return;}
+  if(!data.users||data.users.length===0){
+    list.innerHTML='<div class="empty-users">No surveyors added yet — add one above</div>';
+    return;
+  }
+  list.innerHTML=data.users.map(u=>`
+    <div class="user-row">
+      <div class="user-name">👤 ${u.name}</div>
+      <div class="user-actions">
+        <button class="btn-edit" onclick="openChangeModal('${u.name}')">Change password</button>
+        <button class="btn-del" onclick="deleteUser('${u.name}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+async function addUser(){
+  const name=document.getElementById('new-name').value.trim();
+  const pass=document.getElementById('new-pass').value;
+  const successEl=document.getElementById('add-success');
+  const errorEl=document.getElementById('add-error');
+  successEl.style.display='none';errorEl.style.display='none';
+  if(!name||!pass){errorEl.textContent='Please enter both name and password';errorEl.style.display='block';return;}
+  const data=await authCall({action:'add_user',token:adminToken,name,password:pass});
+  if(data.success){
+    successEl.style.display='block';
+    document.getElementById('new-name').value='';
+    document.getElementById('new-pass').value='';
+    loadUsers();
+    setTimeout(()=>successEl.style.display='none',3000);
+  }else{
+    errorEl.textContent=data.error||'Could not add user';
+    errorEl.style.display='block';
+  }
+}
+
+async function deleteUser(name){
+  if(!confirm(`Delete surveyor "${name}"? They will no longer be able to log in.`))return;
+  const data=await authCall({action:'delete_user',token:adminToken,name});
+  if(data.success)loadUsers();
+  else alert('Could not delete: '+data.error);
+}
+
+function openChangeModal(name){
+  changingUser=name;
+  document.getElementById('change-modal-title').textContent='Change password for '+name;
+  document.getElementById('new-password').value='';
+  document.getElementById('confirm-password').value='';
+  document.getElementById('change-error').style.display='none';
+  document.getElementById('change-modal').style.display='flex';
+}
+function closeChangeModal(){
+  document.getElementById('change-modal').style.display='none';
+  changingUser='';
+}
+async function confirmChangePassword(){
+  const np=document.getElementById('new-password').value;
+  const cp=document.getElementById('confirm-password').value;
+  const err=document.getElementById('change-error');
+  if(!np){err.textContent='Please enter a password';err.style.display='block';return;}
+  if(np!==cp){err.textContent='Passwords do not match';err.style.display='block';return;}
+  const data=await authCall({action:'change_password',token:adminToken,name:changingUser,newPassword:np});
+  if(data.success){closeChangeModal();alert('Password updated successfully');}
+  else{err.textContent=data.error||'Could not update password';err.style.display='block';}
+}
+
+function adminSignOut(){
+  authCall({action:'logout',token:adminToken});
+  sessionStorage.removeItem('bwd_admin_token');
+  adminToken='';
+  document.getElementById('admin-panel').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('admin-badge').style.display='none';
+  document.getElementById('login-pass').value='';
+}
+
+// Auto-login if session exists
+window.addEventListener('load',async()=>{
+  const saved=sessionStorage.getItem('bwd_admin_token');
+  if(saved){
+    const data=await authCall({action:'validate',token:saved});
+    if(data.valid&&data.role==='admin'){adminToken=saved;showAdminPanel();}
+  }
+});
+</script>
+</body>
+</html>
