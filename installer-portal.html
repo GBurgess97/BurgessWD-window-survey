@@ -452,7 +452,8 @@ async function loadJobs(){
     const installerColId=boardColumns.find(c=>c.title==='Installer')?.id||'';
     const statusColId=boardColumns.find(c=>c.title==='Installer Status')?.id||'';
     const addressColId=boardColumns.find(c=>c.title==='Site Address')?.id||'';
-    const timelineColId=boardColumns.find(c=>c.title==='Installation Timeline')?.id||'';
+    const timelineColObj=boardColumns.find(c=>c.title==='Installation TimeLine')||boardColumns.find(c=>c.title==='Installation Timeline')||boardColumns.find(c=>c.type==='timerange')||boardColumns.find(c=>c.type==='timeline');
+    const timelineColId=timelineColObj?.id||'';
 
     const data=await mondayQuery(`query {
       boards(ids:${BOARD_ID}){
