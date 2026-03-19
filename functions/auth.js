@@ -38,7 +38,8 @@ export async function onRequest(context) {
       }
       // Surveyor or installer login
       const requestedRole = role || 'surveyor';
-      const userKey = (requestedRole === 'installer' ? 'installer:' : 'user:') + name.toLowerCase().trim();
+      const prefix = requestedRole === 'installer' ? 'installer:' : requestedRole === 'sales' ? 'sales:' : 'user:';
+      const userKey = prefix + name.toLowerCase().trim();
       const userData = await KV.get(userKey);
       if (!userData) return json({ success: false, error: 'User not found. Please check your name and try again.' }, corsHeaders);
       const user = JSON.parse(userData);
@@ -66,7 +67,7 @@ export async function onRequest(context) {
     // ── Admin: list users ──────────────────────────────────
     if (action === 'list_users') {
       if (!await isAdmin(token, KV)) return json({ error: 'Unauthorized' }, corsHeaders);
-      const pfx = (role === 'installer') ? 'installer:' : 'user:';
+      const pfx = role === 'installer' ? 'installer:' : role === 'sales' ? 'sales:' : 'user:';
       const list = await KV.list({ prefix: pfx });
       const users = await Promise.all(list.keys.map(async k => {
         const data = await KV.get(k.name);
@@ -80,7 +81,7 @@ export async function onRequest(context) {
     if (action === 'add_user') {
       if (!await isAdmin(token, KV)) return json({ error: 'Unauthorized' }, corsHeaders);
       if (!name || !password) return json({ error: 'Name and password required' }, corsHeaders);
-      const userKey = ((role === 'installer') ? 'installer:' : 'user:') + name.toLowerCase().trim();
+      const userKey = (role === 'installer' ? 'installer:' : role === 'sales' ? 'sales:' : 'user:') + name.toLowerCase().trim();
       await KV.put(userKey, JSON.stringify({ name: name.trim(), password: hashPassword(password) }));
       return json({ success: true }, corsHeaders);
     }
@@ -88,7 +89,7 @@ export async function onRequest(context) {
     // ── Admin: delete user ─────────────────────────────────
     if (action === 'delete_user') {
       if (!await isAdmin(token, KV)) return json({ error: 'Unauthorized' }, corsHeaders);
-      const delPrefix = (role === 'installer') ? 'installer:' : 'user:';
+      const delPrefix = role === 'installer' ? 'installer:' : role === 'sales' ? 'sales:' : 'user:';
       const userKey = delPrefix + name.toLowerCase().trim();
       await KV.delete(userKey);
       return json({ success: true }, corsHeaders);
@@ -97,7 +98,7 @@ export async function onRequest(context) {
     // ── Admin: change password ─────────────────────────────
     if (action === 'change_password') {
       if (!await isAdmin(token, KV)) return json({ error: 'Unauthorized' }, corsHeaders);
-      const chgPrefix = (role === 'installer') ? 'installer:' : 'user:';
+      const chgPrefix = role === 'installer' ? 'installer:' : role === 'sales' ? 'sales:' : 'user:';
       const userKey = chgPrefix + name.toLowerCase().trim();
       const userData = await KV.get(userKey);
       if (!userData) return json({ error: 'User not found' }, corsHeaders);
