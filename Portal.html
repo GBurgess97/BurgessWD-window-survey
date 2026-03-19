@@ -539,6 +539,18 @@ async function saveAppointment(){
     document.getElementById('appt-saved').style.display='block';
     document.getElementById('detail-date').textContent=date||selectedJob.date||'—';
     document.getElementById('detail-time').textContent=time||selectedJob.time||'—';
+    // Update local job data so portal reflects change immediately
+    selectedJob.status='Survey Confirmed';
+    selectedJob.date=date||selectedJob.date;
+    selectedJob.time=time||selectedJob.time;
+    const jobInList=allJobs.find(j=>j.id===selectedJob.id);
+    if(jobInList){jobInList.status='Survey Confirmed';jobInList.date=selectedJob.date;jobInList.time=selectedJob.time;}
+    // Update status badge in detail header
+    const badge=document.getElementById('detail-status-badge');
+    badge.textContent='Survey Confirmed';
+    badge.className='job-detail-status status-confirmed';
+    // Refresh stats
+    updateStats();
     btn.textContent='Saved ✓';btn.style.background='#10b981';
     setTimeout(()=>{btn.disabled=false;btn.textContent='Save & update Monday';btn.style.background='';},3000);
   }catch(err){
@@ -568,15 +580,31 @@ async function loadJobFiles(itemId){
     if(!specSheetCol&&!photosCol){loading.textContent='No file columns found.';return;}
     const colIds=[specSheetCol?.id,photosCol?.id].filter(Boolean);
     // Fetch assets for this item
-    // Fetch item assets directly — simplest reliable approach
+    // Fetch files from specific columns only
     const data=await mondayQuery(`query {
       items(ids:${itemId}){
-        assets { id name public_url url file_extension file_size }
+        column_values(ids:${JSON.stringify(colIds)}){
+          id
+          value
+          text
+        }
+        assets { id name public_url file_extension }
       }
     }`);
     const item=data.data?.items?.[0];
     if(!item){loading.textContent='Could not load files.';return;}
-    const files=item.assets||[];
+    // Parse asset IDs from column values JSON
+    const assetIds=new Set();
+    (item.column_values||[]).forEach(col=>{
+      try{
+        const val=JSON.parse(col.value||'{}');
+        const filesList=val.files||[];
+        filesList.forEach(f=>{if(f.asset_id)assetIds.add(String(f.asset_id));});
+      }catch(e){}
+    });
+    // Filter assets to only those in the specified columns
+    const allAssets=item.assets||[];
+    const files=assetIds.size>0?allAssets.filter(a=>assetIds.has(String(a.id))):allAssets;
     loading.style.display='none';
     if(files.length===0){loading.textContent='No files uploaded yet.';loading.style.display='block';return;}
     const imgExts=['jpg','jpeg','png','gif','webp','heic'];
