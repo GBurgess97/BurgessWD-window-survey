@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Installer Portal — Burgess Windows & Doors</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f3;min-height:100vh}
+.app-header{background:#065f46;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.app-title{font-size:16px;font-weight:600;color:#fff}
+.app-subtitle{font-size:12px;color:#6ee7b7;margin-top:1px}
+.container{max-width:800px;margin:0 auto;padding:20px 16px}
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:80vh}
+.login-card{background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:32px;max-width:400px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
+.login-logo{width:56px;height:56px;background:#065f46;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px}
+.login-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.login-sub{font-size:13px;color:#64748b;margin-bottom:24px;line-height:1.6}
+.login-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;text-align:left}
+.login-field label{font-size:12px;font-weight:600;color:#374151}
+.login-field input{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;transition:border-color 0.15s}
+.login-field input:focus{border-color:#059669}
+.login-btn{width:100%;padding:12px;background:#065f46;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.login-btn:hover{background:#047857}
+.login-btn:disabled{background:#6ee7b7;cursor:not-allowed}
+.dashboard{display:none}
+.welcome-bar{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.welcome-name{font-size:16px;font-weight:600}
+.welcome-sub{font-size:12px;color:#64748b;margin-top:2px}
+.btn-signout{background:transparent;border:1px solid #e0e0e0;color:#64748b;padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px;text-align:center}
+.stat-val{font-size:24px;font-weight:700;margin-bottom:2px}
+.stat-lbl{font-size:11px;color:#888}
+.stat-card.allocated .stat-val{color:#f59e0b}
+.stat-card.working .stat-val{color:#3b82f6}
+.stat-card.done .stat-val{color:#059669}
+.stat-card.total .stat-val{color:#065f46}
+.main-tabs{display:flex;gap:6px;margin-bottom:14px}
+.main-tab{padding:8px 20px;border:1px solid #e0e0e0;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500}
+.main-tab.active{background:#065f46;color:#fff;border-color:#065f46}
+.jobs-section{background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:16px}
+.jobs-header{padding:14px 18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.jobs-title{font-size:15px;font-weight:600}
+.filter-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.ftab{padding:5px 12px;border:1px solid #e0e0e0;border-radius:6px;background:transparent;color:#888;font-size:12px;cursor:pointer;font-family:inherit}
+.ftab.active{background:#065f46;color:#fff;border-color:#065f46}
+.job-item{padding:14px 18px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s}
+.job-item:last-child{border-bottom:none}
+.job-item:hover{background:#f0fdf4}
+.job-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.job-dot.allocate{background:#f59e0b}
+.job-dot.working{background:#3b82f6}
+.job-dot.stuck{background:#ef4444}
+.job-dot.parts{background:#8b5cf6}
+.job-dot.done{background:#10b981}
+.job-main{flex:1;min-width:0}
+.job-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.job-meta{font-size:12px;color:#64748b;margin-top:2px}
+.job-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.job-status{font-size:11px;font-weight:500;padding:2px 8px;border-radius:5px;white-space:nowrap}
+.status-allocate{background:#fef3c7;color:#92400e}
+.status-working{background:#dbeafe;color:#1e40af}
+.status-stuck{background:#fee2e2;color:#991b1b}
+.status-parts{background:#ede9fe;color:#5b21b6}
+.status-done{background:#d1fae5;color:#065f46}
+.job-arrow{color:#cbd5e1;font-size:16px}
+.empty-state{padding:40px 20px;text-align:center;color:#9ca3af}
+.loading{padding:40px 20px;text-align:center;color:#9ca3af}
+.spinner{width:28px;height:28px;border:3px solid #e5e5e5;border-top-color:#065f46;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-refresh{background:#f0fdf4;border:1px solid #6ee7b7;color:#065f46;padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500}
+.error-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin-bottom:14px}
+
+/* Job detail */
+.job-detail{display:none;background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:16px}
+.job-detail-header{background:#065f46;padding:14px 18px;display:flex;align-items:center;gap:12px}
+.job-detail-back{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+.job-detail-title{font-size:15px;font-weight:600;color:#fff;flex:1}
+.job-detail-body{padding:18px}
+.detail-section{margin-bottom:16px}
+.detail-section-title{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-field{display:flex;flex-direction:column;gap:4px}
+.detail-label{font-size:11px;color:#888;font-weight:500}
+.detail-value{font-size:14px;font-weight:500}
+
+/* Status update */
+.status-section{background:#f0fdf4;border:1px solid #6ee7b7;border-radius:8px;padding:14px;margin-bottom:16px}
+.status-title{font-size:12px;font-weight:600;color:#065f46;margin-bottom:10px}
+.status-btns{display:flex;gap:8px;flex-wrap:wrap}
+.status-btn{padding:8px 16px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid transparent;font-family:inherit;transition:all 0.15s}
+.status-btn.active{border-color:#065f46;background:#065f46;color:#fff}
+.status-btn:not(.active){background:#fff;border-color:#e0e0e0;color:#374151}
+.status-btn:hover:not(.active){border-color:#065f46;color:#065f46}
+
+/* Action buttons */
+.action-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.btn-action{padding:14px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit;text-align:center;transition:all 0.15s}
+.btn-completion{background:#065f46;color:#fff}
+.btn-completion:hover{background:#047857}
+.btn-parts{background:#8b5cf6;color:#fff}
+.btn-parts:hover{background:#7c3aed}
+
+/* Parts request modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;border-radius:14px;padding:24px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal-field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.modal-field label{font-size:12px;font-weight:600;color:#374151}
+.modal-field input,.modal-field select,.modal-field textarea{padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:#059669}
+.modal-field textarea{resize:vertical;min-height:80px}
+.modal-btns{display:flex;gap:8px;margin-top:16px}
+.modal-btns button{flex:1;padding:11px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;border:none}
+.modal-cancel{background:#f3f4f6;color:#374151}
+.modal-submit{background:#8b5cf6;color:#fff}
+.modal-submit:hover{background:#7c3aed}
+.modal-success{background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:10px 14px;font-size:13px;color:#065f46;margin-top:10px;display:none}
+
+/* Diary */
+.diary-entry{padding:14px 18px;border-bottom:1px solid #f5f5f5;display:flex;align-items:flex-start;gap:14px}
+.diary-entry:last-child{border-bottom:none}
+.diary-date-block{flex-shrink:0;width:52px;text-align:center;background:#f0fdf4;border:1px solid #6ee7b7;border-radius:9px;padding:6px 4px}
+.diary-day{font-size:22px;font-weight:700;color:#065f46;line-height:1}
+.diary-month{font-size:10px;color:#059669;font-weight:600;text-transform:uppercase;margin-top:2px}
+.diary-dow{font-size:10px;color:#64748b;margin-top:1px}
+.diary-info{flex:1;min-width:0}
+.diary-job-name{font-weight:600;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.diary-job-meta{font-size:12px;color:#64748b;margin-bottom:4px}
+.diary-range{display:inline-block;background:#fef3c7;color:#92400e;font-size:11px;font-weight:500;padding:2px 8px;border-radius:5px}
+.diary-entry.today .diary-date-block{background:#065f46;border-color:#065f46}
+.diary-entry.today .diary-day{color:#fff}
+.diary-entry.today .diary-month{color:#6ee7b7}
+.diary-entry.today .diary-dow{color:#a7f3d0}
+.diary-open-btn{flex-shrink:0;background:transparent;border:1px solid #e0e0e0;color:#64748b;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
+
+/* H&S Modal */
+.hs-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;padding:20px}
+.hs-card{background:#fff;border-radius:14px;max-width:600px;width:100%;margin:auto;overflow:hidden}
+.hs-header{background:#dc2626;padding:16px 20px}
+.hs-header-title{font-size:17px;font-weight:700;color:#fff;margin-bottom:2px}
+.hs-header-sub{font-size:12px;color:#fca5a5}
+.hs-body{padding:18px}
+.hs-alert{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 14px;font-size:13px;color:#991b1b;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px}
+.hs-file-area{border:1px solid #e5e5e5;border-radius:8px;overflow:hidden;margin-bottom:16px;min-height:60px}
+.hs-file-loading{padding:16px;text-align:center;font-size:13px;color:#888}
+.hs-file-item{display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 0.1s}
+.hs-file-item:last-child{border-bottom:none}
+.hs-file-item:hover{background:#fef2f2}
+.hs-file-icon{font-size:28px;flex-shrink:0}
+.hs-file-name{font-size:13px;font-weight:500;flex:1}
+.hs-file-open{background:#dc2626;color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;text-decoration:none;font-weight:500;flex-shrink:0}
+.hs-sign-section{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:14px;margin-bottom:14px}
+.hs-sign-title{font-size:13px;font-weight:600;color:#92400e;margin-bottom:10px}
+.hs-declaration{font-size:13px;color:#374151;margin-bottom:12px;line-height:1.6;background:#fff;border:1px solid #e5e5e5;border-radius:7px;padding:12px}
+.hs-sig-wrap{border:1.5px solid #fcd34d;border-radius:8px;background:#fff;overflow:hidden;margin-bottom:8px}
+.hs-sig-canvas{display:block;width:100%;height:140px;cursor:crosshair;touch-action:none}
+.hs-sig-clear{background:transparent;border:none;color:#dc2626;font-size:12px;cursor:pointer;font-family:inherit;padding:4px 0}
+.hs-confirm-btn{width:100%;padding:13px;background:#dc2626;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.hs-confirm-btn:hover{background:#b91c1c}
+.hs-confirm-btn:disabled{background:#fca5a5;cursor:not-allowed}
+/* Files */
+.file-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:8px}
+.file-card img{width:100%;display:block;cursor:pointer}
+.file-card-footer{padding:8px 12px;font-size:12px;color:#64748b;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.file-card-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.file-open-btn{background:#065f46;color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;text-decoration:none;font-weight:500;flex-shrink:0}
+.file-pdf-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.files-loading{font-size:12px;color:#888;padding:8px 0}
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .detail-grid{grid-template-columns:1fr}
+  .action-btns{grid-template-columns:1fr}
+  .status-btns{gap:6px}
+  .status-btn{padding:8px 12px;font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<!-- Parts request modal -->
+<div class="modal-overlay" id="parts-modal">
+  <div class="modal">
+    <div class="modal-title">🔧 Request parts</div>
+    <div class="modal-field"><label>Part description</label><input type="text" id="parts-desc" placeholder="e.g. 70mm window handle, white"></div>
+    <div class="modal-field"><label>Quantity needed</label><input type="number" id="parts-qty" min="1" value="1"></div>
+    <div class="modal-field"><label>Urgency</label>
+      <select id="parts-urgency">
+        <option value="Standard">Standard — can wait</option>
+        <option value="Urgent">Urgent — needed soon</option>
+        <option value="Critical">Critical — job is stopped</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Additional notes</label><textarea id="parts-notes" placeholder="Any extra detail..."></textarea></div>
+    <div class="modal-success" id="parts-success">✓ Parts request submitted to Monday</div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closePartsModal()">Cancel</button>
+      <button class="modal-submit" onclick="submitPartsRequest()">Submit request</button>
+    </div>
+  </div>
+</div>
+
+<div class="app-header">
+  <div>
+    <div class="app-title">Burgess Windows &amp; Doors</div>
+    <div class="app-subtitle">Installer Portal</div>
+  </div>
+  <div id="header-name" style="color:#6ee7b7;font-size:13px;display:none"></div>
+</div>
+
+<!-- Health & Safety Modal -->
+<div class="hs-overlay" id="hs-overlay">
+  <div class="hs-card">
+    <div class="hs-header">
+      <div class="hs-header-title">⚠️ Health &amp; Safety — Required</div>
+      <div class="hs-header-sub">You must read and sign the H&amp;S document before accessing this job</div>
+    </div>
+    <div class="hs-body">
+      <div class="hs-alert">
+        <span style="font-size:20px;flex-shrink:0">⚠️</span>
+        <div>Please read the Health &amp; Safety document for this job carefully before signing. By signing below you confirm you have read, understood and will comply with all requirements.</div>
+      </div>
+
+      <!-- H&S files -->
+      <div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px">Health &amp; Safety document</div>
+      <div class="hs-file-area">
+        <div id="hs-file-loading" class="hs-file-loading">Loading H&amp;S document...</div>
+        <div id="hs-file-list"></div>
+      </div>
+
+      <!-- Signature section -->
+      <div class="hs-sign-section">
+        <div class="hs-sign-title">✍️ Sign to confirm you have read the H&amp;S document</div>
+        <div class="hs-declaration">I confirm that I have read and understood the Health &amp; Safety requirements for this job and will comply with all relevant procedures and regulations.</div>
+        <div class="hs-sig-wrap">
+          <canvas class="hs-sig-canvas" id="hs-sig-canvas"></canvas>
+        </div>
+        <button class="hs-sig-clear" onclick="clearHSSig()">Clear signature</button>
+      </div>
+
+      <button class="hs-confirm-btn" id="hs-confirm-btn" onclick="confirmHS()" disabled>I have read and signed — continue to job</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Login -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-card">
+      <div class="login-logo">🔧</div>
+      <div class="login-title">Installer Portal</div>
+      <div class="login-sub">Sign in to see your assigned installation jobs.</div>
+      <div class="login-field"><label>Your name</label><input type="text" id="login-name" placeholder="e.g. John Smith" oninput="checkLogin()" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="login-field"><label>Password</label><input type="password" id="login-pass" placeholder="Your password" oninput="checkLogin()" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div id="login-error" style="color:#dc2626;font-size:12px;margin-bottom:10px;display:none"></div>
+      <button class="login-btn" id="login-btn" onclick="doLogin()" disabled>Sign in</button>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="dashboard" id="dashboard">
+    <div class="welcome-bar">
+      <div>
+        <div class="welcome-name" id="welcome-name"></div>
+        <div class="welcome-sub">Your installation jobs</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-refresh" onclick="loadJobs()">Refresh</button>
+        <button class="btn-signout" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+
+    <div id="error-box" class="error-box" style="display:none"></div>
+
+    <div class="stats-grid">
+      <div class="stat-card allocated"><div class="stat-val" id="stat-allocated">—</div><div class="stat-lbl">Allocated</div></div>
+      <div class="stat-card working"><div class="stat-val" id="stat-working">—</div><div class="stat-lbl">Working on it</div></div>
+      <div class="stat-card done"><div class="stat-val" id="stat-done">—</div><div class="stat-lbl">Done</div></div>
+      <div class="stat-card total"><div class="stat-val" id="stat-total">—</div><div class="stat-lbl">Total</div></div>
+    </div>
+
+    <!-- Job detail panel -->
+    <div class="job-detail" id="job-detail">
+      <div class="job-detail-header">
+        <button class="job-detail-back" onclick="closeJobDetail()">← Back</button>
+        <div class="job-detail-title" id="detail-title"></div>
+        <span class="job-status" id="detail-status-badge"></span>
+      </div>
+      <div class="job-detail-body">
+        <div class="detail-section">
+          <div class="detail-section-title">Job details</div>
+          <div class="detail-grid">
+            <div class="detail-field"><div class="detail-label">Customer</div><div class="detail-value" id="detail-name">—</div></div>
+            <div class="detail-field"><div class="detail-label">Site address</div><div class="detail-value" id="detail-address">—</div></div>
+            <div class="detail-field"><div class="detail-label">Installation dates</div><div class="detail-value" id="detail-dates">—</div></div>
+            <div class="detail-field"><div class="detail-label">Current status</div><div class="detail-value" id="detail-status-text">—</div></div>
+          </div>
+        </div>
+
+        <!-- Update status -->
+        <div class="status-section">
+          <div class="status-title">Update job status</div>
+          <div class="status-btns">
+            <button class="status-btn" onclick="updateStatus('Allocate')">Allocate</button>
+            <button class="status-btn" onclick="updateStatus('Working on it')">Working on it</button>
+            <button class="status-btn" onclick="updateStatus('Stuck')">Stuck</button>
+            <button class="status-btn" onclick="updateStatus('Parts Required')">Parts Required</button>
+            <button class="status-btn" onclick="updateStatus('Done')">Done</button>
+          </div>
+          <div id="status-saved" style="font-size:12px;color:#065f46;margin-top:8px;display:none">✓ Status updated in Monday</div>
+        </div>
+
+        <!-- Installer Files -->
+        <div class="detail-section" id="installer-files-section" style="display:none">
+          <div class="detail-section-title">Installer files</div>
+          <div id="installer-files-loading" class="files-loading">Loading files...</div>
+          <div id="installer-files-grid"></div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="action-btns">
+          <button class="btn-action btn-completion" onclick="goToCompletion()">📋 Job sign-off</button>
+          <button class="btn-action btn-parts" onclick="openPartsModal()">🔧 Request parts</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main tabs -->
+    <div class="main-tabs">
+      <button class="main-tab active" onclick="switchMainTab('jobs',this)">My jobs</button>
+      <button class="main-tab" onclick="switchMainTab('diary',this)">My diary</button>
+    </div>
+
+    <!-- Jobs list -->
+    <div class="jobs-section" id="jobs-section">
+      <div class="jobs-header">
+        <div class="jobs-title">Your jobs</div>
+        <div class="filter-tabs">
+          <button class="ftab active" onclick="filterJobs('all',this)">All</button>
+          <button class="ftab" onclick="filterJobs('active',this)">Active</button>
+          <button class="ftab" onclick="filterJobs('done',this)">Done</button>
+        </div>
+      </div>
+      <div id="jobs-list"><div class="loading"><div class="spinner"></div>Loading your jobs...</div></div>
+    </div>
+
+    <!-- Diary -->
+    <div id="diary-section" style="display:none">
+      <div class="jobs-section">
+        <div class="jobs-header">
+          <div class="jobs-title">Installation schedule</div>
+          <div style="font-size:12px;color:#888">Upcoming installations</div>
+        </div>
+        <div id="diary-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BOARD_ID='18402849501';
+const PROXY_API='/monday-proxy';
+const AUTH_API='/auth';
+const COMPLETION_URL='https://burgesswd-window-survey.pages.dev/installer-completion.html';
+
+let currentUser='';
+let allJobs=[];
+let currentFilter='all';
+let selectedJob=null;
+let boardColumns=[];
+
+function checkLogin(){
+  const name=document.getElementById('login-name').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  document.getElementById('login-btn').disabled=name.length<2||pass.length<1;
+}
+
+async function doLogin(){
+  const name=document.getElementById('login-name').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-error');
+  err.style.display='none';
+  const btn=document.getElementById('login-btn');
+  btn.disabled=true;btn.textContent='Signing in...';
+  try{
+    const res=await fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login',name,password:pass,role:'installer'})});
+    const data=await res.json();
+    if(data.success){
+      currentUser=data.name||name;
+      localStorage.setItem('bwd_installer_user',currentUser);
+      localStorage.setItem('bwd_installer_token',data.token);
+      showDashboard();
+    }else{
+      err.textContent=data.error||'Incorrect name or password';
+      err.style.display='block';
+      btn.disabled=false;btn.textContent='Sign in';
+    }
+  }catch(e){
+    err.textContent='Could not connect. Please try again.';
+    err.style.display='block';
+    btn.disabled=false;btn.textContent='Sign in';
+  }
+}
+
+function signOut(){
+  const token=localStorage.getItem('bwd_installer_token');
+  if(token)fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout',token})});
+  localStorage.removeItem('bwd_installer_user');
+  localStorage.removeItem('bwd_installer_token');
+  currentUser='';allJobs=[];
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('header-name').style.display='none';
+  document.getElementById('login-name').value='';
+  document.getElementById('login-pass').value='';
+  document.getElementById('login-btn').disabled=true;
+}
+
+function showDashboard(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  document.getElementById('welcome-name').textContent='Welcome, '+currentUser;
+  document.getElementById('header-name').textContent=currentUser;
+  document.getElementById('header-name').style.display='block';
+  loadJobs();
+}
+
+async function mondayQuery(query){
+  const res=await fetch(PROXY_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query})});
+  if(!res.ok)throw new Error('Server error '+res.status);
+  const data=await res.json();
+  if(data.errors)throw new Error(data.errors[0].message);
+  return data;
+}
+
+async function loadJobs(){
+  document.getElementById('jobs-list').innerHTML='<div class="loading"><div class="spinner"></div>Loading your jobs...</div>';
+  document.getElementById('error-box').style.display='none';
+  ['stat-allocated','stat-working','stat-done','stat-total'].forEach(id=>document.getElementById(id).textContent='—');
+  try{
+    const colData=await mondayQuery(`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`);
+    boardColumns=colData.data?.boards?.[0]?.columns||[];
+    const installerColId=boardColumns.find(c=>c.title==='Installer')?.id||'';
+    const statusColId=boardColumns.find(c=>c.title==='Installer Status')?.id||'';
+    const addressColId=boardColumns.find(c=>c.title==='Site Address')?.id||'';
+    const timelineColId=boardColumns.find(c=>c.title==='Installation Timeline')?.id||'';
+
+    const data=await mondayQuery(`query {
+      boards(ids:${BOARD_ID}){
+        items_page(limit:200){
+          items {
+            id name
+            column_values {
+              id text
+              ... on PeopleValue { persons_and_teams { id } }
+              ... on StatusValue { label }
+              ... on TimelineValue { from to }
+            }
+          }
+        }
+      }
+    }`);
+
+    const items=data.data?.boards?.[0]?.items_page?.items||[];
+    const cv=(item,id)=>item.column_values.find(c=>c.id===id);
+
+    allJobs=items.filter(item=>{
+      const col=cv(item,installerColId);
+      return col&&(col.text||'').toLowerCase().includes(currentUser.toLowerCase());
+    }).map(item=>{
+      const statusCol=cv(item,statusColId);
+      const timelineCol=cv(item,timelineColId);
+      return{
+        id:item.id,
+        name:item.name,
+        status:statusCol?.label||statusCol?.text||'—',
+        address:cv(item,addressColId)?.text||'',
+        dateFrom:timelineCol?.from||'',
+        dateTo:timelineCol?.to||'',
+        installerColId,statusColId,addressColId,timelineColId
+      };
+    });
+
+    renderJobs();
+    updateStats();
+  }catch(err){
+    document.getElementById('jobs-list').innerHTML='<div class="empty-state"><div style="font-size:13px">Could not load jobs: '+err.message+'</div></div>';
+    document.getElementById('error-box').textContent='Error: '+err.message;
+    document.getElementById('error-box').style.display='block';
+  }
+}
+
+function getStatusClass(status){
+  const s=(status||'').toLowerCase();
+  if(s==='done')return{dot:'done',badge:'status-done'};
+  if(s==='working on it')return{dot:'working',badge:'status-working'};
+  if(s==='stuck')return{dot:'stuck',badge:'status-stuck'};
+  if(s==='parts required')return{dot:'parts',badge:'status-parts'};
+  return{dot:'allocate',badge:'status-allocate'};
+}
+function isDone(status){return(status||'').toLowerCase()==='done';}
+
+function filterJobs(filter,btn){
+  currentFilter=filter;
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderJobs();
+}
+
+function renderJobs(){
+  const list=document.getElementById('jobs-list');
+  let jobs=allJobs;
+  if(currentFilter==='active')jobs=allJobs.filter(j=>!isDone(j.status));
+  if(currentFilter==='done')jobs=allJobs.filter(j=>isDone(j.status));
+  if(jobs.length===0){
+    list.innerHTML='<div class="empty-state"><div style="font-size:36px;margin-bottom:10px">🔧</div><div style="font-size:14px;font-weight:600;color:#64748b;margin-bottom:4px">No jobs found</div></div>';
+    return;
+  }
+  list.innerHTML=jobs.map(job=>{
+    const sc=getStatusClass(job.status);
+    const dateStr=job.dateFrom?(job.dateFrom+(job.dateTo&&job.dateTo!==job.dateFrom?' → '+job.dateTo:'')):'No date set';
+    return `<div class="job-item" onclick="showHSModal(${JSON.stringify(job)})">
+      <div class="job-dot ${sc.dot}"></div>
+      <div class="job-main">
+        <div class="job-name">${job.name}</div>
+        <div class="job-meta">${job.address||'No address'} · ${dateStr}</div>
+      </div>
+      <div class="job-right">
+        <span class="job-status ${sc.badge}">${job.status}</span>
+      </div>
+      <div class="job-arrow">›</div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats(){
+  const total=allJobs.length;
+  const allocated=allJobs.filter(j=>(j.status||'').toLowerCase()==='allocate').length;
+  const working=allJobs.filter(j=>(j.status||'').toLowerCase()==='working on it').length;
+  const done=allJobs.filter(j=>isDone(j.status)).length;
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-allocated').textContent=allocated;
+  document.getElementById('stat-working').textContent=working;
+  document.getElementById('stat-done').textContent=done;
+}
+
+function openJobDetail(jobId){
+  selectedJob=allJobs.find(j=>j.id===jobId);
+  if(!selectedJob)return;
+  const sc=getStatusClass(selectedJob.status);
+  document.getElementById('detail-title').textContent=selectedJob.name;
+  const badge=document.getElementById('detail-status-badge');
+  badge.textContent=selectedJob.status;
+  badge.className='job-status '+sc.badge;
+  document.getElementById('detail-name').textContent=selectedJob.name;
+  document.getElementById('detail-address').textContent=selectedJob.address||'—';
+  const dateStr=selectedJob.dateFrom?(selectedJob.dateFrom+(selectedJob.dateTo&&selectedJob.dateTo!==selectedJob.dateFrom?' to '+selectedJob.dateTo:'')):'Not scheduled';
+  document.getElementById('detail-dates').textContent=dateStr;
+  document.getElementById('detail-status-text').textContent=selectedJob.status;
+  document.getElementById('status-saved').style.display='none';
+  // Load installer files
+  loadInstallerFiles(selectedJob.id);
+  // Highlight current status button
+  document.querySelectorAll('.status-btn').forEach(btn=>{
+    btn.classList.toggle('active',btn.textContent===selectedJob.status);
+  });
+  document.getElementById('jobs-section').style.display='none';
+  document.getElementById('diary-section').style.display='none';
+  document.querySelector('.main-tabs').style.display='none';
+  document.getElementById('job-detail').style.display='block';
+  window.scrollTo(0,0);
+}
+
+function closeJobDetail(){
+  document.getElementById('job-detail').style.display='none';
+  document.getElementById('jobs-section').style.display='block';
+  document.querySelector('.main-tabs').style.display='flex';
+  selectedJob=null;
+}
+
+async function updateStatus(newStatus){
+  if(!selectedJob)return;
+  try{
+    const statusVal=JSON.stringify(JSON.stringify({label:newStatus}));
+    await mondayQuery(`mutation { change_column_value(board_id:${BOARD_ID}, item_id:${selectedJob.id}, column_id:"${selectedJob.statusColId}", value:${statusVal}) { id } }`);
+    selectedJob.status=newStatus;
+    const jobInList=allJobs.find(j=>j.id===selectedJob.id);
+    if(jobInList)jobInList.status=newStatus;
+    const sc=getStatusClass(newStatus);
+    document.getElementById('detail-status-badge').textContent=newStatus;
+    document.getElementById('detail-status-badge').className='job-status '+sc.badge;
+    document.getElementById('detail-status-text').textContent=newStatus;
+    document.querySelectorAll('.status-btn').forEach(btn=>btn.classList.toggle('active',btn.textContent===newStatus));
+    document.getElementById('status-saved').style.display='block';
+    setTimeout(()=>document.getElementById('status-saved').style.display='none',3000);
+    updateStats();
+  }catch(err){
+    alert('Could not update status: '+err.message);
+  }
+}
+
+async function loadInstallerFiles(itemId){
+  const section=document.getElementById('installer-files-section');
+  const grid=document.getElementById('installer-files-grid');
+  const loading=document.getElementById('installer-files-loading');
+  section.style.display='block';
+  grid.innerHTML='';
+  loading.style.display='block';
+  loading.textContent='Loading files...';
+  try{
+    const data=await mondayQuery(`query {
+      items(ids:${itemId}){
+        assets { id name public_url file_extension }
+        column_values(ids:["installer_files"]){
+          id value
+        }
+      }
+    }`);
+    // First try to find Installer Files column ID from boardColumns
+    const installerFilesCol=boardColumns.find(c=>c.title==='Installer Files');
+    if(!installerFilesCol){
+      // Fallback — fetch all assets
+      const item=data.data?.items?.[0];
+      const assets=item?.assets||[];
+      renderFiles(assets,grid,loading);
+      return;
+    }
+    // Fetch with correct column ID
+    const data2=await mondayQuery(`query {
+      items(ids:${itemId}){
+        assets { id name public_url file_extension }
+        column_values(ids:["${installerFilesCol.id}"]){
+          id value
+        }
+      }
+    }`);
+    const item=data2.data?.items?.[0];
+    if(!item){loading.textContent='No files found.';return;}
+    // Parse asset IDs from column value
+    const assetIds=new Set();
+    (item.column_values||[]).forEach(col=>{
+      try{const val=JSON.parse(col.value||'{}');(val.files||[]).forEach(f=>{if(f.asset_id)assetIds.add(String(f.asset_id));});}catch(e){}
+    });
+    const allAssets=item.assets||[];
+    const files=assetIds.size>0?allAssets.filter(a=>assetIds.has(String(a.id))):allAssets;
+    renderFiles(files,grid,loading);
+  }catch(err){
+    loading.textContent='Could not load files: '+err.message;
+  }
+}
+
+function renderFiles(files,grid,loading){
+  loading.style.display='none';
+  if(files.length===0){loading.textContent='No files uploaded yet.';loading.style.display='block';return;}
+  const imgExts=['jpg','jpeg','png','gif','webp','heic'];
+  grid.innerHTML=files.map(f=>{
+    const ext=(f.file_extension||'').toLowerCase().replace('.','');
+    const isImg=imgExts.includes(ext);
+    const url=f.public_url||'';
+    if(!url)return '';
+    if(isImg){
+      return `<div class="file-card">
+        <img src="${url}" alt="${f.name||'Image'}" onclick="window.open('${url}','_blank')" onerror="this.style.display='none'">
+        <div class="file-card-footer">
+          <span class="file-card-name">${f.name||'Image'}</span>
+          <a href="${url}" target="_blank" class="file-open-btn">Open ↗</a>
+        </div>
+      </div>`;
+    }else{
+      return `<div class="file-pdf-card">
+        <span style="font-size:32px">${ext==='pdf'?'📄':'📎'}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:500;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.name||'Document'}</div>
+          <a href="${url}" target="_blank" class="file-open-btn">Open ↗</a>
+        </div>
+      </div>`;
+    }
+  }).join('');
+}
+
+// ── Health & Safety ───────────────────────────────────────────
+let hsSigDrawing=false;
+let hsSigCanvas,hsSigCtx;
+let pendingJobId=null;
+
+function initHSSig(){
+  hsSigCanvas=document.getElementById('hs-sig-canvas');
+  if(!hsSigCanvas)return;
+  hsSigCtx=hsSigCanvas.getContext('2d');
+  hsSigCanvas.width=hsSigCanvas.offsetWidth||560;
+  hsSigCanvas.height=140;
+  hsSigCtx.strokeStyle='#1a1a1a';hsSigCtx.lineWidth=2;hsSigCtx.lineCap='round';
+  function getPos(e){const rect=hsSigCanvas.getBoundingClientRect();const scaleX=hsSigCanvas.width/rect.width,scaleY=hsSigCanvas.height/rect.height;const src=e.touches?e.touches[0]:e;return{x:(src.clientX-rect.left)*scaleX,y:(src.clientY-rect.top)*scaleY};}
+  hsSigCanvas.addEventListener('mousedown',e=>{hsSigDrawing=true;const{x,y}=getPos(e);hsSigCtx.beginPath();hsSigCtx.moveTo(x,y);checkHSSig();});
+  hsSigCanvas.addEventListener('mousemove',e=>{if(!hsSigDrawing)return;const{x,y}=getPos(e);hsSigCtx.lineTo(x,y);hsSigCtx.stroke();});
+  hsSigCanvas.addEventListener('mouseup',()=>{hsSigDrawing=false;checkHSSig();});
+  hsSigCanvas.addEventListener('touchstart',e=>{e.preventDefault();hsSigDrawing=true;const{x,y}=getPos(e);hsSigCtx.beginPath();hsSigCtx.moveTo(x,y);},{passive:false});
+  hsSigCanvas.addEventListener('touchmove',e=>{e.preventDefault();if(!hsSigDrawing)return;const{x,y}=getPos(e);hsSigCtx.lineTo(x,y);hsSigCtx.stroke();checkHSSig();},{passive:false});
+  hsSigCanvas.addEventListener('touchend',()=>{hsSigDrawing=false;checkHSSig();});
+}
+
+function checkHSSig(){
+  if(!hsSigCtx)return;
+  const data=hsSigCtx.getImageData(0,0,hsSigCanvas.width,hsSigCanvas.height).data;
+  const hasSignature=Array.from(data).some(v=>v!==0);
+  document.getElementById('hs-confirm-btn').disabled=!hasSignature;
+}
+
+function clearHSSig(){
+  if(hsSigCtx)hsSigCtx.clearRect(0,0,hsSigCanvas.width,hsSigCanvas.height);
+  document.getElementById('hs-confirm-btn').disabled=true;
+}
+
+async function showHSModal(job){
+  pendingJobId=job.id;
+  document.getElementById('hs-overlay').style.display='flex';
+  document.getElementById('hs-file-loading').style.display='block';
+  document.getElementById('hs-file-list').innerHTML='';
+  document.getElementById('hs-confirm-btn').disabled=true;
+  // Init signature canvas
+  setTimeout(()=>initHSSig(),100);
+  // Load H&S files
+  try{
+    const hsCol=boardColumns.find(c=>c.title==='Health and Safety');
+    const data=await mondayQuery(`query {
+      items(ids:${job.id}){
+        assets { id name public_url file_extension }
+        ${hsCol?`column_values(ids:["${hsCol.id}"]){ id value }`:''}
+      }
+    }`);
+    const item=data.data?.items?.[0];
+    const allAssets=item?.assets||[];
+    let files=allAssets;
+    if(hsCol){
+      const assetIds=new Set();
+      (item.column_values||[]).forEach(col=>{
+        try{const val=JSON.parse(col.value||'{}');(val.files||[]).forEach(f=>{if(f.asset_id)assetIds.add(String(f.asset_id));});}catch(e){}
+      });
+      if(assetIds.size>0)files=allAssets.filter(a=>assetIds.has(String(a.id)));
+    }
+    document.getElementById('hs-file-loading').style.display='none';
+    if(files.length===0){
+      document.getElementById('hs-file-list').innerHTML='<div style="padding:14px;text-align:center;color:#888;font-size:13px">No H&S document uploaded for this job yet.<br><span style="font-size:11px">You may still sign and proceed.</span></div>';
+    }else{
+      document.getElementById('hs-file-list').innerHTML=files.map(f=>{
+        const url=f.public_url||'';
+        const ext=(f.file_extension||'').toLowerCase().replace('.','');
+        return `<div class="hs-file-item" onclick="window.open('${url}','_blank')">
+          <div class="hs-file-icon">${ext==='pdf'?'📄':'📎'}</div>
+          <div class="hs-file-name">${f.name||'H&S Document'}</div>
+          <a href="${url}" target="_blank" class="hs-file-open" onclick="event.stopPropagation()">Open ↗</a>
+        </div>`;
+      }).join('');
+    }
+  }catch(err){
+    document.getElementById('hs-file-loading').textContent='Could not load H&S document: '+err.message;
+  }
+}
+
+function confirmHS(){
+  if(!hsSigCtx)return;
+  const data=hsSigCtx.getImageData(0,0,hsSigCanvas.width,hsSigCanvas.height).data;
+  if(!Array.from(data).some(v=>v!==0)){alert('Please sign before continuing.');return;}
+  document.getElementById('hs-overlay').style.display='none';
+  // Now open the job detail
+  if(pendingJobId){
+    openJobDetail(pendingJobId);
+    pendingJobId=null;
+  }
+}
+
+function goToCompletion(){
+  if(!selectedJob)return;
+  const url=COMPLETION_URL+'?job='+selectedJob.id+'&name='+encodeURIComponent(selectedJob.name)+'&installer='+encodeURIComponent(currentUser);
+  window.location.href=url;
+}
+
+function openPartsModal(){
+  document.getElementById('parts-desc').value='';
+  document.getElementById('parts-qty').value='1';
+  document.getElementById('parts-urgency').value='Standard';
+  document.getElementById('parts-notes').value='';
+  document.getElementById('parts-success').style.display='none';
+  document.getElementById('parts-modal').style.display='flex';
+}
+function closePartsModal(){document.getElementById('parts-modal').style.display='none';}
+
+async function submitPartsRequest(){
+  if(!selectedJob)return;
+  const desc=document.getElementById('parts-desc').value.trim();
+  const qty=document.getElementById('parts-qty').value;
+  const urgency=document.getElementById('parts-urgency').value;
+  const notes=document.getElementById('parts-notes').value.trim();
+  if(!desc){alert('Please enter a part description.');return;}
+  const btn=document.querySelector('.modal-submit');
+  btn.disabled=true;btn.textContent='Submitting...';
+  try{
+    const message=`🔧 PARTS REQUEST from ${currentUser}\\n\\nJob: ${selectedJob.name}\\nPart: ${desc}\\nQuantity: ${qty}\\nUrgency: ${urgency}${notes?'\\nNotes: '+notes:''}`;
+    await mondayQuery(`mutation { create_update(item_id:${selectedJob.id}, body:"${message.replace(/"/g,'\\"')}") { id } }`);
+    // Also update status to Parts Required
+    if(selectedJob.statusColId){
+      const statusVal=JSON.stringify(JSON.stringify({label:'Parts Required'}));
+      await mondayQuery(`mutation { change_column_value(board_id:${BOARD_ID}, item_id:${selectedJob.id}, column_id:"${selectedJob.statusColId}", value:${statusVal}) { id } }`);
+      selectedJob.status='Parts Required';
+      const jobInList=allJobs.find(j=>j.id===selectedJob.id);
+      if(jobInList)jobInList.status='Parts Required';
+    }
+    document.getElementById('parts-success').style.display='block';
+    btn.disabled=false;btn.textContent='Submit request';
+    setTimeout(()=>closePartsModal(),2000);
+  }catch(err){
+    alert('Could not submit request: '+err.message);
+    btn.disabled=false;btn.textContent='Submit request';
+  }
+}
+
+function switchMainTab(tab,btn){
+  document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('jobs-section').style.display=tab==='jobs'?'block':'none';
+  document.getElementById('diary-section').style.display=tab==='diary'?'block':'none';
+  if(tab==='diary')renderDiary();
+}
+
+function renderDiary(){
+  const list=document.getElementById('diary-list');
+  const today=new Date();today.setHours(0,0,0,0);
+  const scheduled=allJobs
+    .filter(j=>j.dateFrom&&!isDone(j.status))
+    .map(j=>({...j,dateObj:new Date(j.dateFrom)}))
+    .filter(j=>j.dateObj>=today)
+    .sort((a,b)=>a.dateObj-b.dateObj);
+  if(scheduled.length===0){
+    list.innerHTML='<div class="empty-state"><div style="font-size:36px;margin-bottom:10px">📅</div><div style="font-size:14px;font-weight:600;color:#64748b">No upcoming installations</div></div>';
+    return;
+  }
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const todayStr=today.toISOString().slice(0,10);
+  list.innerHTML=scheduled.map(job=>{
+    const d=job.dateObj;
+    const isToday=job.dateFrom===todayStr;
+    const dateRange=job.dateTo&&job.dateTo!==job.dateFrom?job.dateFrom+' → '+job.dateTo:job.dateFrom;
+    return `<div class="diary-entry${isToday?' today':''}">
+      <div class="diary-date-block">
+        <div class="diary-day">${d.getDate()}</div>
+        <div class="diary-month">${months[d.getMonth()]}</div>
+        <div class="diary-dow">${days[d.getDay()]}</div>
+      </div>
+      <div class="diary-info">
+        <div class="diary-job-name">${job.name}</div>
+        <div class="diary-job-meta">${job.address||'No address'}</div>
+        <span class="diary-range">📅 ${dateRange}</span>
+      </div>
+      <button class="diary-open-btn" onclick="showHSModal(${JSON.stringify(job)})">View →</button>
+    </div>`;
+  }).join('');
+}
+
+window.addEventListener('load',async()=>{
+  const savedToken=localStorage.getItem('bwd_installer_token');
+  const savedUser=localStorage.getItem('bwd_installer_user');
+  if(savedToken&&savedUser){
+    try{
+      const res=await fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'validate',token:savedToken})});
+      const data=await res.json();
+      if(data.valid){currentUser=data.name||savedUser;showDashboard();return;}
+    }catch(e){}
+    localStorage.removeItem('bwd_installer_token');
+    localStorage.removeItem('bwd_installer_user');
+  }
+});
+</script>
+</body>
+</html>
