@@ -11,145 +11,144 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .app-title{font-size:16px;font-weight:600;color:#fff}
 .app-subtitle{font-size:12px;color:#93c5fd;margin-top:1px}
 .container{max-width:800px;margin:0 auto;padding:20px 16px}
+
+/* Login */
 .login-screen{display:flex;align-items:center;justify-content:center;min-height:80vh}
 .login-card{background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:32px;max-width:400px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
 .login-logo{width:56px;height:56px;background:#1e40af;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
 .login-logo svg{width:30px;height:30px;fill:none;stroke:#fff;stroke-width:2}
 .login-title{font-size:20px;font-weight:700;margin-bottom:6px}
 .login-sub{font-size:13px;color:#64748b;margin-bottom:24px;line-height:1.6}
-.login-field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;text-align:left}
+.login-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;text-align:left}
 .login-field label{font-size:12px;font-weight:600;color:#374151}
-.login-field input{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;transition:border-color 0.15s}
+.login-field input{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:16px;font-family:inherit;outline:none;transition:border-color 0.15s}
 .login-field input:focus{border-color:#3b82f6}
-.login-btn{width:100%;padding:12px;background:#1e40af;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.15s}
+.login-btn{width:100%;padding:12px;background:#1e40af;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 .login-btn:hover{background:#1d4ed8}
 .login-btn:disabled{background:#93c5fd;cursor:not-allowed}
+.login-error{color:#dc2626;font-size:12px;margin-bottom:10px;display:none;text-align:left}
+
+/* Dashboard */
 .dashboard{display:none}
 .welcome-bar{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .welcome-name{font-size:16px;font-weight:600}
 .welcome-sub{font-size:12px;color:#64748b;margin-top:2px}
 .btn-signout{background:transparent;border:1px solid #e0e0e0;color:#64748b;padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
-.btn-signout:hover{background:#f5f5f5}
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-.stat-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px;text-align:center}
-.stat-val{font-size:28px;font-weight:700;margin-bottom:2px}
-.stat-lbl{font-size:11px;color:#888}
-.stat-card.tobook .stat-val{color:#ef4444}
-.stat-card.booked .stat-val{color:#3b82f6}
-.stat-card.complete .stat-val{color:#059669}
-.stat-card.total .stat-val{color:#1e40af}
-.jobs-section{background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:16px}
-.jobs-header{padding:14px 18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.jobs-title{font-size:15px;font-weight:600}
-.filter-tabs{display:flex;gap:4px}
-.ftab{padding:5px 12px;border:1px solid #e0e0e0;border-radius:6px;background:transparent;color:#888;font-size:12px;cursor:pointer;font-family:inherit}
-.ftab.active{background:#1e40af;color:#fff;border-color:#1e40af}
-.job-item{padding:14px 18px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s}
-.job-item:last-child{border-bottom:none}
-.job-item:hover{background:#f8fafc}
-.job-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.job-dot.booked{background:#f59e0b}
-.job-dot.confirmed{background:#3b82f6}
-.job-dot.complete{background:#10b981}
-.job-main{flex:1;min-width:0}
-.job-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.job-meta{font-size:12px;color:#64748b;margin-top:2px}
-.job-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
-.job-status{font-size:11px;font-weight:500;padding:2px 8px;border-radius:5px;white-space:nowrap}
-.status-booked{background:#fef3c7;color:#92400e}
-.status-confirmed{background:#dbeafe;color:#1e40af}
-.status-complete{background:#d1fae5;color:#065f46}
-.job-arrow{color:#cbd5e1;font-size:16px}
-.empty-state{padding:40px 20px;text-align:center;color:#9ca3af}
-.empty-icon{font-size:40px;margin-bottom:10px}
-.empty-title{font-size:15px;font-weight:600;color:#64748b;margin-bottom:4px}
-.empty-sub{font-size:13px}
-.loading{padding:40px 20px;text-align:center;color:#9ca3af}
-.spinner{width:28px;height:28px;border:3px solid #e5e5e5;border-top-color:#1e40af;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 12px}
-@keyframes spin{to{transform:rotate(360deg)}}
 .btn-refresh{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500}
-.btn-refresh:hover{background:#dbeafe}
-.error-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin-bottom:14px}
 
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:12px;text-align:center}
+.stat-val{font-size:24px;font-weight:700;margin-bottom:2px}
+.stat-lbl{font-size:11px;color:#888}
+.stat-tobook .stat-val{color:#ef4444}
+.stat-booked .stat-val{color:#3b82f6}
+.stat-complete .stat-val{color:#059669}
+.stat-total .stat-val{color:#1e40af}
 
-/* Files */
-.file-thumb{background:#f8fafc;border:1px solid #e5e5e5;border-radius:8px;overflow:hidden;text-align:center;cursor:pointer;transition:all 0.15s}
-.file-thumb:hover{border-color:#3b82f6;background:#eff6ff}
-.file-thumb img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
-.file-thumb-pdf{width:100%;aspect-ratio:1;background:#fee2e2;display:flex;align-items:center;justify-content:center;font-size:28px}
-.file-thumb-name{font-size:10px;color:#64748b;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* Diary */
-.diary-entry{padding:14px 18px;border-bottom:1px solid #f5f5f5;display:flex;align-items:flex-start;gap:14px}
-.diary-entry:last-child{border-bottom:none}
-.diary-date-block{flex-shrink:0;width:52px;text-align:center;background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:6px 4px}
-.diary-day{font-size:22px;font-weight:700;color:#1e40af;line-height:1}
-.diary-month{font-size:10px;color:#3b82f6;font-weight:600;text-transform:uppercase;margin-top:2px}
-.diary-dow{font-size:10px;color:#64748b;margin-top:1px}
-.diary-info{flex:1;min-width:0}
-.diary-job-name{font-weight:600;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.diary-job-meta{font-size:12px;color:#64748b;margin-bottom:4px}
-.diary-time-badge{display:inline-block;background:#fef3c7;color:#92400e;font-size:11px;font-weight:500;padding:2px 8px;border-radius:5px}
-.diary-entry.today .diary-date-block{background:#1e40af;border-color:#1e40af}
-.diary-entry.today .diary-day{color:#fff}
-.diary-entry.today .diary-month{color:#93c5fd}
-.diary-entry.today .diary-dow{color:#bfdbfe}
-.diary-open-btn{flex-shrink:0;background:transparent;border:1px solid #e0e0e0;color:#64748b;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
-.diary-open-btn:hover{background:#f5f5f5}
-.diary-empty{padding:40px 20px;text-align:center;color:#9ca3af}
+/* Main tabs */
 .main-tabs{display:flex;gap:6px;margin-bottom:14px}
 .main-tab{padding:8px 20px;border:1px solid #e0e0e0;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500}
 .main-tab.active{background:#1e40af;color:#fff;border-color:#1e40af}
 
-/* Job detail panel */
-.job-detail{display:none;background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:16px}
-.job-detail-header{background:#1e40af;padding:14px 18px;display:flex;align-items:center;gap:12px}
-.job-detail-back{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
-.job-detail-back:hover{background:rgba(255,255,255,0.25)}
-.job-detail-title{font-size:15px;font-weight:600;color:#fff;flex:1}
-.job-detail-status{font-size:11px;font-weight:500;padding:3px 10px;border-radius:5px}
-.job-detail-body{padding:18px}
-.detail-section{margin-bottom:16px}
+/* Jobs section */
+.section-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:14px}
+.section-head{padding:14px 18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.section-title{font-size:15px;font-weight:600}
+.filter-tabs{display:flex;gap:4px}
+.ftab{padding:5px 12px;border:1px solid #e0e0e0;border-radius:6px;background:transparent;color:#888;font-size:12px;cursor:pointer;font-family:inherit}
+.ftab.active{background:#1e40af;color:#fff;border-color:#1e40af}
+
+/* Job items */
+.job-item{padding:14px 18px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s}
+.job-item:last-child{border-bottom:none}
+.job-item:hover{background:#f8fafc}
+.job-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot-tobook{background:#ef4444}
+.dot-confirmed{background:#3b82f6}
+.dot-complete{background:#10b981}
+.job-main{flex:1;min-width:0}
+.job-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.job-meta{font-size:12px;color:#64748b;margin-top:2px}
+.job-badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:5px;white-space:nowrap}
+.badge-tobook{background:#fee2e2;color:#991b1b}
+.badge-confirmed{background:#dbeafe;color:#1e40af}
+.badge-complete{background:#d1fae5;color:#065f46}
+.badge-default{background:#f3f4f6;color:#6b7280}
+
+/* Job detail */
+.job-detail{display:none}
+.detail-header{background:#1e40af;padding:14px 18px;display:flex;align-items:center;gap:12px;border-radius:10px 10px 0 0}
+.detail-back{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+.detail-title{font-size:15px;font-weight:600;color:#fff;flex:1}
+.detail-body{background:#fff;border:1px solid #e5e5e5;border-top:none;border-radius:0 0 10px 10px;padding:18px}
+.detail-section{margin-bottom:18px}
 .detail-section-title{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.detail-field{display:flex;flex-direction:column;gap:4px}
-.detail-label{font-size:11px;color:#888;font-weight:500}
-.detail-value{font-size:14px;font-weight:500;color:#1a1a1a}
-.detail-value.empty{color:#ccc;font-style:italic;font-weight:400}
-.contact-reveal{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px;margin-bottom:16px;display:none}
-.contact-reveal-title{font-size:12px;font-weight:600;color:#1e40af;margin-bottom:8px}
-.contact-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #dbeafe;font-size:14px}
-.contact-item:last-child{border-bottom:none}
-.contact-item a{color:#1e40af;text-decoration:none;font-weight:500}
-.contact-item a:hover{text-decoration:underline}
+.detail-field label{font-size:11px;color:#888;font-weight:500;display:block;margin-bottom:3px}
+.detail-field span{font-size:14px;font-weight:500}
 
-/* Appointment scheduling */
-.appt-section{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:14px;margin-bottom:16px}
-.appt-title{font-size:12px;font-weight:600;color:#92400e;margin-bottom:10px}
-.appt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.appt-field{display:flex;flex-direction:column;gap:4px}
-.appt-field label{font-size:11px;color:#92400e;font-weight:500}
-.appt-field input{padding:8px 10px;border:1px solid #fcd34d;border-radius:7px;font-size:13px;font-family:inherit;background:#fff;outline:none}
-.appt-field input:focus{border-color:#f59e0b}
-.btn-appt{background:#f59e0b;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
-.btn-appt:hover{background:#d97706}
+/* Contact reveal */
+.contact-reveal{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;display:none;margin-top:8px}
+.contact-item{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:14px}
+
+/* Appointment */
+.appt-box{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:14px;margin-bottom:16px}
+.appt-title{font-size:12px;font-weight:600;color:#92400e;margin-bottom:4px}
+.appt-sub{font-size:12px;color:#b45309;margin-bottom:10px}
+.appt-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.appt-field label{font-size:11px;color:#92400e;font-weight:500;display:block;margin-bottom:4px}
+.appt-field input{width:100%;padding:8px 10px;border:1px solid #fcd34d;border-radius:7px;font-size:14px;font-family:inherit;background:#fff;outline:none}
+.btn-appt{background:#f59e0b;color:#fff;border:none;border-radius:7px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
 .btn-appt:disabled{background:#fcd34d;cursor:not-allowed}
 .appt-saved{background:#ecfdf5;border:1px solid #6ee7b7;border-radius:7px;padding:8px 12px;font-size:12px;color:#065f46;display:none;margin-top:8px}
 
 /* Action buttons */
-.action-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
-.btn-action{padding:14px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit;text-align:center;transition:all 0.15s}
-.btn-view-client{background:#eff6ff;color:#1e40af;border:1.5px solid #bfdbfe}
-.btn-view-client:hover{background:#dbeafe}
-.btn-survey{background:#10b981;color:#fff}
-.btn-survey:hover{background:#059669}
-.btn-survey.complete{background:#6b7280;cursor:default}
+.action-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.btn-contact{background:#eff6ff;color:#1e40af;border:1.5px solid #bfdbfe;padding:12px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;width:100%}
+.btn-survey{background:#10b981;color:#fff;border:none;padding:12px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;width:100%}
+.btn-survey.done{background:#6b7280;cursor:default}
 
-@media(max-width:500px){
-  .stats-grid{grid-template-columns:repeat(3,1fr)}
-  .stat-val{font-size:22px}
+/* Files */
+.files-grid{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.file-img-card{background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden}
+.file-img-card img{width:100%;display:block;cursor:pointer}
+.file-img-footer{padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.file-img-name{font-size:12px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.file-pdf-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px}
+.btn-open{background:#1e40af;color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;text-decoration:none;font-weight:500;flex-shrink:0;white-space:nowrap}
+
+/* Diary */
+.diary-entry{padding:14px 18px;border-bottom:1px solid #f5f5f5;display:flex;align-items:flex-start;gap:14px}
+.diary-entry:last-child{border-bottom:none}
+.diary-entry.today .date-block{background:#1e40af;border-color:#1e40af}
+.diary-entry.today .date-day{color:#fff}
+.diary-entry.today .date-month,.diary-entry.today .date-dow{color:#93c5fd}
+.date-block{flex-shrink:0;width:52px;text-align:center;background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:6px 4px}
+.date-day{font-size:22px;font-weight:700;color:#1e40af;line-height:1}
+.date-month{font-size:10px;color:#3b82f6;font-weight:600;text-transform:uppercase;margin-top:2px}
+.date-dow{font-size:10px;color:#64748b;margin-top:1px}
+.diary-info{flex:1;min-width:0}
+.diary-name{font-weight:600;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.diary-addr{font-size:12px;color:#64748b;margin-bottom:4px}
+.diary-time{display:inline-block;background:#fef3c7;color:#92400e;font-size:11px;font-weight:500;padding:2px 8px;border-radius:5px}
+.btn-diary-view{flex-shrink:0;background:transparent;border:1px solid #e0e0e0;color:#64748b;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
+
+/* Empty/Loading */
+.empty{padding:36px 20px;text-align:center;color:#9ca3af}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.empty-title{font-size:14px;font-weight:600;color:#64748b;margin-bottom:4px}
+.loading{padding:36px 20px;text-align:center;color:#9ca3af}
+.spinner{width:28px;height:28px;border:3px solid #e5e5e5;border-top-color:#1e40af;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-banner{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:13px;color:#991b1b;margin-bottom:14px;display:none}
+
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
   .detail-grid{grid-template-columns:1fr}
-  .appt-grid{grid-template-columns:1fr}
-  .action-btns{grid-template-columns:1fr}
+  .appt-row{grid-template-columns:1fr}
+  .action-row{grid-template-columns:1fr}
+  .container{padding:12px 10px}
 }
 </style>
 </head>
@@ -172,237 +171,231 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </div>
       <div class="login-title">Surveyor Portal</div>
-      <div class="login-sub">Sign in with your name and password.</div>
+      <div class="login-sub">Sign in with your name and password</div>
       <div class="login-field">
         <label>Your name</label>
-        <input type="text" id="login-name" placeholder="e.g. Paul Burgess" oninput="checkLogin()" onkeydown="if(event.key==='Enter')doLogin()">
+        <input type="text" id="login-name" placeholder="e.g. Paul Burgess" autocomplete="name">
       </div>
       <div class="login-field">
         <label>Password</label>
-        <input type="password" id="login-pass" placeholder="Your password" oninput="checkLogin()" onkeydown="if(event.key==='Enter')doLogin()">
+        <input type="password" id="login-pass" placeholder="Your password" autocomplete="current-password">
       </div>
-      <div id="login-error" style="color:#dc2626;font-size:12px;margin-bottom:10px;display:none"></div>
-      <button class="login-btn" id="login-btn" onclick="doLogin()" disabled>Sign in</button>
+      <div class="login-error" id="login-error"></div>
+      <button class="login-btn" id="login-btn" onclick="doLogin()">Sign in</button>
     </div>
   </div>
 
   <!-- Dashboard -->
   <div class="dashboard" id="dashboard">
+
     <div class="welcome-bar">
       <div>
         <div class="welcome-name" id="welcome-name"></div>
-        <div class="welcome-sub">Here are your assigned survey jobs</div>
+        <div class="welcome-sub">Your assigned survey jobs</div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
+      <div style="display:flex;gap:8px">
         <button class="btn-refresh" onclick="loadJobs()">Refresh</button>
         <button class="btn-signout" onclick="signOut()">Sign out</button>
       </div>
     </div>
 
-    <div id="error-box" class="error-box" style="display:none"></div>
+    <div class="error-banner" id="error-banner"></div>
 
     <div class="stats-grid">
-      <div class="stat-card tobook"><div class="stat-val" id="stat-tobook">—</div><div class="stat-lbl">To Book</div></div>
-      <div class="stat-card booked"><div class="stat-val" id="stat-booked">—</div><div class="stat-lbl">Booked</div></div>
-      <div class="stat-card complete"><div class="stat-val" id="stat-complete">—</div><div class="stat-lbl">Complete</div></div>
-      <div class="stat-card total"><div class="stat-val" id="stat-total">—</div><div class="stat-lbl">Total</div></div>
+      <div class="stat-card stat-tobook"><div class="stat-val" id="stat-tobook">—</div><div class="stat-lbl">To Book</div></div>
+      <div class="stat-card stat-booked"><div class="stat-val" id="stat-booked">—</div><div class="stat-lbl">Booked</div></div>
+      <div class="stat-card stat-complete"><div class="stat-val" id="stat-complete">—</div><div class="stat-lbl">Complete</div></div>
+      <div class="stat-card stat-total"><div class="stat-val" id="stat-total">—</div><div class="stat-lbl">Total</div></div>
     </div>
 
-    <!-- Job detail panel -->
-    <div class="job-detail" id="job-detail">
-      <div class="job-detail-header">
-        <button class="job-detail-back" onclick="closeJobDetail()">← Back</button>
-        <div class="job-detail-title" id="detail-title"></div>
-        <span class="job-detail-status" id="detail-status-badge"></span>
-      </div>
-      <div class="job-detail-body">
+    <div class="main-tabs">
+      <button class="main-tab active" onclick="switchTab('jobs',this)">My jobs</button>
+      <button class="main-tab" onclick="switchTab('diary',this)">My diary</button>
+    </div>
 
-        <!-- Job info -->
+    <!-- Job detail -->
+    <div class="job-detail" id="job-detail">
+      <div class="detail-header">
+        <button class="detail-back" onclick="closeDetail()">← Back</button>
+        <div class="detail-title" id="detail-name-title"></div>
+        <span id="detail-status-badge" class="job-badge"></span>
+      </div>
+      <div class="detail-body">
         <div class="detail-section">
           <div class="detail-section-title">Job details</div>
           <div class="detail-grid">
-            <div class="detail-field"><div class="detail-label">Customer</div><div class="detail-value" id="detail-name">—</div></div>
-            <div class="detail-field"><div class="detail-label">Site address</div><div class="detail-value" id="detail-address">—</div></div>
-            <div class="detail-field"><div class="detail-label">Survey date</div><div class="detail-value" id="detail-date">—</div></div>
-            <div class="detail-field"><div class="detail-label">Survey time</div><div class="detail-value" id="detail-time">—</div></div>
+            <div class="detail-field"><label>Customer</label><span id="d-name">—</span></div>
+            <div class="detail-field"><label>Site address</label><span id="d-address">—</span></div>
+            <div class="detail-field"><label>Survey date</label><span id="d-date">—</span></div>
+            <div class="detail-field"><label>Survey time</label><span id="d-time">—</span></div>
           </div>
         </div>
 
-        <!-- Contact details reveal -->
-        <div style="margin-bottom:16px">
-          <button class="btn-action btn-view-client" style="width:100%;padding:10px" onclick="toggleContact()">👤 View client contact details</button>
+        <div class="detail-section">
+          <button class="btn-contact" onclick="toggleContact()">👤 View client contact details</button>
           <div class="contact-reveal" id="contact-reveal">
-            <div class="contact-reveal-title">Client contact details</div>
-            <div class="contact-item" id="contact-phone">
-              <span style="color:#888;font-size:18px">📞</span>
-              <span id="contact-phone-val">Not available</span>
-            </div>
+            <div class="contact-item"><span style="font-size:18px">📞</span><span id="d-phone">Not available</span></div>
           </div>
         </div>
 
-        <!-- Appointment scheduling -->
-        <div class="appt-section" id="appt-section">
-          <div class="appt-title">📅 Schedule / update survey appointment</div>
-          <div style="font-size:12px;color:#92400e;margin-bottom:10px">Setting the date and time will trigger the Monday automation to confirm the appointment and email the client.</div>
-          <div class="appt-grid">
-            <div class="appt-field">
-              <label>Survey date</label>
-              <input type="date" id="appt-date">
-            </div>
-            <div class="appt-field">
-              <label>Survey time</label>
-              <input type="time" id="appt-time">
-            </div>
+        <div class="appt-box">
+          <div class="appt-title">📅 Schedule / update appointment</div>
+          <div class="appt-sub">Setting date &amp; time will trigger the Monday automation to email the client.</div>
+          <div class="appt-row">
+            <div class="appt-field"><label>Survey date</label><input type="date" id="appt-date"></div>
+            <div class="appt-field"><label>Survey time</label><input type="time" id="appt-time"></div>
           </div>
-          <button class="btn-appt" id="appt-save-btn" onclick="saveAppointment()">Save &amp; update Monday</button>
-          <div class="appt-saved" id="appt-saved">✓ Appointment saved and Monday updated successfully</div>
+          <button class="btn-appt" id="appt-btn" onclick="saveAppointment()">Save &amp; update Monday</button>
+          <div class="appt-saved" id="appt-saved">✓ Appointment saved and Monday updated</div>
         </div>
 
-        <!-- Files from Monday -->
         <div class="detail-section" id="files-section" style="display:none">
           <div class="detail-section-title">Survey files &amp; photos</div>
-          <div id="files-loading" style="font-size:12px;color:#888;padding:8px 0">Loading files...</div>
-          <div id="files-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:8px"></div>
+          <div id="files-loading" style="font-size:12px;color:#888">Loading files...</div>
+          <div class="files-grid" id="files-grid"></div>
         </div>
 
-        <!-- Action buttons -->
-        <div class="action-btns">
-          <button class="btn-action btn-survey" id="undertake-btn" onclick="undertakeSurvey()">Start survey →</button>
+        <div class="action-row">
+          <button class="btn-survey" id="survey-btn" onclick="startSurvey()">Start survey →</button>
         </div>
-
-      </div>
-    </div>
-
-    <!-- Main tabs -->
-    <div class="main-tabs">
-      <button class="main-tab active" onclick="switchMainTab('jobs',this)">My jobs</button>
-      <button class="main-tab" onclick="switchMainTab('diary',this)">My diary</button>
-    </div>
-
-    <!-- Diary section -->
-    <div id="diary-section" style="display:none">
-      <div class="jobs-section">
-        <div class="jobs-header">
-          <div class="jobs-title">Upcoming appointments</div>
-          <div style="font-size:12px;color:#888">Showing scheduled surveys</div>
-        </div>
-        <div id="diary-list"><div class="loading"><div class="spinner"></div>Loading diary...</div></div>
       </div>
     </div>
 
     <!-- Jobs list -->
-    <div class="jobs-section" id="jobs-section">
-      <div class="jobs-header">
-        <div class="jobs-title">Your jobs</div>
-        <div class="filter-tabs">
-          <button class="ftab active" onclick="filterJobs('all',this)">All</button>
-          <button class="ftab" onclick="filterJobs('outstanding',this)">Outstanding</button>
-          <button class="ftab" onclick="filterJobs('complete',this)">Complete</button>
+    <div id="jobs-panel">
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-title">Your jobs</div>
+          <div class="filter-tabs">
+            <button class="ftab active" onclick="setFilter('all',this)">All</button>
+            <button class="ftab" onclick="setFilter('outstanding',this)">Outstanding</button>
+            <button class="ftab" onclick="setFilter('complete',this)">Complete</button>
+          </div>
         </div>
-      </div>
-      <div id="jobs-list">
-        <div class="loading"><div class="spinner"></div>Loading your jobs...</div>
+        <div id="jobs-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
       </div>
     </div>
-  </div>
 
+    <!-- Diary -->
+    <div id="diary-panel" style="display:none">
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-title">Upcoming appointments</div>
+        </div>
+        <div id="diary-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script>
-const BOARD_ID='18402849501';
-const PROXY_API='/monday-proxy';
-const SURVEY_URL='https://burgesswd-window-survey.pages.dev/';
+const BOARD_ID = '18402849501';
+const PROXY_API = '/monday-proxy';
+const AUTH_API = '/auth';
+const SURVEY_URL = 'https://burgesswd-window-survey.pages.dev/';
 
-let currentUser='';
-let allJobs=[];
-let currentFilter='all';
-let selectedJob=null;
-let boardColumns=[];
+let currentUser = '';
+let sessionToken = '';
+let allJobs = [];
+let currentFilter = 'all';
+let currentTab = 'jobs';
+let selectedJob = null;
+let boardColumns = [];
 
-const AUTH_API='/auth';
-
-function checkLogin(){
-  const name=document.getElementById('login-name').value.trim();
-  const pass=document.getElementById('login-pass').value;
-  document.getElementById('login-btn').disabled=name.length<2||pass.length<1;
+// ── Auth ───────────────────────────────────────────────────────
+async function authCall(body) {
+  const res = await fetch(AUTH_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  return res.json();
 }
-async function doLogin(){
-  const name=document.getElementById('login-name').value.trim();
-  const pass=document.getElementById('login-pass').value;
-  const err=document.getElementById('login-error');
-  err.style.display='none';
-  if(!name||!pass)return;
-  const btn=document.getElementById('login-btn');
-  btn.disabled=true;btn.textContent='Signing in...';
-  try{
-    const res=await fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login',name,password:pass})});
-    const data=await res.json();
-    if(data.success){
-      currentUser=data.name||name;
-      localStorage.setItem('bwd_portal_user',currentUser);
-      localStorage.setItem('bwd_portal_token',data.token);
+
+async function doLogin() {
+  const name = document.getElementById('login-name').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  errEl.style.display = 'none';
+  if (!name || !pass) { errEl.textContent = 'Please enter your name and password'; errEl.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  try {
+    const data = await authCall({ action: 'login', name, password: pass });
+    if (data.success) {
+      currentUser = data.name || name;
+      sessionToken = data.token;
+      localStorage.setItem('bwd_user', currentUser);
+      localStorage.setItem('bwd_token', sessionToken);
       showDashboard();
-    }else{
-      err.textContent=data.error||'Incorrect name or password';
-      err.style.display='block';
-      btn.disabled=false;btn.textContent='Sign in';
+    } else {
+      errEl.textContent = data.error || 'Incorrect name or password';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Sign in';
     }
-  }catch(e){
-    err.textContent='Could not connect. Please try again.';
-    err.style.display='block';
-    btn.disabled=false;btn.textContent='Sign in';
+  } catch (e) {
+    errEl.textContent = 'Could not connect. Please try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Sign in';
   }
 }
-function signOut(){
-  const token=localStorage.getItem('bwd_portal_token');
-  if(token)fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout',token})});
-  localStorage.removeItem('bwd_portal_user');
-  localStorage.removeItem('bwd_portal_token');
-  currentUser='';allJobs=[];
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('dashboard').style.display='none';
-  document.getElementById('header-name').style.display='none';
-  document.getElementById('login-name').value='';
-  document.getElementById('login-pass').value='';
-  document.getElementById('login-btn').disabled=true;
+
+function signOut() {
+  if (sessionToken) authCall({ action: 'logout', token: sessionToken });
+  localStorage.removeItem('bwd_user');
+  localStorage.removeItem('bwd_token');
+  currentUser = ''; sessionToken = ''; allJobs = [];
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('header-name').style.display = 'none';
+  document.getElementById('login-name').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-btn').disabled = false;
+  document.getElementById('login-btn').textContent = 'Sign in';
 }
-function showDashboard(){
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('dashboard').style.display='block';
-  document.getElementById('welcome-name').textContent='Welcome, '+currentUser;
-  document.getElementById('header-name').textContent=currentUser;
-  document.getElementById('header-name').style.display='block';
+
+function showDashboard() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('welcome-name').textContent = 'Welcome, ' + currentUser;
+  document.getElementById('header-name').textContent = currentUser;
+  document.getElementById('header-name').style.display = 'block';
   loadJobs();
 }
 
-async function mondayQuery(query){
-  const res=await fetch(PROXY_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query})});
-  if(!res.ok)throw new Error('Server error '+res.status);
-  const data=await res.json();
-  if(data.errors)throw new Error(data.errors[0].message);
+// ── Monday API ─────────────────────────────────────────────────
+async function mondayQuery(query) {
+  const res = await fetch(PROXY_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query })
+  });
+  if (!res.ok) throw new Error('Server error ' + res.status);
+  const data = await res.json();
+  if (data.errors) throw new Error(data.errors[0].message);
   return data;
 }
 
-async function loadJobs(){
-  document.getElementById('jobs-list').innerHTML='<div class="loading"><div class="spinner"></div>Loading your jobs...</div>';
-  document.getElementById('error-box').style.display='none';
-  document.getElementById('stat-tobook').textContent='—';
-  document.getElementById('stat-complete').textContent='—';
-  document.getElementById('stat-total').textContent='—';
-  try{
-    // Fetch column metadata
-    const colData=await mondayQuery(`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`);
-    boardColumns=colData.data?.boards?.[0]?.columns||[];
+// ── Jobs ───────────────────────────────────────────────────────
+async function loadJobs() {
+  document.getElementById('jobs-list').innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+  document.getElementById('error-banner').style.display = 'none';
+  ['stat-tobook','stat-booked','stat-complete','stat-total'].forEach(id => document.getElementById(id).textContent = '—');
+  try {
+    // Get column metadata
+    const colData = await mondayQuery(`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`);
+    boardColumns = colData.data?.boards?.[0]?.columns || [];
+    const col = t => boardColumns.find(c => c.title === t)?.id || '';
+    const surveyorId = col('Surveyor') || boardColumns.find(c => c.type === 'people')?.id || '';
+    const statusId = col('Survey Stage') || boardColumns.find(c => c.type === 'color')?.id || '';
+    const dateId = col('Survey Date') || '';
+    const timeId = col('Survey Time') || '';
+    const addressId = col('Site Address') || '';
+    const phoneId = boardColumns.find(c => c.title.toLowerCase().includes('phone') || c.title.toLowerCase().includes('mobile'))?.id || '';
 
-    const surveyorColId=boardColumns.find(c=>c.title==='Surveyor')?.id||'';
-    const statusColId=boardColumns.find(c=>c.title==='Survey Stage')?.id||boardColumns.find(c=>c.type==='color')?.id||'';
-    const dateColId=boardColumns.find(c=>c.title==='Survey Date')?.id||'';
-    const timeColId=boardColumns.find(c=>c.title==='Survey Time')?.id||'';
-    const addressColId=boardColumns.find(c=>c.title==='Site Address')?.id||'';
-    const phoneColId=boardColumns.find(c=>c.title.toLowerCase().includes('phone')||c.title.toLowerCase().includes('contact')||c.title.toLowerCase().includes('number'))?.id||'';
-
-    // Fetch items
-    const data=await mondayQuery(`query {
+    // Get items
+    const itemData = await mondayQuery(`query {
       boards(ids:${BOARD_ID}){
         items_page(limit:200){
           items {
@@ -417,325 +410,307 @@ async function loadJobs(){
         }
       }
     }`);
+    const items = itemData.data?.boards?.[0]?.items_page?.items || [];
+    const cv = (item, id) => item.column_values.find(c => c.id === id);
 
-    const items=data.data?.boards?.[0]?.items_page?.items||[];
-
-    allJobs=items.filter(item=>{
-      const col=item.column_values.find(c=>c.id===surveyorColId);
-      return col&&(col.text||'').toLowerCase().includes(currentUser.toLowerCase());
-    }).map(item=>{
-      const cv=id=>item.column_values.find(c=>c.id===id);
-      const statusCol=cv(statusColId);
-      return{
-        id:item.id,
-        name:item.name,
-        status:statusCol?.label||statusCol?.text||'—',
-        date:cv(dateColId)?.date||cv(dateColId)?.text||'',
-        time:cv(timeColId)?.text||'',
-        address:cv(addressColId)?.text||'',
-        phone:cv(phoneColId)?.text||'',
-        surveyorColId,statusColId,dateColId,timeColId,addressColId,phoneColId
-      };
-    });
+    allJobs = items
+      .filter(item => {
+        const sc = cv(item, surveyorId);
+        return sc && (sc.text || '').toLowerCase().includes(currentUser.toLowerCase());
+      })
+      .map(item => ({
+        id: item.id,
+        name: item.name,
+        status: cv(item, statusId)?.label || cv(item, statusId)?.text || '—',
+        date: cv(item, dateId)?.date || cv(item, dateId)?.text || '',
+        time: cv(item, timeId)?.text || '',
+        address: cv(item, addressId)?.text || '',
+        phone: cv(item, phoneId)?.text || '',
+        surveyorId, statusId, dateId, timeId, addressId, phoneId
+      }));
 
     renderJobs();
     updateStats();
-  }catch(err){
-    document.getElementById('jobs-list').innerHTML='<div class="empty-state"><div class="empty-title">Could not load jobs</div><div class="empty-sub">'+err.message+'</div></div>';
-    const eb=document.getElementById('error-box');
-    eb.textContent='Error loading jobs: '+err.message;
-    eb.style.display='block';
+  } catch (err) {
+    const eb = document.getElementById('error-banner');
+    eb.textContent = 'Error loading jobs: ' + err.message;
+    eb.style.display = 'block';
+    document.getElementById('jobs-list').innerHTML = '<div class="empty"><div class="empty-title">Could not load jobs</div></div>';
   }
 }
 
-function getStatusClass(status){
-  const s=(status||'').toLowerCase();
-  if(s==='complete')return{dot:'complete',badge:'status-complete'};
-  if(s==='survey confirmed')return{dot:'confirmed',badge:'status-confirmed'};
-  return{dot:'booked',badge:'status-booked'};
+function statusInfo(status) {
+  const s = (status || '').toLowerCase();
+  if (s === 'complete') return { dot: 'dot-complete', badge: 'badge-complete' };
+  if (s === 'survey confirmed') return { dot: 'dot-confirmed', badge: 'badge-confirmed' };
+  return { dot: 'dot-tobook', badge: 'badge-tobook' };
 }
-function isComplete(status){return(status||'').toLowerCase()==='complete';}
-function filterJobs(filter,btn){
-  currentFilter=filter;
-  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+
+function isComplete(status) { return (status || '').toLowerCase() === 'complete'; }
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   renderJobs();
 }
-function renderJobs(){
-  const list=document.getElementById('jobs-list');
-  let jobs=allJobs;
-  if(currentFilter==='outstanding')jobs=allJobs.filter(j=>!isComplete(j.status));
-  if(currentFilter==='complete')jobs=allJobs.filter(j=>isComplete(j.status));
-  if(jobs.length===0){
-    list.innerHTML=`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">${currentFilter==='all'?'No jobs assigned to you':'No '+currentFilter+' jobs'}</div><div class="empty-sub">${currentFilter==='all'?'Jobs assigned to you in Monday will appear here':'Check another filter'}</div></div>`;
+
+function renderJobs() {
+  const list = document.getElementById('jobs-list');
+  let jobs = allJobs;
+  if (currentFilter === 'outstanding') jobs = allJobs.filter(j => !isComplete(j.status));
+  if (currentFilter === 'complete') jobs = allJobs.filter(j => isComplete(j.status));
+  if (jobs.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">No ${currentFilter === 'all' ? 'assigned' : currentFilter} jobs</div></div>`;
     return;
   }
-  list.innerHTML=jobs.map(job=>{
-    const sc=getStatusClass(job.status);
-    return `<div class="job-item" onclick="openJobDetail('${job.id}')">
-      <div class="job-dot ${sc.dot}"></div>
+  list.innerHTML = jobs.map(job => {
+    const si = statusInfo(job.status);
+    return `<div class="job-item" onclick="openDetail('${job.id}')">
+      <div class="job-dot ${si.dot}"></div>
       <div class="job-main">
         <div class="job-name">${job.name}</div>
-        <div class="job-meta">${job.address||'No address'}${job.date?' · '+job.date:''}</div>
+        <div class="job-meta">${job.address || 'No address'}${job.date ? ' · ' + job.date : ''}</div>
       </div>
-      <div class="job-right">
-        <span class="job-status ${sc.badge}">${job.status}</span>
-        <span style="font-size:11px;color:#9ca3af">${isComplete(job.status)?'Completed':'Outstanding'}</span>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        <span class="job-badge ${si.badge}">${job.status}</span>
+        <span style="font-size:11px;color:#9ca3af">${isComplete(job.status) ? 'Completed' : 'Outstanding'}</span>
       </div>
-      <div class="job-arrow">›</div>
+      <div style="color:#cbd5e1;font-size:16px;margin-left:4px">›</div>
     </div>`;
   }).join('');
 }
-function updateStats(){
-  const total=allJobs.length;
-  const tobook=allJobs.filter(j=>(j.status||'').toLowerCase()==='to book').length;
-  const booked=allJobs.filter(j=>(j.status||'').toLowerCase()==='survey confirmed').length;
-  const complete=allJobs.filter(j=>(j.status||'').toLowerCase()==='complete').length;
-  document.getElementById('stat-total').textContent=total;
-  document.getElementById('stat-tobook').textContent=tobook;
-  document.getElementById('stat-booked').textContent=booked;
-  document.getElementById('stat-complete').textContent=complete;
+
+function updateStats() {
+  const total = allJobs.length;
+  const tobook = allJobs.filter(j => (j.status || '').toLowerCase() === 'to book').length;
+  const booked = allJobs.filter(j => (j.status || '').toLowerCase() === 'survey confirmed').length;
+  const complete = allJobs.filter(j => isComplete(j.status)).length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-tobook').textContent = tobook;
+  document.getElementById('stat-booked').textContent = booked;
+  document.getElementById('stat-complete').textContent = complete;
 }
 
-function openJobDetail(jobId){
-  selectedJob=allJobs.find(j=>j.id===jobId);
-  if(!selectedJob)return;
-  const sc=getStatusClass(selectedJob.status);
-  document.getElementById('detail-title').textContent=selectedJob.name;
-  const badge=document.getElementById('detail-status-badge');
-  badge.textContent=selectedJob.status;
-  badge.className='job-detail-status '+sc.badge;
-  document.getElementById('detail-name').textContent=selectedJob.name||'—';
-  document.getElementById('detail-address').textContent=selectedJob.address||'—';
-  document.getElementById('detail-date').textContent=selectedJob.date||'Not scheduled';
-  document.getElementById('detail-time').textContent=selectedJob.time||'Not scheduled';
-  // Phone
-  const phoneVal=document.getElementById('contact-phone-val');
-  if(selectedJob.phone){
-    phoneVal.innerHTML=`<a href="tel:${selectedJob.phone}">${selectedJob.phone}</a>`;
-  }else{
-    phoneVal.textContent='Not available (mirrored column)';
+// ── Job detail ─────────────────────────────────────────────────
+function openDetail(jobId) {
+  selectedJob = allJobs.find(j => j.id === jobId);
+  if (!selectedJob) return;
+  const si = statusInfo(selectedJob.status);
+  document.getElementById('detail-name-title').textContent = selectedJob.name;
+  const badge = document.getElementById('detail-status-badge');
+  badge.textContent = selectedJob.status;
+  badge.className = 'job-badge ' + si.badge;
+  document.getElementById('d-name').textContent = selectedJob.name || '—';
+  document.getElementById('d-address').textContent = selectedJob.address || '—';
+  document.getElementById('d-date').textContent = selectedJob.date || 'Not scheduled';
+  document.getElementById('d-time').textContent = selectedJob.time || 'Not scheduled';
+  document.getElementById('d-phone').textContent = selectedJob.phone || 'Not available';
+  document.getElementById('appt-date').value = selectedJob.date || '';
+  document.getElementById('appt-time').value = selectedJob.time || '';
+  document.getElementById('appt-saved').style.display = 'none';
+  document.getElementById('contact-reveal').style.display = 'none';
+  document.getElementById('appt-btn').disabled = false;
+  document.getElementById('appt-btn').textContent = 'Save & update Monday';
+  // Survey button
+  const survBtn = document.getElementById('survey-btn');
+  if (isComplete(selectedJob.status)) {
+    survBtn.textContent = 'Survey completed ✓';
+    survBtn.className = 'btn-survey done';
+    survBtn.onclick = null;
+  } else {
+    survBtn.textContent = 'Start survey →';
+    survBtn.className = 'btn-survey';
+    survBtn.onclick = startSurvey;
   }
-  // Pre-fill appointment fields
-  if(selectedJob.date)document.getElementById('appt-date').value=selectedJob.date;
-  if(selectedJob.time){
-    // Convert time text to HH:MM format
-    const t=selectedJob.time.replace(/\s*(am|pm)/i,'');
-    document.getElementById('appt-time').value=t;
-  }
-  document.getElementById('appt-saved').style.display='none';
-  document.getElementById('contact-reveal').style.display='none';
+  // Show detail, hide list
+  document.getElementById('job-detail').style.display = 'block';
+  document.getElementById('jobs-panel').style.display = 'none';
+  document.getElementById('diary-panel').style.display = 'none';
+  document.querySelector('.main-tabs').style.display = 'none';
+  window.scrollTo(0, 0);
   // Load files
-  loadJobFiles(selectedJob.id);
-  // Hide complete survey btn if already done
-  const btn=document.getElementById('undertake-btn');
-  if(isComplete(selectedJob.status)){
-    btn.textContent='Survey completed ✓';
-    btn.className='btn-action btn-survey complete';
-    btn.onclick=null;
-  }else{
-    btn.textContent='Start survey →';
-    btn.className='btn-action btn-survey';
-    btn.onclick=undertakeSurvey;
+  loadFiles(selectedJob.id);
+}
+
+function closeDetail() {
+  document.getElementById('job-detail').style.display = 'none';
+  document.querySelector('.main-tabs').style.display = 'flex';
+  if (currentTab === 'jobs') {
+    document.getElementById('jobs-panel').style.display = 'block';
+  } else {
+    document.getElementById('diary-panel').style.display = 'block';
   }
-  document.getElementById('jobs-section').style.display='none';
-  document.getElementById('job-detail').style.display='block';
-  window.scrollTo(0,0);
+  selectedJob = null;
 }
 
-function closeJobDetail(){
-  document.getElementById('job-detail').style.display='none';
-  document.getElementById('jobs-section').style.display='block';
-  selectedJob=null;
+function toggleContact() {
+  const r = document.getElementById('contact-reveal');
+  r.style.display = r.style.display === 'none' ? 'block' : 'none';
 }
 
-function toggleContact(){
-  const reveal=document.getElementById('contact-reveal');
-  reveal.style.display=reveal.style.display==='none'?'block':'none';
-}
-
-async function saveAppointment(){
-  if(!selectedJob)return;
-  const date=document.getElementById('appt-date').value;
-  const time=document.getElementById('appt-time').value;
-  if(!date&&!time){alert('Please enter at least a date or time.');return;}
-  const btn=document.getElementById('appt-save-btn');
-  btn.disabled=true;btn.textContent='Saving...';
-  try{
-    // Update date, time and status all in one call
-    const colVals={};
-    if(date&&selectedJob.dateColId) colVals[selectedJob.dateColId]={date:date};
-    if(time&&selectedJob.timeColId) colVals[selectedJob.timeColId]=time;
-    if(selectedJob.statusColId) colVals[selectedJob.statusColId]={label:'Survey Confirmed'};
-    const colValsStr=JSON.stringify(JSON.stringify(colVals));
-    await mondayQuery(`mutation { change_multiple_column_values(board_id:${BOARD_ID}, item_id:${selectedJob.id}, column_values:${colValsStr}) { id } }`);
-    document.getElementById('appt-saved').style.display='block';
-    document.getElementById('detail-date').textContent=date||selectedJob.date||'—';
-    document.getElementById('detail-time').textContent=time||selectedJob.time||'—';
-    // Update local job data so portal reflects change immediately
-    selectedJob.status='Survey Confirmed';
-    selectedJob.date=date||selectedJob.date;
-    selectedJob.time=time||selectedJob.time;
-    const jobInList=allJobs.find(j=>j.id===selectedJob.id);
-    if(jobInList){jobInList.status='Survey Confirmed';jobInList.date=selectedJob.date;jobInList.time=selectedJob.time;}
-    // Update status badge in detail header
-    const badge=document.getElementById('detail-status-badge');
-    badge.textContent='Survey Confirmed';
-    badge.className='job-detail-status status-confirmed';
-    // Refresh stats
+async function saveAppointment() {
+  if (!selectedJob) return;
+  const date = document.getElementById('appt-date').value;
+  const time = document.getElementById('appt-time').value;
+  if (!date && !time) { alert('Please enter at least a date or time.'); return; }
+  const btn = document.getElementById('appt-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const colVals = {};
+    if (date && selectedJob.dateId) colVals[selectedJob.dateId] = { date };
+    if (time && selectedJob.timeId) colVals[selectedJob.timeId] = time;
+    if (selectedJob.statusId) colVals[selectedJob.statusId] = { label: 'Survey Confirmed' };
+    await mondayQuery(`mutation { change_multiple_column_values(board_id:${BOARD_ID}, item_id:${selectedJob.id}, column_values:${JSON.stringify(JSON.stringify(colVals))}) { id } }`);
+    document.getElementById('appt-saved').style.display = 'block';
+    document.getElementById('d-date').textContent = date || selectedJob.date || '—';
+    document.getElementById('d-time').textContent = time || selectedJob.time || '—';
+    // Update local data
+    selectedJob.status = 'Survey Confirmed';
+    selectedJob.date = date || selectedJob.date;
+    selectedJob.time = time || selectedJob.time;
+    const jil = allJobs.find(j => j.id === selectedJob.id);
+    if (jil) { jil.status = 'Survey Confirmed'; jil.date = selectedJob.date; jil.time = selectedJob.time; }
+    const si = statusInfo('Survey Confirmed');
+    const badge = document.getElementById('detail-status-badge');
+    badge.textContent = 'Survey Confirmed'; badge.className = 'job-badge ' + si.badge;
     updateStats();
-    btn.textContent='Saved ✓';btn.style.background='#10b981';
-    setTimeout(()=>{btn.disabled=false;btn.textContent='Save & update Monday';btn.style.background='';},3000);
-  }catch(err){
-    alert('Could not save appointment: '+err.message);
-    btn.disabled=false;btn.textContent='Save & update Monday';
+    btn.textContent = 'Saved ✓'; btn.style.background = '#10b981';
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'Save & update Monday'; btn.style.background = ''; }, 3000);
+  } catch (err) {
+    alert('Could not save: ' + err.message);
+    btn.disabled = false; btn.textContent = 'Save & update Monday';
   }
 }
 
-function undertakeSurvey(){
-  if(!selectedJob)return;
-  const url=SURVEY_URL+'?job='+selectedJob.id+'&name='+encodeURIComponent(selectedJob.name)+'&portal=1';
-  window.location.href=url;
+function startSurvey() {
+  if (!selectedJob) return;
+  window.location.href = SURVEY_URL + '?job=' + selectedJob.id + '&name=' + encodeURIComponent(selectedJob.name) + '&portal=1';
 }
 
-async function loadJobFiles(itemId){
-  const section=document.getElementById('files-section');
-  const grid=document.getElementById('files-grid');
-  const loading=document.getElementById('files-loading');
-  section.style.display='block';
-  grid.innerHTML='';
-  loading.style.display='block';
-  loading.textContent='Loading files...';
-  try{
-    // Get file column IDs
-    const specSheetCol=boardColumns.find(c=>c.title==='Spec Sheet');
-    const photosCol=boardColumns.find(c=>c.title==='Photos Videos Plans');
-    if(!specSheetCol&&!photosCol){loading.textContent='No file columns found.';return;}
-    const colIds=[specSheetCol?.id,photosCol?.id].filter(Boolean);
-    // Fetch assets for this item
-    // Fetch files from specific columns only
-    const data=await mondayQuery(`query {
+// ── Files ──────────────────────────────────────────────────────
+async function loadFiles(itemId) {
+  const section = document.getElementById('files-section');
+  const grid = document.getElementById('files-grid');
+  const loading = document.getElementById('files-loading');
+  section.style.display = 'block';
+  grid.innerHTML = '';
+  loading.style.display = 'block';
+  loading.textContent = 'Loading files...';
+  try {
+    const specCol = boardColumns.find(c => c.title === 'Spec Sheet');
+    const photosCol = boardColumns.find(c => c.title === 'Photos Videos Plans');
+    if (!specCol && !photosCol) { loading.textContent = 'No file columns found.'; return; }
+    const colIds = [specCol?.id, photosCol?.id].filter(Boolean);
+    const data = await mondayQuery(`query {
       items(ids:${itemId}){
-        column_values(ids:${JSON.stringify(colIds)}){
-          id
-          value
-          text
-        }
-        assets { id name public_url url file_extension file_size }
+        assets { id name public_url file_extension }
+        column_values(ids:${JSON.stringify(colIds)}){ id value }
       }
     }`);
-    const item=data.data?.items?.[0];
-    if(!item){loading.textContent='Could not load files.';return;}
-    // Parse asset IDs from column values JSON
-    const assetIds=new Set();
-    (item.column_values||[]).forEach(col=>{
-      try{
-        const val=JSON.parse(col.value||'{}');
-        const filesList=val.files||[];
-        filesList.forEach(f=>{if(f.asset_id)assetIds.add(String(f.asset_id));});
-      }catch(e){}
+    const item = data.data?.items?.[0];
+    if (!item) { loading.textContent = 'Could not load files.'; return; }
+    // Get asset IDs from column values
+    const assetIds = new Set();
+    (item.column_values || []).forEach(col => {
+      try {
+        const val = JSON.parse(col.value || '{}');
+        (val.files || []).forEach(f => { if (f.asset_id) assetIds.add(String(f.asset_id)); });
+      } catch (e) {}
     });
-    // Filter assets to only those in the specified columns
-    const allAssets=item.assets||[];
-    loading.style.display='none';
-    if(allAssets.length===0){loading.textContent='No files uploaded yet.';loading.style.display='block';return;}
-    const imgExts=['jpg','jpeg','png','gif','webp','heic'];
-    console.log('Files found:', allAssets.length);
-    grid.style.gridTemplateColumns='1fr';
-    grid.style.gap='12px';
-    grid.innerHTML=allAssets.map(f=>{
-      const ext=(f.file_extension||'').toLowerCase().replace('.','');
-      const isImg=imgExts.includes(ext);
-      const url=f.public_url||f.url||'';
-      if(!url) return '';
-      if(isImg){
-        return `<div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:4px">
-          <img src="${url}" alt="${f.name||'Image'}" style="width:100%;display:block;cursor:pointer;border-radius:10px 10px 0 0" onclick="window.open('${url}','_blank')" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div style="display:none;height:80px;align-items:center;justify-content:center;gap:8px;background:#f0f0f0;cursor:pointer;border-radius:10px 10px 0 0" onclick="window.open('${url}','_blank')">
-            <span style="font-size:24px">🖼️</span><span style="font-size:12px;color:#64748b">Tap to open</span>
-          </div>
-          <div style="padding:8px 12px;font-size:12px;color:#64748b;display:flex;align-items:center;justify-content:space-between;gap:8px">
-            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${f.name||'Image'}</span>
-            <a href="${url}" target="_blank" style="background:#1e40af;color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;text-decoration:none;font-weight:500;flex-shrink:0">Open ↗</a>
+    const assets = item.assets || [];
+    const files = assetIds.size > 0 ? assets.filter(a => assetIds.has(String(a.id))) : assets;
+    loading.style.display = 'none';
+    if (files.length === 0) { loading.textContent = 'No files uploaded yet.'; loading.style.display = 'block'; return; }
+    const imgExts = ['jpg','jpeg','png','gif','webp','heic'];
+    grid.innerHTML = files.map(f => {
+      const ext = (f.file_extension || '').toLowerCase().replace('.','');
+      const url = f.public_url || '';
+      if (!url) return '';
+      if (imgExts.includes(ext)) {
+        return `<div class="file-img-card">
+          <a href="${url}" target="_blank"><img src="${url}" alt="${f.name || 'Image'}" onerror="this.style.display='none'"></a>
+          <div class="file-img-footer">
+            <span class="file-img-name">${f.name || 'Image'}</span>
+            <a href="${url}" target="_blank" class="btn-open">Open ↗</a>
           </div>
         </div>`;
-      }else{
-        return `<div style="background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px">
-          <div style="font-size:36px;flex-shrink:0">${ext==='pdf'?'📄':'📎'}</div>
+      } else {
+        return `<div class="file-pdf-card">
+          <div style="font-size:32px">${ext === 'pdf' ? '📄' : '📎'}</div>
           <div style="flex:1;min-width:0">
-            <div style="font-weight:500;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.name||'Document'}</div>
-            <a href="${url}" target="_blank" style="background:#1e40af;color:#fff;padding:8px 16px;border-radius:7px;font-size:13px;text-decoration:none;font-weight:500;display:inline-block">Open ↗</a>
+            <div style="font-weight:500;font-size:13px;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name || 'Document'}</div>
+            <a href="${url}" target="_blank" class="btn-open">Open ↗</a>
           </div>
         </div>`;
       }
     }).join('');
-    loading.textContent='Could not load files: '+err.message;
+  } catch (err) {
+    loading.textContent = 'Could not load files: ' + err.message;
   }
 }
 
-function switchMainTab(tab, btn){
-  document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
+// ── Tabs ───────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('jobs-section').style.display=tab==='jobs'?'block':'none';
-  document.getElementById('diary-section').style.display=tab==='diary'?'block':'none';
-  if(tab==='diary')renderDiary();
+  document.getElementById('jobs-panel').style.display = tab === 'jobs' ? 'block' : 'none';
+  document.getElementById('diary-panel').style.display = tab === 'diary' ? 'block' : 'none';
+  if (tab === 'diary') renderDiary();
 }
 
-function renderDiary(){
-  const list=document.getElementById('diary-list');
-  // Get jobs with dates, sorted by date ascending, only future/today
-  const today=new Date();today.setHours(0,0,0,0);
-  const scheduled=allJobs
-    .filter(j=>j.date&&!isComplete(j.status))
-    .map(j=>({...j,dateObj:new Date(j.date)}))
-    .filter(j=>j.dateObj>=today)
-    .sort((a,b)=>a.dateObj-b.dateObj);
-
-  if(scheduled.length===0){
-    list.innerHTML=`<div class="diary-empty"><div style="font-size:36px;margin-bottom:10px">📅</div><div style="font-size:15px;font-weight:600;color:#64748b;margin-bottom:4px">No upcoming appointments</div><div style="font-size:13px">Scheduled surveys will appear here</div></div>`;
+// ── Diary ──────────────────────────────────────────────────────
+function renderDiary() {
+  const list = document.getElementById('diary-list');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = today.toISOString().slice(0,10);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const scheduled = allJobs
+    .filter(j => j.date && !isComplete(j.status))
+    .map(j => ({ ...j, dateObj: new Date(j.date) }))
+    .filter(j => j.dateObj >= today)
+    .sort((a,b) => a.dateObj - b.dateObj);
+  if (scheduled.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><div class="empty-title">No upcoming appointments</div></div>';
     return;
   }
-
-  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const todayStr=today.toISOString().slice(0,10);
-
-  list.innerHTML=scheduled.map(job=>{
-    const d=job.dateObj;
-    const isToday=job.date===todayStr;
-    return `<div class="diary-entry${isToday?' today':''}">
-      <div class="diary-date-block">
-        <div class="diary-day">${d.getDate()}</div>
-        <div class="diary-month">${months[d.getMonth()]}</div>
-        <div class="diary-dow">${days[d.getDay()]}</div>
+  list.innerHTML = scheduled.map(job => {
+    const d = job.dateObj;
+    const isToday = job.date === todayStr;
+    return `<div class="diary-entry${isToday ? ' today' : ''}">
+      <div class="date-block">
+        <div class="date-day">${d.getDate()}</div>
+        <div class="date-month">${months[d.getMonth()]}</div>
+        <div class="date-dow">${days[d.getDay()]}</div>
       </div>
       <div class="diary-info">
-        <div class="diary-job-name">${job.name}</div>
-        <div class="diary-job-meta">${job.address||'No address'}</div>
-        ${job.time?`<span class="diary-time-badge">🕐 ${job.time}</span>`:'<span style="font-size:11px;color:#9ca3af">No time set</span>'}
+        <div class="diary-name">${job.name}</div>
+        <div class="diary-addr">${job.address || 'No address'}</div>
+        ${job.time ? `<span class="diary-time">🕐 ${job.time}</span>` : '<span style="font-size:11px;color:#9ca3af">No time set</span>'}
       </div>
-      <button class="diary-open-btn" onclick="openJobDetail('${job.id}')">View →</button>
+      <button class="btn-diary-view" onclick="openDetail('${job.id}')">View →</button>
     </div>`;
   }).join('');
 }
 
-window.addEventListener('load',async()=>{
-  const savedToken=localStorage.getItem('bwd_portal_token');
-  const savedUser=localStorage.getItem('bwd_portal_user');
-  if(savedToken&&savedUser){
-    try{
-      const res=await fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'validate',token:savedToken})});
-      const data=await res.json();
-      if(data.valid){
-        currentUser=data.name||savedUser;
-        document.getElementById('login-name').value=currentUser;
+// ── Init ───────────────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  const savedToken = localStorage.getItem('bwd_token');
+  const savedUser = localStorage.getItem('bwd_user');
+  if (savedToken && savedUser) {
+    try {
+      const data = await authCall({ action: 'validate', token: savedToken });
+      if (data.valid) {
+        currentUser = data.name || savedUser;
+        sessionToken = savedToken;
         showDashboard();
         return;
       }
-    }catch(e){}
-    // Token invalid — clear and show login
-    localStorage.removeItem('bwd_portal_token');
-    localStorage.removeItem('bwd_portal_user');
+    } catch (e) {}
+    localStorage.removeItem('bwd_token');
+    localStorage.removeItem('bwd_user');
   }
 });
 </script>
