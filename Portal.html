@@ -171,12 +171,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </div>
       <div class="login-title">Surveyor Portal</div>
-      <div class="login-sub">Enter your name to see your assigned jobs.</div>
+      <div class="login-sub">Sign in with your name and password.</div>
       <div class="login-field">
         <label>Your name</label>
         <input type="text" id="login-name" placeholder="e.g. Paul Burgess" oninput="checkLogin()" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
-      <button class="login-btn" id="login-btn" onclick="doLogin()" disabled>View my jobs</button>
+      <div class="login-field">
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="Your password" oninput="checkLogin()" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div id="login-error" style="color:#dc2626;font-size:12px;margin-bottom:10px;display:none"></div>
+      <button class="login-btn" id="login-btn" onclick="doLogin()" disabled>Sign in</button>
     </div>
   </div>
 
@@ -313,24 +318,51 @@ let currentFilter='all';
 let selectedJob=null;
 let boardColumns=[];
 
+const AUTH_API='/auth';
+
 function checkLogin(){
-  const val=document.getElementById('login-name').value.trim();
-  document.getElementById('login-btn').disabled=val.length<2;
-}
-function doLogin(){
   const name=document.getElementById('login-name').value.trim();
-  if(name.length<2)return;
-  currentUser=name;
-  localStorage.setItem('bwd_portal_user',name);
-  showDashboard();
+  const pass=document.getElementById('login-pass').value;
+  document.getElementById('login-btn').disabled=name.length<2||pass.length<1;
+}
+async function doLogin(){
+  const name=document.getElementById('login-name').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-error');
+  err.style.display='none';
+  if(!name||!pass)return;
+  const btn=document.getElementById('login-btn');
+  btn.disabled=true;btn.textContent='Signing in...';
+  try{
+    const res=await fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login',name,password:pass})});
+    const data=await res.json();
+    if(data.success){
+      currentUser=data.name||name;
+      localStorage.setItem('bwd_portal_user',currentUser);
+      localStorage.setItem('bwd_portal_token',data.token);
+      showDashboard();
+    }else{
+      err.textContent=data.error||'Incorrect name or password';
+      err.style.display='block';
+      btn.disabled=false;btn.textContent='Sign in';
+    }
+  }catch(e){
+    err.textContent='Could not connect. Please try again.';
+    err.style.display='block';
+    btn.disabled=false;btn.textContent='Sign in';
+  }
 }
 function signOut(){
+  const token=localStorage.getItem('bwd_portal_token');
+  if(token)fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout',token})});
   localStorage.removeItem('bwd_portal_user');
+  localStorage.removeItem('bwd_portal_token');
   currentUser='';allJobs=[];
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('dashboard').style.display='none';
   document.getElementById('header-name').style.display='none';
   document.getElementById('login-name').value='';
+  document.getElementById('login-pass').value='';
   document.getElementById('login-btn').disabled=true;
 }
 function showDashboard(){
@@ -670,9 +702,24 @@ function renderDiary(){
   }).join('');
 }
 
-window.addEventListener('load',()=>{
-  const saved=localStorage.getItem('bwd_portal_user');
-  if(saved){currentUser=saved;document.getElementById('login-name').value=saved;showDashboard();}
+window.addEventListener('load',async()=>{
+  const savedToken=localStorage.getItem('bwd_portal_token');
+  const savedUser=localStorage.getItem('bwd_portal_user');
+  if(savedToken&&savedUser){
+    try{
+      const res=await fetch(AUTH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'validate',token:savedToken})});
+      const data=await res.json();
+      if(data.valid){
+        currentUser=data.name||savedUser;
+        document.getElementById('login-name').value=currentUser;
+        showDashboard();
+        return;
+      }
+    }catch(e){}
+    // Token invalid — clear and show login
+    localStorage.removeItem('bwd_portal_token');
+    localStorage.removeItem('bwd_portal_user');
+  }
 });
 </script>
 </body>
