@@ -97,9 +97,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <button class="btn-signout" onclick="adminSignOut()">Sign out</button>
     </div>
 
-    <!-- Add surveyor -->
+    <!-- Role tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button id="tab-surveyor" onclick="switchRole('surveyor')" style="padding:8px 20px;border:1px solid #1e40af;border-radius:8px;background:#1e40af;color:#fff;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">Surveyors</button>
+      <button id="tab-installer" onclick="switchRole('installer')" style="padding:8px 20px;border:1px solid #e0e0e0;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">Installers</button>
+    </div>
+
+    <!-- Add user -->
     <div class="section">
-      <div class="sec-title">➕ Add new surveyor</div>
+      <div class="sec-title" id="add-title">➕ Add new surveyor</div>
       <div class="add-form">
         <div>
           <div style="font-size:11px;color:#666;margin-bottom:4px;font-weight:500">Full name</div>
@@ -111,13 +117,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         </div>
         <button class="add-btn" onclick="addUser()">Add user</button>
       </div>
-      <div class="success-msg" id="add-success">✓ Surveyor added successfully</div>
+      <div class="success-msg" id="add-success">✓ User added successfully</div>
       <div class="error-msg" id="add-error"></div>
     </div>
 
-    <!-- Surveyor list -->
+    <!-- User list -->
     <div class="section">
-      <div class="sec-title">👥 Surveyor accounts</div>
+      <div class="sec-title" id="list-title">👥 Surveyor accounts</div>
       <div id="users-list"><div class="empty-users">Loading...</div></div>
     </div>
 
@@ -157,18 +163,34 @@ function showAdminPanel(){
   loadUsers();
 }
 
+let currentRole='surveyor';
+
+function switchRole(role){
+  currentRole=role;
+  document.getElementById('tab-surveyor').style.background=role==='surveyor'?'#1e40af':'transparent';
+  document.getElementById('tab-surveyor').style.color=role==='surveyor'?'#fff':'#888';
+  document.getElementById('tab-surveyor').style.borderColor=role==='surveyor'?'#1e40af':'#e0e0e0';
+  document.getElementById('tab-installer').style.background=role==='installer'?'#065f46':'transparent';
+  document.getElementById('tab-installer').style.color=role==='installer'?'#fff':'#888';
+  document.getElementById('tab-installer').style.borderColor=role==='installer'?'#065f46':'#e0e0e0';
+  document.getElementById('add-title').textContent=role==='installer'?'➕ Add new installer':'➕ Add new surveyor';
+  document.getElementById('list-title').textContent=role==='installer'?'🔧 Installer accounts':'👥 Surveyor accounts';
+  loadUsers();
+}
+
 async function loadUsers(){
   const list=document.getElementById('users-list');
   list.innerHTML='<div class="empty-users">Loading...</div>';
-  const data=await authCall({action:'list_users',token:adminToken});
+  const data=await authCall({action:'list_users',token:adminToken,role:currentRole});
   if(data.error){list.innerHTML='<div class="empty-users">'+data.error+'</div>';return;}
   if(!data.users||data.users.length===0){
-    list.innerHTML='<div class="empty-users">No surveyors added yet — add one above</div>';
+    list.innerHTML='<div class="empty-users">No '+(currentRole==='installer'?'installers':'surveyors')+' added yet — add one above</div>';
     return;
   }
+  const icon=currentRole==='installer'?'🔧':'👤';
   list.innerHTML=data.users.map(u=>`
     <div class="user-row">
-      <div class="user-name">👤 ${u.name}</div>
+      <div class="user-name">${icon} ${u.name}</div>
       <div class="user-actions">
         <button class="btn-edit" onclick="openChangeModal('${u.name}')">Change password</button>
         <button class="btn-del" onclick="deleteUser('${u.name}')">Delete</button>
@@ -183,7 +205,7 @@ async function addUser(){
   const errorEl=document.getElementById('add-error');
   successEl.style.display='none';errorEl.style.display='none';
   if(!name||!pass){errorEl.textContent='Please enter both name and password';errorEl.style.display='block';return;}
-  const data=await authCall({action:'add_user',token:adminToken,name,password:pass});
+  const data=await authCall({action:'add_user',token:adminToken,name,password:pass,role:currentRole});
   if(data.success){
     successEl.style.display='block';
     document.getElementById('new-name').value='';
@@ -197,8 +219,8 @@ async function addUser(){
 }
 
 async function deleteUser(name){
-  if(!confirm(`Delete surveyor "${name}"? They will no longer be able to log in.`))return;
-  const data=await authCall({action:'delete_user',token:adminToken,name});
+  if(!confirm(`Delete "${name}"? They will no longer be able to log in.`))return;
+  const data=await authCall({action:'delete_user',token:adminToken,name,role:currentRole});
   if(data.success)loadUsers();
   else alert('Could not delete: '+data.error);
 }
@@ -221,7 +243,7 @@ async function confirmChangePassword(){
   const err=document.getElementById('change-error');
   if(!np){err.textContent='Please enter a password';err.style.display='block';return;}
   if(np!==cp){err.textContent='Passwords do not match';err.style.display='block';return;}
-  const data=await authCall({action:'change_password',token:adminToken,name:changingUser,newPassword:np});
+  const data=await authCall({action:'change_password',token:adminToken,name:changingUser,newPassword:np,role:currentRole});
   if(data.success){closeChangeModal();alert('Password updated successfully');}
   else{err.textContent=data.error||'Could not update password';err.style.display='block';}
 }
