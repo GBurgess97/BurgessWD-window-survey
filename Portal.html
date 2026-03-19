@@ -534,8 +534,9 @@ async function saveAppointment(){
       await mondayQuery(`mutation { change_column_value(board_id:${BOARD_ID}, item_id:${selectedJob.id}, column_id:"${selectedJob.dateColId}", value:"{\\"date\\":\\"${date}\\"}") { id } }`);
     }
     // Update time column
+    // Update time column — plain text value
     if(time&&selectedJob.timeColId){
-      await mondayQuery(`mutation { change_column_value(board_id:${BOARD_ID}, item_id:${selectedJob.id}, column_id:"${selectedJob.timeColId}", value:${JSON.stringify(JSON.stringify(time))}) { id } }`);
+      await mondayQuery(`mutation { change_simple_column_value(board_id:${BOARD_ID}, item_id:${selectedJob.id}, column_id:"${selectedJob.timeColId}", value:"${time}") { id } }`);
     }
     document.getElementById('appt-saved').style.display='block';
     document.getElementById('detail-date').textContent=date||selectedJob.date||'—';
