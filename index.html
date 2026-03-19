@@ -121,6 +121,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .sketch-thumb{width:80px;height:56px;object-fit:contain;border:1px solid #e5e5e5;border-radius:5px}
 .bottom-bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 .bottom-bar .btn{flex:1;min-width:140px;padding:12px;font-size:14px}
+.sticky-submit{position:sticky;bottom:0;background:#f5f5f3;padding:10px 0;z-index:50;margin:0 -16px;padding:10px 16px;border-top:1px solid #e5e5e5}
 .upload-progress{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-top:10px;display:none}
 .progress-title{font-size:13px;font-weight:500;color:#1e40af;margin-bottom:8px}
 .progress-step{display:flex;align-items:center;gap:8px;font-size:12px;color:#64748b;margin-bottom:4px}
@@ -128,7 +129,92 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .step-icon{width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
 .step-icon.done{background:#d1fae5;color:#059669}.step-icon.active{background:#dbeafe;color:#1e40af}
 .step-icon.error{background:#fee2e2;color:#dc2626}.step-icon.wait{background:#f3f4f6;color:#9ca3af}
-@media(max-width:600px){.row{grid-template-columns:1fr 1fr}.row-2{grid-template-columns:1fr}.split-grid{grid-template-columns:1fr}}
+@media(max-width:768px){
+  /* Header */
+  .app-header{padding:10px 14px}
+  .app-title{font-size:14px}
+  #job-chip{max-width:120px;font-size:11px}
+  #portal-back-btn{font-size:11px;padding:5px 8px}
+
+  /* Container */
+  .container{padding:12px 10px}
+
+  /* Tabs */
+  .tab-bar{gap:4px}
+  .tab{padding:7px 12px;font-size:12px}
+
+  /* Section */
+  .section{padding:12px 12px}
+
+  /* Rows — single column on mobile */
+  .row{grid-template-columns:1fr}
+  .row-2{grid-template-columns:1fr}
+  .split-grid{grid-template-columns:1fr 1fr}
+
+  /* Fields */
+  .field input,.field select,.field textarea{font-size:16px;padding:10px 12px}
+
+  /* Item cards */
+  .item-form{padding:10px}
+  .sub-section{padding:10px}
+  .save-bar{padding-top:12px;margin-top:12px}
+  .save-bar .btn{width:100%;padding:12px;font-size:14px}
+
+  /* Bottom bar */
+  .bottom-bar{flex-direction:column;gap:8px}
+  .bottom-bar .btn{width:100%;padding:14px;font-size:14px}
+
+  /* Order table — scrollable */
+  .order-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* Summary grid */
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+
+  /* Canvas toolbar — wrap nicely */
+  .canvas-toolbar{gap:4px;padding:6px 8px}
+  .tool-btn{padding:6px 10px;font-size:12px}
+  .stroke-btn{padding:5px 8px}
+  .color-swatch{width:26px;height:26px}
+
+  /* Items header */
+  .items-header{flex-wrap:wrap;gap:8px}
+  .items-title{font-size:14px}
+
+  /* Saved item cards */
+  .item-card.saved > div{padding:10px 12px}
+
+  /* Breakdown boxes */
+  .breakdown-box{font-size:12px}
+  .brow{padding:4px 0}
+
+  /* Side boxes */
+  .side-box{padding:8px}
+  .side-label{font-size:10px}
+  .side-row{font-size:12px}
+
+  /* Upload areas */
+  .img-upload-area{padding:16px}
+  .img-preview-grid{grid-template-columns:repeat(auto-fill,minmax(64px,1fr))}
+
+  /* Progress */
+  .upload-progress{padding:10px 12px}
+  .progress-step{font-size:12px}
+
+  /* Token banner */
+  .token-banner{flex-direction:column;align-items:flex-start;gap:6px;padding:10px 12px}
+
+  /* Modal */
+  .modal{padding:22px 18px}
+  .modal-title{font-size:17px}
+}
+
+@media(max-width:400px){
+  .row{grid-template-columns:1fr}
+  .split-grid{grid-template-columns:1fr}
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+  .app-header-right{gap:6px}
+  .tab{padding:6px 10px;font-size:11px}
+}
 </style>
 </head>
 <body>
@@ -205,7 +291,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       </div>
       <div id="items-list"><p style="color:#999;font-size:13px;text-align:center;padding:20px 0">No items yet — click "+ Add item" to start</p></div>
     </div>
-    <div class="bottom-bar">
+    <div class="bottom-bar sticky-submit">
       <button class="btn btn-primary" onclick="generateOrder()">Calculate order sizes ↗</button>
       <button class="btn btn-success" id="submit-btn" onclick="submitSurvey()">Submit &amp; upload to Monday</button>
     </div>
@@ -419,7 +505,7 @@ function generateOrderSheetPDF(){
     const d=item.data,res=computeItemResults(d);
     return[idx+1,d.loc||'—',d.type||'—',d.qty||1,d.sw&&d.sh?`${d.sw}×${d.sh}`:'-',res.ow&&res.oh?`${res.ow}×${res.oh}`:'-',d.cillType||'No cill',res.upstandNote,d.opening||'—',isWindow(d.type)?(d.hingeType||'—'):'—',d.glassType||'—',d.glassFinish||'—',d.ventSize&&d.ventSize!=='N/A'?`${d.ventSize}×${d.ventQty||0}`:'N/A',res.needsAddon?'ADD-ON':'OK',d.col||'—',d.glz||'—'];
   });
-  doc.autoTable({startY:25,head:[['#','Location','Product','Qty','Survey','Order','Cill','Upstand','Opening','Hinge','Glass','Finish','Vent','Frame','Colour','Glazing']],body:tableData,styles:{fontSize:7.5,cellPadding:2},headStyles:{fillColor:[30,64,175],textColor:255,fontStyle:'bold'},alternateRowStyles:{fillColor:[248,250,252]},columnStyles:{0:{cellWidth:8},1:{cellWidth:22},2:{cellWidth:28},3:{cellWidth:8},4:{cellWidth:20},5:{cellWidth:20},6:{cellWidth:22},7:{cellWidth:18},8:{cellWidth:18},9:{cellWidth:16},10:{cellWidth:16},11:{cellWidth:12},12:{cellWidth:14},13:{cellWidth:14},14:{cellWidth:14},15:{cellWidth:14}},didParseCell:function(data){if(data.section==='body'&&data.column.index===13){if(data.cell.raw==='ADD-ON'){data.cell.styles.textColor=[220,38,38];data.cell.styles.fontStyle='bold';}else{data.cell.styles.textColor=[5,150,105];}}}});
+  doc.autoTable({startY:25,head:[['#','Location','Product','Qty','Survey','Order','Cill','Upstand','Opening','Hinge','Glass','Finish','Vent','Frame','Colour','Glazing']],body:tableData,styles:{fontSize:7.5,cellPadding:2},headStyles:{fillColor:[30,64,175],textColor:255,fontStyle:'bold'},alternateRowStyles:{fillColor:[248,250,252]},columnStyles:{0:{cellWidth:7},1:{cellWidth:18},2:{cellWidth:24},3:{cellWidth:7},4:{cellWidth:17},5:{cellWidth:17},6:{cellWidth:18},7:{cellWidth:13},8:{cellWidth:15},9:{cellWidth:13},10:{cellWidth:13},11:{cellWidth:10},12:{cellWidth:11},13:{cellWidth:11},14:{cellWidth:12},15:{cellWidth:12}},didParseCell:function(data){if(data.section==='body'&&data.column.index===13){if(data.cell.raw==='ADD-ON'){data.cell.styles.textColor=[220,38,38];data.cell.styles.fontStyle='bold';}else{data.cell.styles.textColor=[5,150,105];}}}});
   const pc=doc.getNumberOfPages();for(let i=1;i<=pc;i++){doc.setPage(i);doc.setFontSize(7);doc.setTextColor(150,150,150);doc.text(`${jobName} — Order Sheet — Page ${i} of ${pc}`,14,207);}
   return doc.output('blob');
 }
@@ -456,8 +542,9 @@ async function submitSurvey(){
     try{
       const statusCol=cols.find(c=>c.title==='Survey Stage')||cols.find(c=>c.type==='color');
       if(statusCol){
-        const statusVal=JSON.stringify(JSON.stringify({[statusCol.id]:{label:'Complete'}}));
-        await mondayQuery(`mutation { change_multiple_column_values(board_id:${BOARD_ID}, item_id:${mondayItemId}, column_values:${statusVal}) { id } }`);
+        // Use change_column_value with properly escaped JSON string
+        const labelJson=JSON.stringify(JSON.stringify({label:'Complete'}));
+        await mondayQuery(`mutation { change_column_value(board_id:${BOARD_ID}, item_id:${mondayItemId}, column_id:"${statusCol.id}", value:${labelJson}) { id } }`);
       }
     }catch(e){console.warn('Could not update status:',e);}
     document.getElementById('progress-title').textContent='Upload complete!';document.getElementById('progress-title').style.color='#059669';
@@ -506,7 +593,7 @@ function renderPropImages(){const grid=g('prop-img-grid');if(!grid)return;grid.i
 function initCanvas(id){
   const canvas=g(id+'-canvas');if(!canvas||canvasState[id])return;
   const state={tool:'pen',color:'#1a1a1a',stroke:2,drawing:false,startX:0,startY:0,snapshot:null};canvasState[id]=state;
-  const ctx=canvas.getContext('2d');ctx.lineCap='round';ctx.lineJoin='round';canvas.width=canvas.offsetWidth||600;canvas.height=280;
+  const ctx=canvas.getContext('2d');ctx.lineCap='round';ctx.lineJoin='round';canvas.width=canvas.offsetWidth||600;canvas.height=window.innerWidth<600?200:280;
   function getPos(e){const rect=canvas.getBoundingClientRect();const scaleX=canvas.width/rect.width,scaleY=canvas.height/rect.height;const src=e.touches?e.touches[0]:e;return{x:(src.clientX-rect.left)*scaleX,y:(src.clientY-rect.top)*scaleY};}
   function startDraw(e){e.preventDefault();const{x,y}=getPos(e);state.drawing=true;state.startX=x;state.startY=y;state.snapshot=ctx.getImageData(0,0,canvas.width,canvas.height);if(state.tool==='pen'||state.tool==='eraser'){ctx.beginPath();ctx.moveTo(x,y);}}
   function draw(e){e.preventDefault();if(!state.drawing)return;const{x,y}=getPos(e);ctx.strokeStyle=state.tool==='eraser'?'#ffffff':state.color;ctx.lineWidth=state.tool==='eraser'?20:state.stroke;if(state.tool==='pen'){ctx.lineTo(x,y);ctx.stroke();}else{ctx.putImageData(state.snapshot,0,0);ctx.beginPath();if(state.tool==='rect')ctx.strokeRect(state.startX,state.startY,x-state.startX,y-state.startY);else if(state.tool==='line'){ctx.moveTo(state.startX,state.startY);ctx.lineTo(x,y);ctx.stroke();}else if(state.tool==='arrow')drawArrow(ctx,state.startX,state.startY,x,y,state.color,state.stroke);}}
