@@ -637,7 +637,6 @@ async function loadJobFiles(itemId){
     });
     // Filter assets to only those in the specified columns
     const allAssets=item.assets||[];
-    const allAssets=item.assets||[];
     loading.style.display='none';
     if(allAssets.length===0){loading.textContent='No files uploaded yet.';loading.style.display='block';return;}
     const imgExts=['jpg','jpeg','png','gif','webp','heic'];
