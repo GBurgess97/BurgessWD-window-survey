@@ -637,6 +637,7 @@ async function loadJobFiles(itemId){
     });
     // Filter assets to only those in the specified columns
     const allAssets=item.assets||[];
+    console.log('All assets from Monday:', JSON.stringify(allAssets.map(a=>({id:a.id,name:a.name,public_url:a.public_url,file_extension:a.file_extension}))));
     const files=assetIds.size>0?allAssets.filter(a=>assetIds.has(String(a.id))):allAssets;
     loading.style.display='none';
     if(files.length===0){loading.textContent='No files uploaded yet.';loading.style.display='block';return;}
