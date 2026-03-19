@@ -30,11 +30,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .welcome-sub{font-size:12px;color:#64748b;margin-top:2px}
 .btn-signout{background:transparent;border:1px solid #e0e0e0;color:#64748b;padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
 .btn-signout:hover{background:#f5f5f5}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
 .stat-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px;text-align:center}
 .stat-val{font-size:28px;font-weight:700;margin-bottom:2px}
 .stat-lbl{font-size:11px;color:#888}
-.stat-card.outstanding .stat-val{color:#d97706}
+.stat-card.tobook .stat-val{color:#ef4444}
+.stat-card.booked .stat-val{color:#3b82f6}
 .stat-card.complete .stat-val{color:#059669}
 .stat-card.total .stat-val{color:#1e40af}
 .jobs-section{background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:16px}
@@ -69,6 +70,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .btn-refresh{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500}
 .btn-refresh:hover{background:#dbeafe}
 .error-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 16px;font-size:13px;color:#991b1b;margin-bottom:14px}
+
+/* Files */
+.file-thumb{background:#f8fafc;border:1px solid #e5e5e5;border-radius:8px;overflow:hidden;text-align:center;cursor:pointer;transition:all 0.15s}
+.file-thumb:hover{border-color:#3b82f6;background:#eff6ff}
+.file-thumb img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.file-thumb-pdf{width:100%;aspect-ratio:1;background:#fee2e2;display:flex;align-items:center;justify-content:center;font-size:28px}
+.file-thumb-name{font-size:10px;color:#64748b;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Diary */
+.diary-entry{padding:14px 18px;border-bottom:1px solid #f5f5f5;display:flex;align-items:flex-start;gap:14px}
+.diary-entry:last-child{border-bottom:none}
+.diary-date-block{flex-shrink:0;width:52px;text-align:center;background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:6px 4px}
+.diary-day{font-size:22px;font-weight:700;color:#1e40af;line-height:1}
+.diary-month{font-size:10px;color:#3b82f6;font-weight:600;text-transform:uppercase;margin-top:2px}
+.diary-dow{font-size:10px;color:#64748b;margin-top:1px}
+.diary-info{flex:1;min-width:0}
+.diary-job-name{font-weight:600;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.diary-job-meta{font-size:12px;color:#64748b;margin-bottom:4px}
+.diary-time-badge{display:inline-block;background:#fef3c7;color:#92400e;font-size:11px;font-weight:500;padding:2px 8px;border-radius:5px}
+.diary-entry.today .diary-date-block{background:#1e40af;border-color:#1e40af}
+.diary-entry.today .diary-day{color:#fff}
+.diary-entry.today .diary-month{color:#93c5fd}
+.diary-entry.today .diary-dow{color:#bfdbfe}
+.diary-open-btn{flex-shrink:0;background:transparent;border:1px solid #e0e0e0;color:#64748b;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
+.diary-open-btn:hover{background:#f5f5f5}
+.diary-empty{padding:40px 20px;text-align:center;color:#9ca3af}
+.main-tabs{display:flex;gap:6px;margin-bottom:14px}
+.main-tab{padding:8px 20px;border:1px solid #e0e0e0;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500}
+.main-tab.active{background:#1e40af;color:#fff;border-color:#1e40af}
 
 /* Job detail panel */
 .job-detail{display:none;background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:16px}
@@ -167,9 +196,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div id="error-box" class="error-box" style="display:none"></div>
 
     <div class="stats-grid">
-      <div class="stat-card outstanding"><div class="stat-val" id="stat-outstanding">—</div><div class="stat-lbl">Outstanding</div></div>
-      <div class="stat-card complete"><div class="stat-val" id="stat-complete">—</div><div class="stat-lbl">Completed</div></div>
-      <div class="stat-card total"><div class="stat-val" id="stat-total">—</div><div class="stat-lbl">Total jobs</div></div>
+      <div class="stat-card tobook"><div class="stat-val" id="stat-tobook">—</div><div class="stat-lbl">To Book</div></div>
+      <div class="stat-card booked"><div class="stat-val" id="stat-booked">—</div><div class="stat-lbl">Booked</div></div>
+      <div class="stat-card complete"><div class="stat-val" id="stat-complete">—</div><div class="stat-lbl">Complete</div></div>
+      <div class="stat-card total"><div class="stat-val" id="stat-total">—</div><div class="stat-lbl">Total</div></div>
     </div>
 
     <!-- Job detail panel -->
@@ -222,11 +252,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           <div class="appt-saved" id="appt-saved">✓ Appointment saved and Monday updated successfully</div>
         </div>
 
+        <!-- Files from Monday -->
+        <div class="detail-section" id="files-section" style="display:none">
+          <div class="detail-section-title">Survey files &amp; photos</div>
+          <div id="files-loading" style="font-size:12px;color:#888;padding:8px 0">Loading files...</div>
+          <div id="files-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:8px"></div>
+        </div>
+
         <!-- Action buttons -->
         <div class="action-btns">
           <button class="btn-action btn-survey" id="undertake-btn" onclick="undertakeSurvey()">Start survey →</button>
         </div>
 
+      </div>
+    </div>
+
+    <!-- Main tabs -->
+    <div class="main-tabs">
+      <button class="main-tab active" onclick="switchMainTab('jobs',this)">My jobs</button>
+      <button class="main-tab" onclick="switchMainTab('diary',this)">My diary</button>
+    </div>
+
+    <!-- Diary section -->
+    <div id="diary-section" style="display:none">
+      <div class="jobs-section">
+        <div class="jobs-header">
+          <div class="jobs-title">Upcoming appointments</div>
+          <div style="font-size:12px;color:#888">Showing scheduled surveys</div>
+        </div>
+        <div id="diary-list"><div class="loading"><div class="spinner"></div>Loading diary...</div></div>
       </div>
     </div>
 
@@ -363,11 +417,11 @@ async function loadJobs(){
 
 function getStatusClass(status){
   const s=(status||'').toLowerCase();
-  if(s.includes('complete'))return{dot:'complete',badge:'status-complete'};
-  if(s.includes('confirm'))return{dot:'confirmed',badge:'status-confirmed'};
+  if(s==='complete')return{dot:'complete',badge:'status-complete'};
+  if(s==='survey confirmed')return{dot:'confirmed',badge:'status-confirmed'};
   return{dot:'booked',badge:'status-booked'};
 }
-function isComplete(status){return(status||'').toLowerCase().includes('complete');}
+function isComplete(status){return(status||'').toLowerCase()==='complete';}
 function filterJobs(filter,btn){
   currentFilter=filter;
   document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
@@ -401,10 +455,13 @@ function renderJobs(){
 }
 function updateStats(){
   const total=allJobs.length;
-  const complete=allJobs.filter(j=>isComplete(j.status)).length;
+  const tobook=allJobs.filter(j=>(j.status||'').toLowerCase()==='to book').length;
+  const booked=allJobs.filter(j=>(j.status||'').toLowerCase()==='survey confirmed').length;
+  const complete=allJobs.filter(j=>(j.status||'').toLowerCase()==='complete').length;
   document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-tobook').textContent=tobook;
+  document.getElementById('stat-booked').textContent=booked;
   document.getElementById('stat-complete').textContent=complete;
-  document.getElementById('stat-outstanding').textContent=total-complete;
 }
 
 function openJobDetail(jobId){
@@ -435,6 +492,8 @@ function openJobDetail(jobId){
   }
   document.getElementById('appt-saved').style.display='none';
   document.getElementById('contact-reveal').style.display='none';
+  // Load files
+  loadJobFiles(selectedJob.id);
   // Hide complete survey btn if already done
   const btn=document.getElementById('undertake-btn');
   if(isComplete(selectedJob.status)){
@@ -493,6 +552,106 @@ function undertakeSurvey(){
   if(!selectedJob)return;
   const url=SURVEY_URL+'?job='+selectedJob.id+'&name='+encodeURIComponent(selectedJob.name)+'&portal=1';
   window.location.href=url;
+}
+
+async function loadJobFiles(itemId){
+  const section=document.getElementById('files-section');
+  const grid=document.getElementById('files-grid');
+  const loading=document.getElementById('files-loading');
+  section.style.display='block';
+  grid.innerHTML='';
+  loading.style.display='block';
+  loading.textContent='Loading files...';
+  try{
+    // Get file column IDs
+    const specSheetCol=boardColumns.find(c=>c.title==='Spec Sheet');
+    const photosCol=boardColumns.find(c=>c.title==='Photos Videos Plans');
+    if(!specSheetCol&&!photosCol){loading.textContent='No file columns found.';return;}
+    const colIds=[specSheetCol?.id,photosCol?.id].filter(Boolean);
+    // Fetch assets for this item
+    const data=await mondayQuery(`query {
+      items(ids:${itemId}){
+        assets { id name url file_extension public_url }
+        column_values(ids:${JSON.stringify(colIds)}){
+          id
+          ... on FileValue { files { asset_id name url file_extension } }
+        }
+      }
+    }`);
+    const item=data.data?.items?.[0];
+    if(!item){loading.textContent='Could not load files.';return;}
+    // Collect all files from both columns
+    const files=[];
+    (item.column_values||[]).forEach(col=>{
+      (col.files||[]).forEach(f=>files.push(f));
+    });
+    // Fallback to assets if column files empty
+    if(files.length===0&&item.assets){
+      item.assets.forEach(a=>files.push({name:a.name,url:a.public_url||a.url,file_extension:a.file_extension}));
+    }
+    loading.style.display='none';
+    if(files.length===0){loading.textContent='No files uploaded yet.';loading.style.display='block';return;}
+    const imgExts=['jpg','jpeg','png','gif','webp','heic'];
+    grid.innerHTML=files.map(f=>{
+      const ext=(f.file_extension||'').toLowerCase().replace('.','');
+      const isImg=imgExts.includes(ext);
+      const url=f.public_url||f.url||'';
+      return `<div class="file-thumb" onclick="window.open('${url}','_blank')">
+        ${isImg?`<img src="${url}" alt="${f.name}" onerror="this.parentElement.querySelector('.file-thumb-pdf').style.display='flex';this.style.display='none'">
+        <div class="file-thumb-pdf" style="display:none">🖼️</div>`:
+        `<div class="file-thumb-pdf">${ext==='pdf'?'📄':'📎'}</div>`}
+        <div class="file-thumb-name">${f.name||'File'}</div>
+      </div>`;
+    }).join('');
+  }catch(err){
+    loading.textContent='Could not load files: '+err.message;
+  }
+}
+
+function switchMainTab(tab, btn){
+  document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('jobs-section').style.display=tab==='jobs'?'block':'none';
+  document.getElementById('diary-section').style.display=tab==='diary'?'block':'none';
+  if(tab==='diary')renderDiary();
+}
+
+function renderDiary(){
+  const list=document.getElementById('diary-list');
+  // Get jobs with dates, sorted by date ascending, only future/today
+  const today=new Date();today.setHours(0,0,0,0);
+  const scheduled=allJobs
+    .filter(j=>j.date&&!isComplete(j.status))
+    .map(j=>({...j,dateObj:new Date(j.date)}))
+    .filter(j=>j.dateObj>=today)
+    .sort((a,b)=>a.dateObj-b.dateObj);
+
+  if(scheduled.length===0){
+    list.innerHTML=`<div class="diary-empty"><div style="font-size:36px;margin-bottom:10px">📅</div><div style="font-size:15px;font-weight:600;color:#64748b;margin-bottom:4px">No upcoming appointments</div><div style="font-size:13px">Scheduled surveys will appear here</div></div>`;
+    return;
+  }
+
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const todayStr=today.toISOString().slice(0,10);
+
+  list.innerHTML=scheduled.map(job=>{
+    const d=job.dateObj;
+    const isToday=job.date===todayStr;
+    return `<div class="diary-entry${isToday?' today':''}">
+      <div class="diary-date-block">
+        <div class="diary-day">${d.getDate()}</div>
+        <div class="diary-month">${months[d.getMonth()]}</div>
+        <div class="diary-dow">${days[d.getDay()]}</div>
+      </div>
+      <div class="diary-info">
+        <div class="diary-job-name">${job.name}</div>
+        <div class="diary-job-meta">${job.address||'No address'}</div>
+        ${job.time?`<span class="diary-time-badge">🕐 ${job.time}</span>`:'<span style="font-size:11px;color:#9ca3af">No time set</span>'}
+      </div>
+      <button class="diary-open-btn" onclick="openJobDetail('${job.id}')">View →</button>
+    </div>`;
+  }).join('');
 }
 
 window.addEventListener('load',()=>{
