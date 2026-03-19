@@ -392,7 +392,7 @@ async function loadJobs() {
     const dateId = col('Survey Date') || '';
     const timeId = col('Survey Time') || '';
     const addressId = col('Site Address') || '';
-    const phoneId = boardColumns.find(c => c.title.toLowerCase().includes('phone') || c.title.toLowerCase().includes('mobile'))?.id || '';
+    const phoneId = col('Phone') || boardColumns.find(c => c.title.toLowerCase().includes('phone'))?.id || '';
 
     // Get items
     const itemData = await mondayQuery(`query {
@@ -405,6 +405,7 @@ async function loadJobs() {
               ... on PeopleValue { persons_and_teams { id } }
               ... on StatusValue { label }
               ... on DateValue { date }
+              ... on PhoneValue { phone }
             }
           }
         }
@@ -425,7 +426,7 @@ async function loadJobs() {
         date: cv(item, dateId)?.date || cv(item, dateId)?.text || '',
         time: cv(item, timeId)?.text || '',
         address: cv(item, addressId)?.text || '',
-        phone: cv(item, phoneId)?.text || '',
+        phone: cv(item, phoneId)?.phone || cv(item, phoneId)?.text || '',
         surveyorId, statusId, dateId, timeId, addressId, phoneId
       }));
 
@@ -505,7 +506,12 @@ function openDetail(jobId) {
   document.getElementById('d-address').textContent = selectedJob.address || '—';
   document.getElementById('d-date').textContent = selectedJob.date || 'Not scheduled';
   document.getElementById('d-time').textContent = selectedJob.time || 'Not scheduled';
-  document.getElementById('d-phone').textContent = selectedJob.phone || 'Not available';
+  const phoneEl = document.getElementById('d-phone');
+  if(selectedJob.phone){
+    phoneEl.innerHTML = `<a href="tel:${selectedJob.phone}" style="color:#1e40af;text-decoration:none;font-weight:500">${selectedJob.phone}</a>`;
+  } else {
+    phoneEl.textContent = 'Not available';
+  }
   document.getElementById('appt-date').value = selectedJob.date || '';
   document.getElementById('appt-time').value = selectedJob.time || '';
   document.getElementById('appt-saved').style.display = 'none';
