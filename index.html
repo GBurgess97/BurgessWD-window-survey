@@ -452,13 +452,14 @@ async function submitSurvey(){
     const addonCount=items.filter(i=>computeItemResults(i.data).needsAddon).length;
     await addUpdate(mondayItemId,`Survey completed by ${v('surveyor')||'surveyor'} on ${v('surveyDate')||dateStr}. Items: ${items.length} lines / ${totalUnits} total units. Add-ons flagged: ${addonCount}. Full survey PDF and clean order sheet uploaded.`);
     // Update Survey Status to Survey Complete
+    // Update Survey Stage to Complete
     try{
       const statusCol=cols.find(c=>c.title==='Survey Stage')||cols.find(c=>c.type==='color');
       if(statusCol){
-        await mondayQuery(`mutation { change_column_value(board_id: ${BOARD_ID}, item_id: ${mondayItemId}, column_id: "${statusCol.id}", value: "{\"label\":\"Complete\"}") { id } }`);
+        const statusVal=JSON.stringify(JSON.stringify({[statusCol.id]:{label:'Complete'}}));
+        await mondayQuery(`mutation { change_multiple_column_values(board_id:${BOARD_ID}, item_id:${mondayItemId}, column_values:${statusVal}) { id } }`);
       }
     }catch(e){console.warn('Could not update status:',e);}
-    setStep(5,'done');
     document.getElementById('progress-title').textContent='Upload complete!';document.getElementById('progress-title').style.color='#059669';
     btn.textContent='Uploaded ✓';btn.style.background='#10b981';
     setTimeout(()=>{btn.disabled=false;btn.textContent='Submit & upload to Monday';btn.style.background='';document.getElementById('upload-progress').style.display='none';},5000);
