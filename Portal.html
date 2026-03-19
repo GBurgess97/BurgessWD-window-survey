@@ -637,33 +637,39 @@ async function loadJobFiles(itemId){
     });
     // Filter assets to only those in the specified columns
     const allAssets=item.assets||[];
-    const files=assetIds.size>0?allAssets.filter(a=>assetIds.has(String(a.id))):allAssets;
+    const allAssets=item.assets||[];
     loading.style.display='none';
-    if(files.length===0){loading.textContent='No files uploaded yet.';loading.style.display='block';return;}
+    if(allAssets.length===0){loading.textContent='No files uploaded yet.';loading.style.display='block';return;}
     const imgExts=['jpg','jpeg','png','gif','webp','heic'];
-    // Log files for debugging
-    console.log('Files found:', files.map(f=>({name:f.name,public_url:f.public_url,url:f.url,ext:f.file_extension})));
-    grid.innerHTML=files.map(f=>{
+    console.log('Files found:', allAssets.length);
+    grid.style.gridTemplateColumns='1fr';
+    grid.style.gap='12px';
+    grid.innerHTML=allAssets.map(f=>{
       const ext=(f.file_extension||'').toLowerCase().replace('.','');
       const isImg=imgExts.includes(ext);
-      const rawUrl=f.public_url||f.url||'';
-      if(!rawUrl){
-        return `<div class="file-thumb" style="opacity:0.5">
-          <div class="file-thumb-pdf">❌</div>
-          <div class="file-thumb-name">${f.name||'No URL'}</div>
+      const url=f.public_url||f.url||'';
+      if(!url) return '';
+      if(isImg){
+        return `<div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:4px">
+          <img src="${url}" alt="${f.name||'Image'}" style="width:100%;display:block;cursor:pointer;border-radius:10px 10px 0 0" onclick="window.open('${url}','_blank')" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div style="display:none;height:80px;align-items:center;justify-content:center;gap:8px;background:#f0f0f0;cursor:pointer;border-radius:10px 10px 0 0" onclick="window.open('${url}','_blank')">
+            <span style="font-size:24px">🖼️</span><span style="font-size:12px;color:#64748b">Tap to open</span>
+          </div>
+          <div style="padding:8px 12px;font-size:12px;color:#64748b;display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${f.name||'Image'}</span>
+            <a href="${url}" target="_blank" style="background:#1e40af;color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;text-decoration:none;font-weight:500;flex-shrink:0">Open ↗</a>
+          </div>
+        </div>`;
+      }else{
+        return `<div style="background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px">
+          <div style="font-size:36px;flex-shrink:0">${ext==='pdf'?'📄':'📎'}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:500;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.name||'Document'}</div>
+            <a href="${url}" target="_blank" style="background:#1e40af;color:#fff;padding:8px 16px;border-radius:7px;font-size:13px;text-decoration:none;font-weight:500;display:inline-block">Open ↗</a>
+          </div>
         </div>`;
       }
-      const proxyUrl='/monday-file?url='+encodeURIComponent(rawUrl);
-      const safeName=encodeURIComponent(f.name||'file');
-      const viewerProxyUrl='/monday-file?url='+encodeURIComponent(rawUrl)+'&name='+safeName;
-      return `<div class="file-thumb" onclick="openViewer('${viewerProxyUrl}','${(f.name||'File').replace(/'/g,'')  }','${isImg?'image':'pdf'}')">
-        ${isImg?`<img src="${proxyUrl}" alt="${f.name}" loading="lazy" onerror="this.parentElement.querySelector('.file-thumb-pdf').style.display='flex';this.style.display='none'">
-        <div class="file-thumb-pdf" style="display:none">🖼️</div>`:
-        `<div class="file-thumb-pdf">${ext==='pdf'?'📄':'📎'}</div>`}
-        <div class="file-thumb-name">${f.name||'File'}</div>
-      </div>`;
     }).join('');
-  }catch(err){
     loading.textContent='Could not load files: '+err.message;
   }
 }
