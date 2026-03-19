@@ -643,9 +643,11 @@ async function loadJobFiles(itemId){
     grid.innerHTML=files.map(f=>{
       const ext=(f.file_extension||'').toLowerCase().replace('.','');
       const isImg=imgExts.includes(ext);
-      const url=f.public_url||'';
-      return `<div class="file-thumb" onclick="window.open('${url}','_blank')">
-        ${isImg?`<img src="${url}" alt="${f.name}" onerror="this.parentElement.querySelector('.file-thumb-pdf').style.display='flex';this.style.display='none'">
+      const rawUrl=f.public_url||'';
+      // Route through proxy for reliable mobile access
+      const proxyUrl='/monday-file?url='+encodeURIComponent(rawUrl);
+      return `<div class="file-thumb" onclick="window.open('${proxyUrl}','_blank')">
+        ${isImg?`<img src="${proxyUrl}" alt="${f.name}" loading="lazy" onerror="this.parentElement.querySelector('.file-thumb-pdf').style.display='flex';this.style.display='none'">
         <div class="file-thumb-pdf" style="display:none">🖼️</div>`:
         `<div class="file-thumb-pdf">${ext==='pdf'?'📄':'📎'}</div>`}
         <div class="file-thumb-name">${f.name||'File'}</div>
