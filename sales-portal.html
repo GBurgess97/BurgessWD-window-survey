@@ -2419,7 +2419,11 @@ async function saveNewContact() {
     const spId = gc('Sales Person');
     const filesColId = gc('Files');
 
-    // Build column values — text columns only (not People which needs user ID)
+    // Build column values
+    // Text columns: plain string value
+    // Status/dropdown columns: {label: "value"}
+    // Phone: {phone: "number", countryShortName: "GB"}
+    // Email: {email: "addr", text: "addr"}
     const colVals = {};
     const phone = document.getElementById('nc-phone').value.trim();
     const email = document.getElementById('nc-email').value.trim();
@@ -2428,10 +2432,25 @@ async function saveNewContact() {
     const leadSource = document.getElementById('nc-leadsource').value.trim();
     const comments = document.getElementById('nc-comments').value.trim();
 
-    if (phoneId && phone) colVals[phoneId] = phone;
-    if (emailId && email) colVals[emailId] = email;
+    // Find column types to send correct format
+    const getColType = function(id) {
+      const c = cols.find(function(c){ return c.id === id; });
+      return c ? c.type : 'text';
+    };
+
+    if (phoneId && phone) {
+      const t = getColType(phoneId);
+      colVals[phoneId] = t === 'phone' ? { phone: phone, countryShortName: 'GB' } : phone;
+    }
+    if (emailId && email) {
+      const t = getColType(emailId);
+      colVals[emailId] = t === 'email' ? { email: email, text: email } : email;
+    }
     if (locId && location) colVals[locId] = location;
-    if (typeId && clientType) colVals[typeId] = JSON.stringify({ label: clientType });
+    if (typeId && clientType) {
+      const t = getColType(typeId);
+      colVals[typeId] = (t === 'color' || t === 'status' || t === 'dropdown') ? { label: clientType } : clientType;
+    }
     if (leadSourceId && leadSource) colVals[leadSourceId] = leadSource;
     if (commentsId && comments) colVals[commentsId] = comments;
 
