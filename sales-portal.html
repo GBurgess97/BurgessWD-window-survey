@@ -314,6 +314,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <button class="qtab" onclick="showQTab('products',this)">🪟 Products</button>
       <button class="qtab" onclick="showQTab('photos',this)">📸 Photos</button>
       <button class="qtab" onclick="showQTab('files',this);loadMondayFiles()">📁 Files</button>
+      <button class="qtab" onclick="showQTab('quote',this)">📄 Quote</button>
       <button class="qtab" onclick="showQTab('submit',this)">✅ Submit</button>
     </div>
 
@@ -529,6 +530,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div style="font-size:12px;color:#64748b;margin-bottom:12px">Add each window, door or product. All sizes in mm. Use the canvas to sketch the design.</div>
       <div id="products-list"></div>
       <button class="add-prod-btn" onclick="addProduct()">+ Add product / item</button>
+
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid #e5e5e5">
+        <button onclick="saveProductRequest()" id="prod-request-btn" style="width:100%;padding:13px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">
+          📋 Save &amp; submit product request to Monday
+        </button>
+        <div id="prod-request-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
+      </div>
     </div>
 
     <!-- PHOTOS TAB -->
