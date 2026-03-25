@@ -292,6 +292,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:8px">Comments</div>
       <div style="font-size:13px;color:#374151" id="cd-comments">—</div>
     </div>
+    <!-- Create deal button -->
+    <div style="padding:14px 16px;border-bottom:1px solid #f0f0f0">
+      <button onclick="createDealFromContact()" style="width:100%;padding:11px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">+ Create deal from this contact</button>
+      <div id="create-deal-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
+    </div>
     <!-- Linked deals -->
     <div style="padding:14px 16px">
       <div style="font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:10px">LINKED DEALS</div>
@@ -689,7 +694,7 @@ async function loadContacts() {
     const colData = await mq(`query { boards(ids:${CONTACTS_BOARD}){ columns{ id title type } } }`);
     contactCols = colData.data?.boards?.[0]?.columns || [];
     const gc = (title) => contactCols.find(c => c.title === title)?.id || '';
-    const assignedId = gc('Assigned');
+    const assignedId = gc('Sales Person') || gc('Assigned');
     const phoneId = gc('Phone'), emailId = gc('Email');
     const locId = gc('Location') || gc('Address');
     const typeId = gc('Client Type');
@@ -706,7 +711,6 @@ async function loadContacts() {
     const cv = (item, id) => item.column_values.find(c => c.id === id)?.text || '';
     const cvLabel = (item, id) => item.column_values.find(c => c.id === id)?.label || cv(item, id);
     allContacts = items
-      .filter(item => (cv(item, assignedId) || '').toLowerCase().includes(currentUser.toLowerCase()))
       .map(item => ({
         id: item.id, name: item.name,
         phone: cv(item, phoneId), email: cv(item, emailId),
@@ -774,6 +778,48 @@ function openContact(id) {
   }
   document.getElementById('nav-contacts').classList.add('active');
   navTo('contact-detail');
+}
+
+// ── Create deal from contact ─────────────────────────────────
+async function createDealFromContact() {
+  if (!selectedContact) return;
+  const statusEl = document.getElementById('create-deal-status');
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'Creating deal...';
+  statusEl.style.display = 'none';
+  try {
+    // Get Deals board columns
+    const colData = await mq(`query { boards(ids:${DEALS_BOARD}){ columns{ id title type } } }`);
+    const cols = colData.data?.boards?.[0]?.columns || [];
+    const gc = (title) => cols.find(c => c.title === title)?.id || '';
+    const addrId = gc('Address') || gc('Location');
+    const phoneId = gc('Phone');
+    const emailId = gc('Email');
+    // Build column values — only text/simple columns
+    const colVals = {};
+    if (addrId && selectedContact.address) colVals[addrId] = selectedContact.address;
+    if (phoneId && selectedContact.phone) colVals[phoneId] = selectedContact.phone;
+    if (emailId && selectedContact.email) colVals[emailId] = selectedContact.email;
+    const colValsStr = JSON.stringify(JSON.stringify(colVals));
+    const itemName = selectedContact.name.replace(/"/g, '\"');
+    const result = await mq(`mutation { create_item(board_id:${DEALS_BOARD}, item_name:"${itemName}", column_values:${colValsStr}) { id } }`);
+    const newId = result.data?.create_item?.id;
+    if (!newId) throw new Error('Could not create deal');
+    // Add a note
+    await mq(`mutation { create_update(item_id:${newId}, body:"Deal created from Contacts board for ${itemName}. Type: ${selectedContact.clientType || 'Client'}.") { id } }`);
+    statusEl.textContent = '✓ Deal created successfully!';
+    statusEl.style.color = '#059669';
+    statusEl.style.display = 'block';
+    btn.textContent = '✓ Deal created';
+    btn.style.background = '#10b981';
+    // Reload deals so it appears straight away
+    await loadDeals();
+  } catch (err) {
+    statusEl.textContent = '✗ Could not create deal: ' + err.message;
+    statusEl.style.color = '#dc2626';
+    statusEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = '+ Create deal from this contact';
+  }
 }
 
 // ── Deal detail ───────────────────────────────────────────────
