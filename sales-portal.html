@@ -1026,8 +1026,14 @@ function openDeal(id){
     let apptStr='';
     if(selectedDeal.apptDate){apptStr=fmtDate(selectedDeal.apptDate);if(selectedDeal.apptTime)apptStr+=' at '+fmtTime(selectedDeal.apptTime);if(selectedDeal.apptType)apptStr+=' ('+selectedDeal.apptType+')';}
   document.getElementById('di-appt').textContent=apptStr;
+  // Pre-fill appointment fields
+  if(selectedDeal.apptDate) document.getElementById('q-appt-date').value=selectedDeal.apptDate;
+  else document.getElementById('q-appt-date').value='';
+  if(selectedDeal.apptTime) document.getElementById('q-appt-time').value=selectedDeal.apptTime.slice(0,5);
+  else document.getElementById('q-appt-time').value='';
   // Set current appt type in dropdown
-  if(selectedDeal.apptType){const sel=document.getElementById('q-appttype');for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===selectedDeal.apptType){sel.selectedIndex=i;break;}}}
+  if(selectedDeal.apptType){const sel=document.getElementById('q-appttype');for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===selectedDeal.apptType){sel.selectedIndex=i;break;}}}
+  document.getElementById('book-appt-status').style.display='none';
   document.querySelectorAll('.stage-btn').forEach(b=>b.classList.toggle('active',b.textContent===selectedDeal.stage));
   products=[];productCount=0;sitePhotos=[];projectFiles=[];canvases={};drawingState={};activeTools={};activeColors={};
   initProfitChecker();
@@ -1059,6 +1065,58 @@ function showQTab(tab,btn){
   if(tab==='submit')updateSubmitSummary();
 }
 
+
+// ── Book appointment ──────────────────────────────────────────
+async function bookAppointment(){
+  if(!selectedDeal) return;
+  const date = document.getElementById('q-appt-date').value;
+  const time = document.getElementById('q-appt-time').value;
+  const apptType = document.getElementById('q-appttype').value;
+  const statusEl = document.getElementById('book-appt-status');
+  const btn = document.getElementById('book-appt-btn');
+  if(!date){ statusEl.textContent='Please select a date first.'; statusEl.style.color='#dc2626'; statusEl.style.display='block'; return; }
+  btn.disabled=true; btn.textContent='Saving...'; statusEl.style.display='none';
+  try{
+    const apptColId = selectedDeal.apptId || boardCols.find(c=>c.title==='Appointment')?.id;
+    const stageColId = selectedDeal.stageId || boardCols.find(c=>c.title==='Stage')?.id;
+    const apptTypeColId = selectedDeal.apptTypeId || boardCols.find(c=>c.title==='Appointment Type')?.id;
+    const updates = [];
+    // Set appointment date + time
+    if(apptColId){
+      const dateVal = JSON.stringify(JSON.stringify({date: date, time: time ? time+':00' : '09:00:00'}));
+      updates.push(mq('mutation{change_column_value(board_id:'+DEALS_BOARD+',item_id:'+selectedDeal.id+',column_id:"'+apptColId+'",value:'+dateVal+'){id}}'));
+    }
+    // Set stage to Appointment
+    if(stageColId){
+      const stageVal = JSON.stringify(JSON.stringify({label:'Appointment'}));
+      updates.push(mq('mutation{change_column_value(board_id:'+DEALS_BOARD+',item_id:'+selectedDeal.id+',column_id:"'+stageColId+'",value:'+stageVal+'){id}}'));
+    }
+    // Set appointment type if selected
+    if(apptTypeColId && apptType){
+      const typeVal = JSON.stringify(JSON.stringify({label:apptType}));
+      updates.push(mq('mutation{change_column_value(board_id:'+DEALS_BOARD+',item_id:'+selectedDeal.id+',column_id:"'+apptTypeColId+'",value:'+typeVal+'){id}}'));
+    }
+    await Promise.all(updates);
+    // Update local state
+    selectedDeal.apptDate=date; selectedDeal.apptTime=time; selectedDeal.stage='Appointment';
+    if(apptType) selectedDeal.apptType=apptType;
+    const d=allDeals.find(x=>x.id===selectedDeal.id);
+    if(d){ d.apptDate=date; d.apptTime=time; d.stage='Appointment'; if(apptType)d.apptType=apptType; }
+    // Update UI
+    const badge=document.getElementById('deal-stage-badge'); badge.textContent='Appointment'; badge.className='badge b-appt';
+    document.querySelectorAll('.stage-btn').forEach(b=>b.classList.toggle('active',b.textContent==='Appointment'));
+    const apptStr=fmtDate(date)+(time?' at '+fmtTime(time):'')+(apptType?' ('+apptType+')':'');
+    document.getElementById('di-appt').textContent=apptStr;
+    renderStats(); renderDeals(); renderAppointments();
+    statusEl.textContent='✓ Appointment saved and stage set to Appointment';
+    statusEl.style.color='#059669'; statusEl.style.display='block';
+    btn.textContent='✓ Saved'; btn.style.background='#10b981';
+    setTimeout(()=>{ btn.disabled=false; btn.textContent='📅 Save appointment & set stage to Appointment'; btn.style.background='#0ea5e9'; },3000);
+  }catch(err){
+    statusEl.textContent='Could not save: '+err.message; statusEl.style.color='#dc2626'; statusEl.style.display='block';
+    btn.disabled=false; btn.textContent='📅 Save appointment & set stage to Appointment';
+  }
+}
 
 // ── Appointment Type update ───────────────────────────────────
 async function updateApptType(){
@@ -1456,8 +1514,15 @@ async function loadMondayFiles(){
   const listEl=document.getElementById('monday-files-list');
   if(loadEl)loadEl.textContent='Loading...';
   try{
-    const data=await mq(`query{items(ids:${selectedDeal.id}){assets{id name public_url file_extension}}}`);
-    const assets=data.data?.items?.[0]?.assets||[];
+    // Only fetch from the "Files" column — never show PROFIT CHECKER REPORT
+    const colData=await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
+    const cols=colData.data?.boards?.[0]?.columns||[];
+    const filesCol=cols.find(c=>c.title==='Files')||cols.find(c=>c.type==='file'&&c.title!=='PROFIT CHECKER REPORT');
+    if(!filesCol){if(loadEl)loadEl.textContent='No files column found.';return;}
+    const data=await mq(`query{items(ids:${selectedDeal.id}){column_values(ids:["${filesCol.id}"]){...on FileValue{files{id name url file_extension}}}}}`);
+    const fileVals=data.data?.items?.[0]?.column_values?.[0]?.files||[];
+    // Map to same shape as assets
+    const assets=fileVals.map(f=>({id:f.id,name:f.name,public_url:f.url,file_extension:f.file_extension}));
     if(loadEl)loadEl.style.display='none';
     if(assets.length===0){if(listEl)listEl.innerHTML='<div style="font-size:12px;color:#94a3b8">No files uploaded yet.</div>';return;}
     const imgExts=['jpg','jpeg','png','gif','webp'];
@@ -1666,6 +1731,225 @@ function generateSurveyorOrderPack(){
   return doc.output('blob');
 }
 
+// ── PDF: Profit breakdown report ─────────────────────────────
+function generateProfitReportPDF(){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const name=selectedDeal?.name||'—';
+  const address=document.getElementById('q-siteaddress')?.value||selectedDeal?.address||'';
+  const dateStr=new Date().toLocaleDateString('en-GB');
+  const refNum='BWD-COST-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
+
+  // Header
+  doc.setFillColor(30,58,95);doc.rect(0,0,210,30,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont('helvetica','bold');
+  doc.text('Burgess Windows & Doors',14,13);
+  doc.setFontSize(9);doc.setFont('helvetica','normal');
+  doc.text('INTERNAL PROFIT BREAKDOWN — CONFIDENTIAL',14,21);
+  doc.setFillColor(245,158,11);doc.rect(150,0,60,30,'F');
+  doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+  doc.text('COST ANALYSIS',153,11);
+  doc.setFont('helvetica','normal');
+  doc.text('Ref: '+refNum,153,17);
+  doc.text(dateStr,153,23);
+
+  // Job info
+  doc.setTextColor(30,30,30);let y=38;
+  doc.setFillColor(240,244,248);doc.rect(10,y-4,190,18,'F');
+  doc.setFontSize(9);doc.setFont('helvetica','bold');
+  doc.text('Customer: '+name,14,y+2);
+  doc.text('Salesperson: '+currentUser,120,y+2);
+  if(address){doc.setFont('helvetica','normal');doc.text('Address: '+address,14,y+8);}
+  y+=22;
+
+  // Get all values
+  const productSel=document.getElementById('pc-product');
+  const productName=productSel?productSel.options[productSel.selectedIndex].text:'—';
+  const margin=parseFloat(productSel?.value)||0.4;
+  const contingencyMargin=Math.min(margin+0.02,0.99);
+  const fitDays=parseFloat(document.getElementById('pc-fitdays')?.value)||0;
+  const dayRate=parseFloat(document.getElementById('pc-dayrate')?.value)||550;
+  const loadOut=parseFloat(document.getElementById('pc-loadout')?.value)||0;
+  const lifting=parseFloat(document.getElementById('pc-lifting')?.value)||0;
+  const distanceFuel=parseFloat(document.getElementById('pc-distance')?.value)||0;
+  const transport=parseFloat(document.getElementById('pc-transport')?.value)||0;
+  const subcontract=parseFloat(document.getElementById('pc-subcontract')?.value)||0;
+  const cillM=parseFloat(document.getElementById('pc-cill-m')?.value)||0;
+  const comp650=parseFloat(document.getElementById('pc-comp650')?.value)||0;
+  const comp652=parseFloat(document.getElementById('pc-comp652')?.value)||0;
+  const scaffolding=parseFloat(document.getElementById('pc-scaffolding')?.value)||0;
+  const building=parseFloat(document.getElementById('pc-building')?.value)||0;
+  const otherCost=parseFloat(document.getElementById('pc-other-cost')?.value)||0;
+  const delivery=parseFloat(document.getElementById('pc-delivery')?.value)||0;
+  const sold=parseFloat(document.getElementById('pc-sold')?.value)||0;
+
+  const f2=function(v){return'£'+v.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});};
+
+  // Section header helper
+  function secHeader(title,yPos){
+    doc.setFillColor(30,58,95);doc.rect(10,yPos-4,190,8,'F');
+    doc.setTextColor(255,255,255);doc.setFontSize(9);doc.setFont('helvetica','bold');
+    doc.text(title,14,yPos+1);
+    doc.setTextColor(30,30,30);
+    return yPos+10;
+  }
+
+  // Row helper
+  function row(label,value,yPos,bold,highlight){
+    if(yPos>270){doc.addPage();yPos=20;}
+    if(highlight){doc.setFillColor(240,244,248);doc.rect(10,yPos-4,190,8,'F');}
+    doc.setFontSize(9);
+    doc.setFont('helvetica',bold?'bold':'normal');
+    doc.setTextColor(bold?30:80,bold?30:80,bold?30:80);
+    doc.text(label,14,yPos);
+    doc.setTextColor(30,30,30);
+    doc.text(value,196,yPos,{align:'right'});
+    return yPos+6;
+  }
+
+  function divider(yPos){
+    doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(10,yPos,200,yPos);
+    return yPos+4;
+  }
+
+  // Product type & margin
+  y=secHeader('Product & margin',y);
+  y=row('Product type',productName,y);
+  y=row('Target margin',Math.round(margin*100)+'%',y);
+  y=row('Margin incl. 2% contingency',Math.round(contingencyMargin*100)+'%',y,true);
+  y=divider(y);
+
+  // Frame suppliers
+  let framesTotal=0;
+  if(frameLines.length>0){
+    y=secHeader('Frame suppliers',y);
+    frameLines.forEach(function(f,i){
+      if(!f.supplier&&!f.listPrice)return;
+      const surchargeRate=SUPPLIER_SURCHARGES_DATA[f.supplier]||0;
+      const afterDiscount=(f.listPrice||0)*(1-(f.discount||0)/100);
+      const supplierSurcharge=(f.listPrice||0)*surchargeRate;
+      const framePrice=afterDiscount+(f.surcharge||0)+supplierSurcharge;
+      framesTotal+=framePrice;
+      if(f.supplier)y=row('Supplier '+(i+1)+': '+f.supplier,'',y);
+      y=row('  List price',f2(f.listPrice||0),y);
+      if(f.discount>0)y=row('  Discount',(f.discount||0)+'%',y);
+      if(f.surcharge>0)y=row('  Surcharge',f2(f.surcharge||0),y);
+      if(surchargeRate>0)y=row('  Auto-surcharge ('+Math.round(surchargeRate*100)+'%)',f2(supplierSurcharge),y);
+      y=row('  Frame price',f2(framePrice),y,true);
+      if(i<frameLines.length-1)y=divider(y);
+    });
+    y=row('Frames total',f2(framesTotal),y,true,true);
+    y=divider(y);
+  }
+
+  // Glass suppliers
+  let glassTotal=0;
+  if(glasLines.length>0){
+    y=secHeader('Glass suppliers',y);
+    glasLines.forEach(function(g,i){
+      if(!g.supplier&&!g.sqm)return;
+      const linePrice=(g.sqm||0)*(g.pricePerSqm||0)+(g.manualOversize||0)+(g.extras||0);
+      glassTotal+=linePrice;
+      if(g.supplier)y=row('Supplier '+(i+1)+': '+g.supplier,'',y);
+      y=row('  Quantity',((g.sqm||0))+'m²',y);
+      y=row('  Price per m²',f2(g.pricePerSqm||0),y);
+      if(g.manualOversize>0)y=row('  Oversize surcharge',f2(g.manualOversize),y);
+      if(g.extras>0)y=row('  Extras (astragal bars etc.)',f2(g.extras),y);
+      y=row('  Glass line price',f2(linePrice),y,true);
+      if(i<glasLines.length-1)y=divider(y);
+    });
+    y=row('Glass total',f2(glassTotal),y,true,true);
+    y=divider(y);
+  }
+
+  if(delivery>0){y=row('Supplier delivery fee',f2(delivery),y);y=divider(y);}
+  const productTotal=framesTotal+glassTotal+delivery;
+  y=row('Total product costs',f2(productTotal),y,true,true);
+  y+=4;
+
+  // Installation
+  if(y>240){doc.addPage();y=20;}
+  y=secHeader('Installation costs',y);
+  const fitCost=subcontract>0?subcontract:(fitDays+loadOut)*dayRate;
+  if(subcontract>0){
+    y=row('Subcontract fit (manual)',f2(subcontract),y);
+  }else{
+    y=row('Fitting days',fitDays+' days @ £'+dayRate+'/day',y);
+    if(loadOut>0)y=row('Load out days',loadOut+' days @ £'+dayRate+'/day',y);
+  }
+  if(lifting>0)y=row('Lifting equipment',lifting+' days @ £550/day',y);
+  const distanceLabels={'0':'0-25 miles','30':'26-50 miles (+£30)','60':'51-79 miles (+£60)','90':'80-100 miles (+£90)','120':'100+ miles (+£120)'};
+  if(distanceFuel>0)y=row('Site distance fuel',distanceLabels[String(distanceFuel)]||'£'+distanceFuel,y);
+  if(transport>0)y=row('Transport / logistics',f2(transport),y);
+  const installTotal=fitCost+(lifting*550)+distanceFuel+transport;
+  y=row('Total installation costs',f2(installTotal),y,true,true);
+  y=divider(y);
+
+  // Ancillaries
+  const ancillaries=(cillM*50)+(comp650*6)+(comp652*8.5)+scaffolding+building+otherCost;
+  if(ancillaries>0){
+    if(y>240){doc.addPage();y=20;}
+    y=secHeader('Ancillaries',y);
+    if(cillM>0)y=row('Cill/pressings',cillM+'m @ £50/m = '+f2(cillM*50),y);
+    if(comp650>0)y=row('Compriband TP650',comp650+'m @ £6/m = '+f2(comp650*6),y);
+    if(comp652>0)y=row('Compriband TP652',comp652+'m @ £8.50/m = '+f2(comp652*8.5),y);
+    if(scaffolding>0)y=row('Scaffolding',f2(scaffolding),y);
+    if(building>0)y=row('Building works',f2(building),y);
+    if(otherCost>0)y=row('Other costs',f2(otherCost),y);
+    y=row('Total ancillaries',f2(ancillaries),y,true,true);
+    y=divider(y);
+  }
+
+  // Summary matrix
+  if(y>220){doc.addPage();y=20;}
+  const totalCosts=productTotal+installTotal+ancillaries;
+  const recommended=totalCosts/(1-contingencyMargin);
+
+  doc.setFillColor(30,58,95);doc.rect(10,y-4,190,10,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(10);doc.setFont('helvetica','bold');
+  doc.text('Cost & margin summary',14,y+3);y+=12;
+  doc.setTextColor(30,30,30);
+
+  y=row('Total product costs',f2(productTotal),y);
+  y=row('Total installation costs',f2(installTotal),y);
+  y=row('Ancillaries',f2(ancillaries),y);
+  doc.setDrawColor(30,58,95);doc.setLineWidth(0.5);doc.line(10,y,200,y);y+=4;
+  y=row('Total costs',f2(totalCosts),y,true,true);
+  y+=2;
+  doc.setFillColor(220,235,250);doc.rect(10,y-4,190,9,'F');
+  doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);
+  doc.text('Recommended minimum sale value ('+Math.round(contingencyMargin*100)+'%)',14,y+2);
+  doc.text(f2(recommended),196,y+2,{align:'right'});
+  y+=12;
+
+  if(sold>0){
+    const marginVal=sold-totalCosts;
+    const marginPct=sold>0?(marginVal/sold)*100:0;
+    const vsRec=(sold/recommended)*100;
+    doc.setFillColor(marginPct>=contingencyMargin*100?209:marginPct>=margin*100?254:254,marginPct>=contingencyMargin*100?250:marginPct>=margin*100?243:226,marginPct>=contingencyMargin*100?229:marginPct>=margin*100?199:199);
+    doc.rect(10,y-4,190,28,'F');
+    doc.setFontSize(9);doc.setFont('helvetica','bold');
+    doc.setTextColor(marginPct>=contingencyMargin*100?5:marginPct>=margin*100?146:185,marginPct>=contingencyMargin*100?150:marginPct>=margin*100?64:28,marginPct>=contingencyMargin*100?105:marginPct>=margin*100?0:11);
+    doc.text('SOLD VALUE ANALYSIS',14,y+2);y+=7;
+    doc.setFont('helvetica','normal');doc.setTextColor(30,30,30);
+    doc.text('Quoted / sold value',14,y);doc.text(f2(sold),196,y,{align:'right'});y+=5;
+    doc.text('Margin value (£)',14,y);doc.text(f2(marginVal),196,y,{align:'right'});y+=5;
+    doc.text('Margin %',14,y);doc.text(marginPct.toFixed(1)+'%',196,y,{align:'right'});y+=5;
+    doc.setFont('helvetica','bold');
+    doc.text('vs recommended (%)',14,y);doc.text(vsRec.toFixed(1)+'%',196,y,{align:'right'});y+=10;
+  }
+
+  // Footer on all pages
+  const pc=doc.getNumberOfPages();
+  for(let i=1;i<=pc;i++){
+    doc.setPage(i);
+    doc.setFillColor(30,58,95);doc.rect(0,285,210,12,'F');
+    doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(147,197,253);
+    doc.text('INTERNAL — NOT FOR CLIENT USE  |  Burgess W&D  |  '+name+'  |  '+refNum+'  |  Page '+i+' of '+pc,105,292,{align:'center'});
+  }
+  return doc.output('blob');
+}
+
 // ── Submit ────────────────────────────────────────────────────
 async function uploadFile(itemId,colId,fileName,blob){
   const base64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Read failed'));r.readAsDataURL(blob);});
@@ -1686,10 +1970,11 @@ async function submitQuote(){
   const safeName=(selectedDeal.name||'deal').replace(/[^a-z0-9]/gi,'_');
   try{
     setStep(0,'active');const quotePDF=generateCustomerQuotePDF();setStep(0,'done');
-    setStep(1,'active');
-    const orderPDF=isWon?generateSurveyorOrderPack():null;
-    setStep(1,'done',isWon?'Order pack generated':'Stage is not Won — skipped');
+    setStep(1,'active');const profitPDF=generateProfitReportPDF();setStep(1,'done');
     setStep(2,'active');
+    const orderPDF=isWon?generateSurveyorOrderPack():null;
+    setStep(2,'done',isWon?'Order pack generated':'Stage is not Won — skipped');
+    setStep(3,'active');
     const colData=await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
     const cols=colData.data?.boards?.[0]?.columns||[];
     const filesCol=cols.find(c=>c.title==='Files')||cols.find(c=>c.type==='file');
@@ -1697,19 +1982,30 @@ async function submitQuote(){
     setStep(2,'done',`"${filesCol.title}"`);
     setStep(3,'active');await uploadFile(selectedDeal.id,filesCol.id,`${safeName}_Quote_${dateStr}.pdf`,quotePDF);setStep(3,'done');
     setStep(4,'active');
-    if(orderPDF){await uploadFile(selectedDeal.id,filesCol.id,`${safeName}_SurveyorOrderPack_${dateStr}.pdf`,orderPDF);setStep(4,'done');}
-    else{setStep(4,'done','Skipped');}
+    // Upload profit report to its own hidden column
+    const colDataProfit=await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
+    const colsProfit=colDataProfit.data?.boards?.[0]?.columns||[];
+    const profitCol=colsProfit.find(c=>c.title==='PROFIT CHECKER REPORT')||colsProfit.find(c=>c.title==='Profit Checker Report');
+    if(profitCol){
+      await uploadFile(selectedDeal.id,profitCol.id,`${safeName}_ProfitReport_${dateStr}.pdf`,profitPDF);
+      setStep(4,'done','Uploaded to "PROFIT CHECKER REPORT" column');
+    } else {
+      setStep(4,'done','Column not found — skipped');
+    }
     setStep(5,'active');
+    if(orderPDF){await uploadFile(selectedDeal.id,filesCol.id,`${safeName}_SurveyorOrderPack_${dateStr}.pdf`,orderPDF);setStep(5,'done');}
+    else{setStep(5,'done','Skipped');}
+    setStep(6,'active');
     for(const f of projectFiles){
       try{const base64=f.dataUrl.split(',')[1];await fetch(UPLOAD,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:String(selectedDeal.id),columnId:filesCol.id,fileName:f.name,fileBase64:base64})});}catch(e){console.warn('File upload failed:',e);}
     }
     setStep(5,'done');
-    setStep(6,'active');
+    setStep(7,'active');
     if(!isWon){await updateStage('Quote Sent');}
     const pv=document.getElementById('pc-sold').value;
     const note=`💼 Sales visit by ${currentUser} on ${new Date().toLocaleDateString('en-GB')}.\\n\\nProducts: ${products.length} item(s)\\n${pv?'Quoted: £'+parseFloat(pv).toLocaleString():''}\\n${isWon?'\\n✅ WON — Surveyor Order Pack generated and uploaded.':''}\\n\\nCustomer quote PDF uploaded.`;
     await mq(`mutation{create_update(item_id:${selectedDeal.id},body:"${note.replace(/"/g,'\\"')}"){id}}`);
-    setStep(6,'done');
+    setStep(7,'done');
     document.getElementById('progress-title').textContent=isWon?'✓ Won! Quote + Surveyor Order Pack submitted!':'✓ Quote submitted!';
     document.getElementById('progress-title').style.color='#059669';
     btn.textContent='Submitted ✓';btn.style.background='#10b981';
@@ -1717,7 +2013,7 @@ async function submitQuote(){
     renderStats();renderDeals();
     setTimeout(()=>navTo('deals'),3000);
   }catch(err){
-    const fi=[0,1,2,3,4,5,6].find(i=>document.getElementById('ps'+i)?.classList.contains('active'));
+    const fi=[0,1,2,3,4,5,6,7,8].find(i=>document.getElementById('ps'+i)?.classList.contains('active'));
     if(fi!==undefined)setStep(fi,'error',err.message);
     document.getElementById('progress-title').textContent='Submission failed';
     document.getElementById('progress-title').style.color='#dc2626';
@@ -2566,6 +2862,74 @@ async function triggerCreateOpportunity() {
     btn.disabled = false;
     btn.textContent = '🚀 Create opportunity in Monday';
     btn.style.background = '#059669';
+  }
+}
+
+// ── Book appointment ──────────────────────────────────────────
+async function bookAppointment(){
+  if(!selectedDeal) return;
+  const date = document.getElementById('q-appt-date').value;
+  const time = document.getElementById('q-appt-time').value;
+  const type = document.getElementById('q-appttype').value;
+  const btn = document.getElementById('book-appt-btn');
+  const statusEl = document.getElementById('book-appt-status');
+  if(!date){ statusEl.textContent='Please select a date.'; statusEl.style.color='#dc2626'; statusEl.style.display='block'; return; }
+  btn.disabled=true; btn.textContent='Saving...'; statusEl.style.display='none';
+  try{
+    // Get column IDs
+    const colData = await mq('query{boards(ids:'+DEALS_BOARD+'){columns{id title type}}}');
+    const cols = colData.data?.boards?.[0]?.columns||[];
+    const gc = function(t){ const c=cols.find(function(c){return c.title===t;}); return c?c.id:''; };
+    const apptColId = gc('Appointment');
+    const apptTypeColId = gc('Appointment Type');
+    const stageColId = gc('Stage');
+    const mutations = [];
+    // Set appointment date+time
+    if(apptColId){
+      const apptVal = time ? JSON.stringify({date:date,time:time+':00'}) : JSON.stringify({date:date});
+      mutations.push('apptDate: change_column_value(board_id:'+DEALS_BOARD+',item_id:'+selectedDeal.id+',column_id:"'+apptColId+'",value:'+JSON.stringify(apptVal)+'){id}');
+    }
+    // Set appointment type
+    if(apptTypeColId && type){
+      mutations.push('apptType: change_column_value(board_id:'+DEALS_BOARD+',item_id:'+selectedDeal.id+',column_id:"'+apptTypeColId+'",value:'+JSON.stringify(JSON.stringify({label:type}))+'){id}');
+    }
+    // Set stage to Appointment
+    if(stageColId){
+      mutations.push('stage: change_column_value(board_id:'+DEALS_BOARD+',item_id:'+selectedDeal.id+',column_id:"'+stageColId+'",value:'+JSON.stringify(JSON.stringify({label:'Appointment'}))+'){id}');
+    }
+    if(mutations.length>0){
+      await mq('mutation{'+mutations.join(' ')+'}');
+    }
+    // Update local state
+    selectedDeal.apptDate=date;
+    selectedDeal.apptTime=time;
+    selectedDeal.apptType=type;
+    selectedDeal.stage='Appointment';
+    // Update info strip
+    let apptStr=fmtDate(date);
+    if(time) apptStr+=' at '+time;
+    if(type) apptStr+=' ('+type+')';
+    document.getElementById('di-appt').textContent=apptStr;
+    document.getElementById('deal-stage-badge').textContent='Appointment';
+    document.getElementById('deal-stage-badge').className='badge b-appt';
+    document.getElementById('di-stage').textContent='Appointment';
+    document.querySelectorAll('.stage-btn').forEach(function(b){b.classList.toggle('active',b.textContent==='Appointment');});
+    // Update deals list
+    const d=allDeals.find(function(x){return x.id===selectedDeal.id;});
+    if(d){d.stage='Appointment';d.apptDate=date;d.apptTime=time;d.apptType=type;}
+    renderStats(); renderDeals(); renderAppointments();
+    statusEl.textContent='✓ Appointment booked and stage set to Appointment';
+    statusEl.style.color='#059669';
+    statusEl.style.display='block';
+    btn.textContent='✓ Booked';
+    btn.style.background='#10b981';
+    setTimeout(function(){btn.disabled=false;btn.textContent='📅 Book appointment & set stage to Appointment';btn.style.background='#0ea5e9';},3000);
+  }catch(err){
+    statusEl.textContent='Could not save: '+err.message;
+    statusEl.style.color='#dc2626';
+    statusEl.style.display='block';
+    btn.disabled=false;
+    btn.textContent='📅 Book appointment & set stage to Appointment';
   }
 }
 
