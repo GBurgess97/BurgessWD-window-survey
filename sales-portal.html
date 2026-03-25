@@ -239,6 +239,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="tab-panel active" id="tab-visit">
         <div class="section">
           <div class="sec-title">👤 Customer details</div>
+          <div id="contact-loaded" style="display:none;background:#f0fdf4;border:1px solid #6ee7b7;border-radius:7px;padding:7px 12px;font-size:12px;color:#065f46;margin-bottom:10px"></div>
           <div class="row2">
             <div class="field"><label>Customer name</label><input type="text" id="v-name"></div>
             <div class="field"><label>Phone</label><input type="tel" id="v-phone"></div>
@@ -506,6 +507,7 @@ async function loadDeals() {
     const addressColId = boardColumns.find(c => c.title === 'Address' || c.title === 'Location')?.id || '';
     const phoneColId = boardColumns.find(c => c.title === 'Phone')?.id || '';
     const emailColId = boardColumns.find(c => c.title === 'Email')?.id || '';
+    const contactsColId = boardColumns.find(c => c.title === 'Contacts')?.id || '';
 
     const data = await mondayQuery(`query {
       boards(ids:${BOARD_ID}){
@@ -538,7 +540,8 @@ async function loadDeals() {
         phone: cv(item, phoneColId),
         email: cv(item, emailColId),
         salesPerson: cv(item, salesPersonColId),
-        stageColId, addressColId, phoneColId, emailColId, salesPersonColId
+        contactsText: cv(item, contactsColId),
+        stageColId, addressColId, phoneColId, emailColId, salesPersonColId, contactsColId
       }));
 
     renderDeals();
@@ -593,14 +596,42 @@ function setFilter(f, btn) {
   renderDeals();
 }
 
-function openDeal(id) {
+async function openDeal(id) {
   selectedDeal = allDeals.find(d => d.id === id);
   if (!selectedDeal) return;
-  // Pre-fill visit form
+  // Pre-fill visit form with deal data first
   document.getElementById('v-name').value = selectedDeal.name || '';
   document.getElementById('v-phone').value = selectedDeal.phone || '';
   document.getElementById('v-email').value = selectedDeal.email || '';
   document.getElementById('v-address').value = selectedDeal.address || '';
+  // Try to fetch linked contact details to fill in missing info
+  if (selectedDeal.contactsColId) {
+    try {
+      const contactData = await mondayQuery(`query {
+        items(ids:${selectedDeal.id}){
+          column_values(ids:["${selectedDeal.contactsColId}"]){
+            id
+            ... on BoardRelationValue { linked_items { id name column_values { id title text } } }
+          }
+        }
+      }`);
+      const linked = contactData.data?.items?.[0]?.column_values?.[0]?.linked_items || [];
+      if (linked.length > 0) {
+        const contact = linked[0];
+        const getCol = (title) => contact.column_values.find(c => c.title === title)?.text || '';
+        // Only fill if deal doesn't already have the value
+        if (!document.getElementById('v-phone').value) document.getElementById('v-phone').value = getCol('Phone');
+        if (!document.getElementById('v-email').value) document.getElementById('v-email').value = getCol('Email');
+        if (!document.getElementById('v-address').value) document.getElementById('v-address').value = getCol('Location') || getCol('Address');
+        // Show contact name if deal name is generic
+        const contactName = contact.name;
+        if (contactName && !document.getElementById('v-name').value) document.getElementById('v-name').value = contactName;
+        // Show a small indicator that contact was loaded
+        document.getElementById('contact-loaded').style.display = 'block';
+        document.getElementById('contact-loaded').textContent = '✓ Contact details loaded from: ' + contactName;
+      }
+    } catch(e) { console.warn('Could not load linked contact:', e); }
+  }
   document.getElementById('v-date').value = new Date().toISOString().slice(0, 10);
   document.getElementById('v-salesperson').value = currentUser;
   // Stage badge
