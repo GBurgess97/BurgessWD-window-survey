@@ -1633,88 +1633,213 @@ function generateCustomerQuotePDF(){
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   const name=selectedDeal?.name||'—';
-  const address=document.getElementById('q-siteaddress').value||selectedDeal?.address||'';
+  const address=document.getElementById('q-siteaddress')?.value||selectedDeal?.address||'';
   const phone=selectedDeal?.phone||'';
   const email=selectedDeal?.email||'';
   const dateStr=new Date().toLocaleDateString('en-GB');
   const validity=30;
   const validUntil=new Date();validUntil.setDate(validUntil.getDate()+validity);
-  const vatRate=parseFloat(document.getElementById('q-vat').value)||0;
-  const soldValue=parseFloat(document.getElementById('pc-sold').value)||0;
+  const vatRate=parseFloat(document.getElementById('q-vat')?.value)||0;
+  const soldValue=parseFloat(document.getElementById('pc-sold')?.value)||0;
   const vatAmt=soldValue*vatRate;
   const totalIncVat=soldValue+vatAmt;
   const refNum='BWD-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
-  const worksDesc=document.getElementById('q-worksdesc').value||'';
-  const payTerms=document.getElementById('q-payment').value||'';
-  doc.setFillColor(30,58,95);doc.rect(0,0,210,36,'F');
-  doc.setTextColor(255,255,255);doc.setFontSize(22);doc.setFont('helvetica','bold');
-  doc.text('Burgess Windows & Doors',14,16);
-  doc.setFontSize(9);doc.setFont('helvetica','normal');
-  doc.text('Premium Window & Door Specialists',14,23);
-  doc.text('Tel: 01234 567890  |  info@burgesswd.co.uk  |  www.burgesswd.co.uk',14,29);
-  doc.setFillColor(245,158,11);doc.rect(150,0,60,36,'F');
-  doc.setTextColor(255,255,255);doc.setFontSize(14);doc.setFont('helvetica','bold');
-  doc.text('QUOTATION',152,14);doc.setFontSize(8);doc.setFont('helvetica','normal');
-  doc.text('Ref: '+refNum,152,21);doc.text('Date: '+dateStr,152,27);doc.text('Valid: '+validUntil.toLocaleDateString('en-GB'),152,33);
-  doc.setTextColor(30,30,30);let y=46;
-  doc.setFillColor(248,250,252);doc.rect(10,y-4,88,32,'F');doc.setFillColor(248,250,252);doc.rect(112,y-4,88,32,'F');
-  doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(100,116,139);
-  doc.text('PREPARED FOR',14,y);doc.text('QUOTE DETAILS',116,y);y+=5;
-  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(30,30,30);doc.text(name,14,y);
-  doc.setFont('helvetica','normal');doc.setFontSize(9);
-  if(address){const al=doc.splitTextToSize(address,84);doc.text(al,14,y+5);}
-  if(phone&&phone!=='—')doc.text('T: '+phone,14,y+15);
-  if(email&&email!=='—')doc.text('E: '+email,14,y+20);
-  let ry=y;
-  doc.text('Salesperson: '+currentUser,116,ry);ry+=5;
-  doc.text('Payment: '+payTerms,116,ry);ry+=5;
-  doc.text('Survey: '+document.getElementById('q-surveytype').value,116,ry);ry+=5;
-  doc.text('Timeframe: '+document.getElementById('q-surveytime').value,116,ry);
-  y+=32;doc.setDrawColor(226,232,240);doc.line(10,y,200,y);y+=8;
-  if(worksDesc){
-    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);doc.text('Description of Works',14,y);y+=6;
-    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(30,30,30);
-    const dl=doc.splitTextToSize(worksDesc,182);doc.text(dl,14,y);y+=dl.length*4.5+6;
-    doc.setDrawColor(226,232,240);doc.line(10,y,200,y);y+=8;
+  const worksDesc=document.getElementById('q-worksdesc')?.value||'';
+  const payTerms=document.getElementById('q-payment')?.value||'100% on order';
+  const surveyType=document.getElementById('q-surveytype')?.value||'';
+  const surveyTime=document.getElementById('q-surveytime')?.value||'';
+
+  // ── Page 1: Quotation ─────────────────────────────────────────────────
+  // Logo — correct aspect ratio (1563x514 = 3.04:1)
+  try{doc.addImage(BWD_LOGO,'JPEG',14,12,70,23);}catch(e){
+    doc.setFontSize(18);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
+    doc.text('BURGESS',14,22);doc.setFontSize(8);doc.setFont('helvetica','normal');
+    doc.text('WINDOWS AND DOORS',14,28);
   }
+
+  // Quotation title block — top right
+  doc.setFillColor(30,58,95);doc.rect(130,10,70,30,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(16);doc.setFont('helvetica','bold');
+  doc.text('QUOTATION',165,23,{align:'center'});
+  doc.setFontSize(8);doc.setFont('helvetica','normal');
+  doc.text('Ref: '+refNum,165,30,{align:'center'});
+  doc.text('Date: '+dateStr,165,35,{align:'center'});
+
+  // Thin rule
+  doc.setDrawColor(30,58,95);doc.setLineWidth(0.5);doc.line(14,44,196,44);
+
+  // Two-column info block
+  let y=50;
+  doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(100,116,139);
+  doc.text('PREPARED FOR',14,y);
+  doc.text('BURGESS WINDOWS AND DOORS LTD',110,y);
+  y+=5;
+  doc.setFont('helvetica','normal');doc.setTextColor(30,30,30);doc.setFontSize(9);
+  doc.setFont('helvetica','bold');doc.text(name,14,y);
+  doc.setFont('helvetica','normal');
+  doc.text('Unit 2, Ballmoor',110,y);y+=4.5;
+  if(address){const al=doc.splitTextToSize(address,88);al.forEach(l=>{doc.text(l,14,y);y+=4.5;});} else y+=4.5;
+  doc.text('Buckingham Industrial Park',110,y-4.5);
+  doc.text('Buckingham, MK18 1RT',110,y);y+=4.5;
+  if(phone&&phone!=='—'){doc.text(phone,14,y);}
+  doc.text('Tel: 01280 815493',110,y);y+=4.5;
+  if(email&&email!=='—'){const el=doc.splitTextToSize(email,88);doc.text(el,14,y);}
+  doc.text('info@burgesswindowsanddoors.com',110,y);y+=4.5;
+  doc.setFont('helvetica','italic');doc.setTextColor(100,116,139);doc.setFontSize(8);
+  doc.text('Salesperson: '+currentUser+'  |  Valid for '+validity+' days',14,y+2);
+  y+=8;
+
+  // Rule
+  doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(14,y,196,y);y+=6;
+
+  // Intro paragraph
+  const intro='At Burgess Windows and Doors, we are proud to work with some of the UK and Europe\'s leading manufacturers of high-performance glazing systems. Every project we undertake is entirely bespoke, tailored to your specific design, performance and lifestyle requirements. As an accredited FENSA installer and proud member of the Consumer Protection Association, your investment is fully protected. Following our discussions, please find enclosed your quotation for consideration.';
+  doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);doc.setFontSize(8.5);
+  const introLines=doc.splitTextToSize(intro,182);
+  doc.text(introLines,14,y);y+=introLines.length*4.2+6;
+  doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(14,y,196,y);y+=6;
+
+  // Description of works
+  if(worksDesc){
+    doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);
+    doc.text('Description of Works',14,y);y+=5;
+    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(60,60,60);
+    const wl=doc.splitTextToSize(worksDesc,182);doc.text(wl,14,y);y+=wl.length*4.2+5;
+    doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(14,y,196,y);y+=6;
+  }
+
+  // Schedule of works table
   if(products.length>0){
-    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);doc.text('Schedule of Works',14,y);y+=4;
-    const qRows=products.map(function(p,i){const sz=p.width&&p.height?p.width+' x '+p.height+'mm':'TBC';let gl=p.glazing||'';if(p.glassFinish==='Obscure'){gl+=' Obscure';if(p.obscureType)gl+=' ('+p.obscureType+')';}return[i+1,p.type||'',p.system||'',sz,p.qty||1,p.colour||'',gl,p.notes||''];});
-    doc.autoTable({startY:y,head:[['#','Product','System','Size','Qty','Colour','Glass','Notes']],body:qRows,styles:{fontSize:7.5,cellPadding:2},headStyles:{fillColor:[30,58,95],textColor:255},alternateRowStyles:{fillColor:[248,250,252]},columnStyles:{0:{cellWidth:8},1:{cellWidth:30},2:{cellWidth:28},3:{cellWidth:22},4:{cellWidth:8},5:{cellWidth:20},6:{cellWidth:28},7:{cellWidth:34}}});
+    if(y>200){doc.addPage();y=20;}
+    doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);
+    doc.text('Schedule of Works',14,y);y+=4;
+    const qRows=products.map(function(p,i){
+      const sz=p.width&&p.height?p.width+' \xD7 '+p.height+'mm':'TBC';
+      let gl=p.glazing||'';
+      if(p.glassFinish==='Obscure'){gl+=' Obscure';if(p.obscureType)gl+=' ('+p.obscureType+')';}
+      return[i+1,p.type||'—',p.system||'—',sz,p.qty||1,p.colour||'—',gl,p.notes||''];
+    });
+    doc.autoTable({startY:y,head:[['#','Product','System','Size','Qty','Colour','Glass','Notes']],body:qRows,
+      styles:{fontSize:7.5,cellPadding:2.5,textColor:[50,50,50]},
+      headStyles:{fillColor:[30,58,95],textColor:255,fontStyle:'bold',fontSize:8},
+      alternateRowStyles:{fillColor:[248,250,252]},
+      columnStyles:{0:{cellWidth:8},1:{cellWidth:30},2:{cellWidth:28},3:{cellWidth:22},4:{cellWidth:8},5:{cellWidth:20},6:{cellWidth:28},7:{cellWidth:34}}
+    });
     y=doc.lastAutoTable.finalY+8;
   }
+
+  // Pricing block
   if(soldValue>0){
     if(y>230){doc.addPage();y=20;}
-    doc.setDrawColor(226,232,240);doc.line(10,y,200,y);y+=8;
-    const bx=110,bw=90;
-    doc.setFillColor(248,250,252);doc.rect(bx,y-4,bw,vatRate>0?32:22,'F');
-    doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);doc.text('Net price (ex VAT)',bx+4,y+2);
-    doc.setTextColor(30,30,30);doc.setFont('helvetica','bold');doc.text('£'+soldValue.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw-4,y+2,{align:'right'});
+    doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(14,y,196,y);y+=6;
+    const bx=116,bw=80;
+    // Net
+    doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);
+    doc.text('Subtotal (ex VAT)',bx,y);
+    doc.setTextColor(30,30,30);doc.setFont('helvetica','bold');
+    doc.text('\xA3'+soldValue.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw,y,{align:'right'});y+=5;
+    // VAT
     if(vatRate>0){
-      doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);doc.text('VAT ('+Math.round(vatRate*100)+'%)',bx+4,y+9);
-      doc.setTextColor(30,30,30);doc.text('£'+vatAmt.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw-4,y+9,{align:'right'});
-      doc.setFillColor(30,58,95);doc.rect(bx,y+13,bw,11,'F');doc.setTextColor(255,255,255);doc.setFontSize(10);doc.setFont('helvetica','bold');
-      doc.text('TOTAL INC VAT',bx+4,y+21);doc.text('£'+totalIncVat.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw-4,y+21,{align:'right'});y+=32;
-    }else{
-      doc.setFillColor(30,58,95);doc.rect(bx,y+6,bw,11,'F');doc.setTextColor(255,255,255);doc.setFontSize(10);doc.setFont('helvetica','bold');
-      doc.text('TOTAL',bx+4,y+14);doc.text('£'+soldValue.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw-4,y+14,{align:'right'});y+=22;
+      doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);
+      doc.text('VAT ('+Math.round(vatRate*100)+'%)',bx,y);
+      doc.setTextColor(30,30,30);
+      doc.text('\xA3'+vatAmt.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw,y,{align:'right'});y+=5;
+    } else {
+      doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);
+      doc.text(vatRate===0?'Net Zero - VAT 0%':'VAT',bx,y);
+      doc.text('0%',bx+bw,y,{align:'right'});y+=5;
     }
+    // Total box
+    doc.setFillColor(30,58,95);doc.rect(bx-2,y-2,bw+4,11,'F');
+    doc.setTextColor(255,255,255);doc.setFontSize(10);doc.setFont('helvetica','bold');
+    doc.text('TOTAL',bx+2,y+5);
+    doc.text('\xA3'+(vatRate>0?totalIncVat:soldValue).toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw,y+5,{align:'right'});
+    y+=14;
   }
+
+  // Survey & payment info
   if(y<255){
-    doc.setDrawColor(226,232,240);doc.line(10,y,200,y);y+=6;
-    doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);doc.text('Terms & Conditions',14,y);y+=4;
-    doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);
-    ['• This quotation is valid for 30 days from the date of issue.',
-     '• All prices are subject to a formal survey. Final pricing may vary following survey.',
-     '• A deposit is required to confirm your order. Payment terms: '+payTerms+'.',
-     '• Lead times are indicative and subject to supplier availability.',
-     '• All work carried out in accordance with current Building Regulations.'].forEach(t=>{if(y<280){doc.text(t,14,y);y+=4.5;}});
+    doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(14,y,196,y);y+=6;
+    doc.setFontSize(8.5);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);
+    doc.text('Specification & Lead Time: Please review the attached specification for full details. Current estimated lead time to our warehouse is',14,y);y+=4;
+    doc.text('approximately 12 weeks from point of survey. Installation date will be confirmed once materials are received and checked into stock.',14,y);y+=6;
+    doc.text('Performance & Survey: U-values and energy ratings are subject to site survey. All sizes, thresholds and cills are provisional and will be',14,y);y+=4;
+    doc.text('confirmed at formal survey. FENSA certification registered upon receipt of final payment.',14,y);y+=6;
+    doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
+    doc.text('Payment Terms: ',14,y);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);
+    doc.text(payTerms,56,y);y+=5;
+    doc.setFont('helvetica','italic');doc.text('This quotation is valid for '+validity+' days from the date of issue and is subject to a formal survey and our Terms & Conditions.',14,y);
   }
-  const pc=doc.getNumberOfPages();for(let i=1;i<=pc;i++){doc.setPage(i);doc.setFillColor(30,58,95);doc.rect(0,285,210,12,'F');doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(147,197,253);doc.text('Burgess Windows & Doors  |  Ref: '+refNum+'  |  '+dateStr+'  |  Page '+i+' of '+pc,105,292,{align:'center'});}
+
+  // Sign-off
+  if(y<260){
+    y+=6;doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);doc.setFontSize(8.5);
+    doc.text('We look forward to the opportunity of working with you. Should you have any questions please do not hesitate to contact us.',14,y);y+=5;
+    doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
+    doc.text('Yours sincerely,',14,y);y+=4.5;
+    doc.text('Burgess Windows and Doors',14,y);
+  }
+
+  // Footer on page 1
+  const addFooter=function(pageNum,totalPages){
+    doc.setPage(pageNum);
+    doc.setFillColor(30,58,95);doc.rect(0,285,210,12,'F');
+    doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(147,197,253);
+    doc.text('Burgess Windows and Doors Ltd  |  Reg: 11890427  |  Unit 2 Ballmoor, Buckingham MK18 1RT  |  Tel: 01280 815493  |  Ref: '+refNum,105,290,{align:'center'});
+    doc.text('Page '+pageNum+' of '+totalPages,196,290,{align:'right'});
+  };
+
+  // ── T&C Pages ─────────────────────────────────────────────────────────
+  doc.addPage();
+  // Logo header on T&C pages
+  try{doc.addImage(BWD_LOGO,'JPEG',14,10,55,18);}catch(e){}
+  doc.setFillColor(30,58,95);doc.rect(0,0,8,297,'F'); // left accent bar
+  doc.setFontSize(14);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
+  doc.text('TERMS & CONDITIONS',80,22);
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);
+  doc.text('These Terms & Conditions apply upon acceptance of the quotation and payment of the deposit.',80,28);
+  doc.setDrawColor(30,58,95);doc.setLineWidth(0.5);doc.line(14,32,196,32);
+
+  const tcSections=[
+    {title:'1. Company Details',body:'Burgess Windows and Doors Ltd ("BWD") | Registered in England and Wales: 11890427 | Unit 2, Ballmoor, Buckingham Industrial Park, Buckingham, MK18 1RT | Tel: 01280 815493 | FENSA Registration No. 38737'},
+    {title:'2. Our Service',body:'BWD will advise on the suitability of products supplied and issue an estimate based on the customer\'s chosen specification. Customers are encouraged to visit the showroom to view products before ordering. Acceptance of the quotation and payment of the deposit constitutes full acceptance of these Terms & Conditions and forms a binding contract. All estimates are subject to survey. BWD reserves the right to cancel a contract following survey.'},
+    {title:'3. FENSA & Insurance-Backed Guarantees',body:'BWD is a FENSA registered installer. Domestic replacements in existing openings will be registered with FENSA. FENSA does not apply to commercial or new-build installations. Deposit insurance (up to \xA37,500) is available through the Consumer Protection Association (CPA). Domestic installations include a CPA-backed 10-year insurance-backed guarantee (up to \xA330,000). Installations over \xA330,000 will not have the remaining value covered by CPA unless requested (subject to 3% surcharge on the contract value including VAT).'},
+    {title:'4. Payment Terms',body:'Unless otherwise agreed: 25% Deposit payable on order (prior to survey) | 25% payable after survey | 40% payable when goods arrive with BWD | 10% Final Balance payable upon completion. Invoices are due immediately; delays in payment may delay works. Late payment charges apply: \xA325 admin fee after 14 days; 8% above Bank of England base rate after 30 days; debt recovery and legal fees after 40 days (charged to customer).'},
+    {title:'5. Timescales',body:'Survey is arranged once the deposit clears. Lead times vary 4\u201316 weeks depending on manufacturer and are given as approximations subject to delay. BWD is not liable for manufacturer delays or for delays affecting other trades.'},
+    {title:'6. Survey Requirements',body:'Customers must ensure suitable parking, clear access, and that children/pets are secured. The surveyor will review the order; any changes will be confirmed in writing. After the order is placed with the manufacturer, the full contract value is payable. If the customer cancels before ordering, BWD may deduct survey, admin and drawing costs.'},
+    {title:'7. Ordering & Delivery',body:'A second survey may be required if requested by the manufacturer. Installation dates may change; notice will be provided where possible. Goods are insured by BWD only until installed, after which the customer\'s home insurance must apply.'},
+    {title:'8. Installation \u2014 Customer Responsibilities',body:'Before installation: remove alarms, sensors, blinds and curtains; move furniture within 2m of openings; protect remaining items; ensure home insurance covers works. On installation day: provide parking and access; secure children and pets; provide electricity, water and toilet facilities; notify fitters before removal if any items are to be retained.'},
+    {title:'9. Installation \u2014 BWD Responsibilities',body:'Protective floor coverings will be used where practical. Old frames will be removed unless otherwise instructed. Reasonable care will be taken, but disturbance to plaster, brickwork, render, tiles or d\xe9cor cannot be avoided and is not BWD\'s responsibility. No allowance is made for plastering, rendering or head height alterations unless specified in the quotation. Pre-existing issues discovered will not be rectified by BWD. The customer must inspect and sign off the installation.'},
+    {title:'10. Guarantees',body:'All products are covered solely by the manufacturer\'s warranty, subject to their terms, exclusions and limitations. BWD provides free adjustments for 6 weeks following installation. Defects must be reported within 48 hours with photos/videos to operations@burgesswindowsanddoors.com. Glass is supplied to GGF standards; natural haze in direct sunlight is not a defect. Warranties exclude wear and tear, improper use, incorrect cleaning products, third-party interference and failure to report issues promptly.'},
+    {title:'11. Manufacturer Warranty Summary',body:'Residence Collection R7/R9: Frames 10yr, Glass 5yr, Hardware 1yr. Aluplast/Liniar UPVC: Frames 10yr, Glass 5yr, Hardware 1yr. Origin Aluminium: Frames 20yr (10yr coastal/OS20), Glass 5yr, Hardware 10yr. Rationel Dovista: Frames 10yr, Glass 10yr, Hardware 2yr. Velfac Dovista: Frames/Glass 12yr, Hardware 2yr. Internorm: Frames/Glass 10yr, Handles (VD coated) 5yr. Rockdoor/CompDoor/Solidor: Slabs/Frames/Glass 10yr. Evolution Timber-Alt: Frames 10yr, Glass 5yr, Hardware 1yr.'},
+    {title:'12. Limitations of Liability',body:'BWD\'s maximum liability shall not exceed the replacement value of the defective product and in no event shall exceed the price paid for that specific product. BWD shall not be liable for loss of profit, loss of business, loss of revenue, any indirect or consequential losses, or any losses caused by manufacturers, suppliers or circumstances outside BWD\'s control. Nothing in these terms excludes liability for death or personal injury caused by BWD\'s negligence, fraud or any liability that cannot legally be excluded under English law.'},
+    {title:'13. Access Equipment & Unforeseen Issues',body:'Where safe installation requires scaffolding, towers, MEWPs or other access equipment, the cost shall be payable by the customer. If unforeseen structural issues are discovered (rotten timbers, missing lintels, asbestos, hidden services), work will stop and the customer will be notified immediately. All additional costs arising are chargeable. If asbestos is suspected, the customer must arrange testing, removal and certification by a licensed contractor.'},
+    {title:'14. Decoration & Making Good',body:'Installation may cause unavoidable disturbance to plaster, render, brickwork, tiles, paint, wallpaper or decoration. Unless explicitly included in the quotation, BWD does not carry out redecoration or making good. Any plastering, painting, re-tiling, caulking or finishing works are the responsibility of the customer.'},
+    {title:'15. Abortive Visit Charges',body:'If BWD attends site for installation and the site is not ready, accessible, safe or prepared as agreed, an abortive visit charge will apply reflecting labour, productivity loss, travel and loss of profit. These charges are payable before rebooking an installation date.'},
+    {title:'16. Additional Provisions',body:'Warranty validity requires adherence to manufacturer maintenance guidelines. Guarantees are non-transferable unless agreed in writing. Where products are embedded within the building envelope, any making good required to access or reinstate these areas is excluded from warranty works and chargeable. This quotation is governed by English law and the jurisdiction of the English Courts. Burgess Windows and Doors is a proud member of the Consumer Protection Association (CPA) and FENSA accredited (Reg. No. 38737).'},
+  ];
+
+  let ty=38;
+  tcSections.forEach(function(section){
+    if(ty>265){
+      doc.addPage();
+      doc.setFillColor(30,58,95);doc.rect(0,0,8,297,'F');
+      ty=16;
+    }
+    doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);
+    doc.text(section.title,14,ty);ty+=4.5;
+    doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);doc.setFontSize(8);
+    const lines=doc.splitTextToSize(section.body,180);
+    doc.text(lines,14,ty);ty+=lines.length*3.8+4;
+  });
+
+  // Page numbers
+  const pc=doc.getNumberOfPages();
+  for(let i=1;i<=pc;i++){addFooter(i,pc);}
+
   return doc.output('blob');
 }
 
-// ── PDF: Surveyor Order Pack ──────────────────────────────────
 function generateSurveyorOrderPack(){
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
