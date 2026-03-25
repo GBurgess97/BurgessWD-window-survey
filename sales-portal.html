@@ -8,127 +8,160 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f3;min-height:100vh}
-.app-header{background:#1e3a5f;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.app-title{font-size:16px;font-weight:600;color:#fff}
-.app-subtitle{font-size:12px;color:#93c5fd;margin-top:1px}
-.container{max-width:860px;margin:0 auto;padding:20px 16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f0f4f8;min-height:100vh}
+
+/* Header */
+.app-header{background:#1e3a5f;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.app-title{font-size:15px;font-weight:600;color:#fff}
+.app-sub{font-size:11px;color:#93c5fd;margin-top:1px}
+.header-user{font-size:12px;color:#93c5fd;display:none}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e5e5;display:none;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-items{display:flex}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;cursor:pointer;color:#94a3b8;border:none;background:transparent;font-family:inherit;font-size:10px;font-weight:500;gap:3px;transition:color 0.15s}
+.nav-item.active{color:#1e3a5f}
+.nav-icon{font-size:20px;line-height:1}
+
+/* Container */
+.page{display:none;padding:16px 16px 80px;max-width:860px;margin:0 auto}
+.page.active{display:block}
 
 /* Login */
-.login-screen{display:flex;align-items:center;justify-content:center;min-height:80vh}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:80vh;padding:20px}
 .login-card{background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:32px;max-width:400px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
 .login-logo{width:56px;height:56px;background:#1e3a5f;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px}
 .login-title{font-size:20px;font-weight:700;margin-bottom:6px}
-.login-sub{font-size:13px;color:#64748b;margin-bottom:24px;line-height:1.6}
-.login-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;text-align:left}
-.login-field label{font-size:12px;font-weight:600;color:#374151}
-.login-field input{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:16px;font-family:inherit;outline:none}
-.login-field input:focus{border-color:#1e3a5f}
+.login-sub{font-size:13px;color:#64748b;margin-bottom:24px}
+.lfield{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;text-align:left}
+.lfield label{font-size:12px;font-weight:600;color:#374151}
+.lfield input{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:16px;font-family:inherit;outline:none}
+.lfield input:focus{border-color:#1e3a5f}
 .login-btn{width:100%;padding:12px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 .login-btn:disabled{background:#93c5fd;cursor:not-allowed}
-.login-error{color:#dc2626;font-size:12px;margin-bottom:10px;display:none}
+.login-err{color:#dc2626;font-size:12px;margin-bottom:10px;display:none}
 
-/* Dashboard */
-.dashboard{display:none}
-.welcome-bar{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.welcome-name{font-size:16px;font-weight:600}
-.welcome-sub{font-size:12px;color:#64748b;margin-top:2px}
-.top-btns{display:flex;gap:8px;align-items:center}
-.btn-refresh{background:#f0f4ff;border:1px solid #bfdbfe;color:#1e3a5f;padding:7px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500}
-.btn-signout{background:transparent;border:1px solid #e0e0e0;color:#64748b;padding:7px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+/* Cards */
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;margin-bottom:12px}
+.card-header{padding:13px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.card-title{font-size:14px;font-weight:600}
 
-/* Stats */
-.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
-.stat-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:12px;text-align:center}
+/* Stats row */
+.stats-row{display:grid;gap:8px;margin-bottom:14px}
+.stat-box{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:12px 14px;text-align:center}
 .stat-val{font-size:22px;font-weight:700;margin-bottom:2px}
-.stat-lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.03em}
-.stat-card.s-new .stat-val{color:#6366f1}
-.stat-card.s-appt .stat-val{color:#0ea5e9}
-.stat-card.s-pricing .stat-val{color:#8b5cf6}
-.stat-card.s-won .stat-val{color:#059669}
-.stat-card.s-total .stat-val{color:#1e3a5f}
+.stat-lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.04em}
 
-/* Deals list */
-.deals-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;margin-bottom:16px}
-.deals-header{padding:14px 18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.deals-title{font-size:15px;font-weight:600}
-.search-input{padding:7px 12px;border:1px solid #e0e0e0;border-radius:7px;font-size:13px;font-family:inherit;outline:none;width:180px}
-.search-input:focus{border-color:#1e3a5f}
-.filter-bar{display:flex;gap:4px;flex-wrap:wrap}
-.ftab{padding:4px 10px;border:1px solid #e0e0e0;border-radius:6px;background:transparent;color:#888;font-size:11px;cursor:pointer;font-family:inherit}
+/* List rows */
+.list-row{padding:12px 16px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s}
+.list-row:last-child{border-bottom:none}
+.list-row:hover{background:#f8faff}
+.row-avatar{width:36px;height:36px;border-radius:50%;background:#dbeafe;color:#1e40af;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.row-main{flex:1;min-width:0}
+.row-name{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-meta{font-size:11px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.row-arrow{color:#cbd5e1;font-size:16px;flex-shrink:0}
+
+/* Badges */
+.badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;white-space:nowrap}
+.b-new{background:#e0e7ff;color:#3730a3}
+.b-appt{background:#e0f2fe;color:#0369a1}
+.b-pricing{background:#ede9fe;color:#5b21b6}
+.b-quotesent{background:#dcfce7;color:#065f46}
+.b-prospect{background:#fef3c7;color:#92400e}
+.b-won{background:#d1fae5;color:#065f46}
+.b-lost{background:#fee2e2;color:#991b1b}
+.b-unsuccessful{background:#f3f4f6;color:#374151}
+.b-client{background:#dbeafe;color:#1e40af}
+.b-architect{background:#ede9fe;color:#5b21b6}
+.b-contractor{background:#fef3c7;color:#92400e}
+
+/* Search & filter */
+.search-box{padding:7px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;outline:none;width:100%;margin-bottom:10px}
+.search-box:focus{border-color:#1e3a5f}
+.filter-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.ftab{padding:4px 10px;border:1px solid #e0e0e0;border-radius:6px;background:transparent;color:#888;font-size:11px;cursor:pointer;font-family:inherit;font-weight:500}
 .ftab.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
-.deal-row{padding:13px 18px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s}
-.deal-row:last-child{border-bottom:none}
-.deal-row:hover{background:#f0f4ff}
-.deal-avatar{width:36px;height:36px;border-radius:50%;background:#dbeafe;color:#1e40af;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
-.deal-main{flex:1;min-width:0}
-.deal-name{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.deal-meta{font-size:11px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.deal-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
-.stage-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;white-space:nowrap}
-.s-New{background:#e0e7ff;color:#3730a3}
-.s-Appointment{background:#e0f2fe;color:#0369a1}
-.s-Pricing{background:#ede9fe;color:#5b21b6}
-.s-Quote-Sent{background:#f0fdf4;color:#065f46}
-.s-Prospect{background:#fef3c7;color:#92400e}
-.s-Won{background:#d1fae5;color:#065f46}
-.s-Lost{background:#fee2e2;color:#991b1b}
-.s-Unsuccessful{background:#f3f4f6;color:#374151}
-.deal-arrow{color:#cbd5e1;font-size:16px}
-.loading-box{padding:40px;text-align:center;color:#9ca3af}
-.spinner{width:28px;height:28px;border:3px solid #e5e5e5;border-top-color:#1e3a5f;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 12px}
+
+/* Loading */
+.loading{padding:40px;text-align:center;color:#94a3b8}
+.spinner{width:26px;height:26px;border:3px solid #e5e5e5;border-top-color:#1e3a5f;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 10px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.empty-state{padding:40px;text-align:center;color:#9ca3af}
-.error-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;font-size:13px;color:#991b1b;margin-bottom:14px}
+.empty{padding:40px;text-align:center;color:#94a3b8}
+.err-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:12px;color:#991b1b;margin-bottom:12px}
 
-/* Visit tool */
-.visit-tool{display:none}
-.vt-header{background:#1e3a5f;border-radius:10px 10px 0 0;padding:14px 18px;display:flex;align-items:center;gap:12px}
-.vt-back{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
-.vt-title{font-size:15px;font-weight:600;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.vt-body{background:#fff;border:1px solid #e5e5e5;border-top:none;border-radius:0 0 10px 10px}
+/* Detail panel */
+.detail-panel{display:none;background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;margin-bottom:12px}
+.detail-header{background:#1e3a5f;padding:13px 16px;display:flex;align-items:center;gap:10px}
+.detail-back{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
+.detail-title{font-size:14px;font-weight:600;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* Tab navigation */
-.tab-nav{display:flex;border-bottom:1px solid #e5e5e5;overflow-x:auto}
-.tab-btn{padding:12px 18px;border:none;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
-.tab-btn.active{color:#1e3a5f;border-bottom-color:#1e3a5f;font-weight:600}
-.tab-panel{display:none;padding:20px}
-.tab-panel.active{display:block}
+/* Info grid */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px;border-bottom:1px solid #f0f0f0}
+.info-item{display:flex;flex-direction:column;gap:3px}
+.info-label{font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.04em}
+.info-value{font-size:13px;font-weight:500}
 
-/* Form elements */
-.section{background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:16px;margin-bottom:14px}
-.sec-title{font-size:13px;font-weight:600;margin-bottom:12px;color:#1e3a5f;display:flex;align-items:center;gap:6px}
+/* Appt card */
+.appt-card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;gap:14px;cursor:pointer;transition:background 0.1s}
+.appt-card:hover{background:#f8faff}
+.appt-date-block{flex-shrink:0;width:52px;text-align:center;background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:6px 4px}
+.appt-day{font-size:22px;font-weight:700;color:#1e3a5f;line-height:1}
+.appt-month{font-size:10px;color:#3b82f6;font-weight:600;text-transform:uppercase;margin-top:2px}
+.appt-dow{font-size:10px;color:#64748b;margin-top:1px}
+.appt-info{flex:1;min-width:0}
+.appt-name{font-weight:600;font-size:14px;margin-bottom:3px}
+.appt-time{display:inline-flex;align-items:center;gap:4px;background:#eff6ff;color:#1e3a5f;font-size:12px;font-weight:600;padding:3px 8px;border-radius:5px;margin-bottom:4px}
+.appt-meta{font-size:12px;color:#64748b}
+.appt-card.today .appt-date-block{background:#1e3a5f;border-color:#1e3a5f}
+.appt-card.today .appt-day{color:#fff}
+.appt-card.today .appt-month{color:#93c5fd}
+.appt-card.today .appt-dow{color:#bfdbfe}
+
+/* Section */
+.section{background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.sec-title{font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em;display:flex;align-items:center;gap:6px}
 .field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
 .field label{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em}
 .field input,.field select,.field textarea{padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:#fff}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:#1e3a5f}
 .field textarea{resize:vertical;min-height:80px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 
-/* Product items */
-.product-item{background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:14px;margin-bottom:10px;position:relative}
-.pi-num{font-size:10px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
-.pi-remove{position:absolute;top:10px;right:10px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;width:24px;height:24px;border-radius:5px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0}
-.pi-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:8px}
-.pi-grid2{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
-.add-product-btn{width:100%;padding:10px;border:1.5px dashed #93c5fd;background:#f8faff;color:#1e3a5f;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;margin-top:6px}
-.add-product-btn:hover{background:#eff6ff}
+/* Quote tabs */
+.qtabs{display:flex;border-bottom:1px solid #e5e5e5;overflow-x:auto;background:#fff}
+.qtab{padding:11px 16px;border:none;background:transparent;color:#888;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.qtab.active{color:#1e3a5f;border-bottom-color:#1e3a5f;font-weight:600}
+.qtab-panel{display:none;padding:16px}
+.qtab-panel.active{display:block}
+
+/* Product item */
+.prod-item{background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:13px;margin-bottom:8px;position:relative}
+.prod-num{font-size:10px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px}
+.prod-remove{position:absolute;top:10px;right:10px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;width:24px;height:24px;border-radius:5px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0}
+.add-prod-btn{width:100%;padding:10px;border:1.5px dashed #93c5fd;background:#f8faff;color:#1e3a5f;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;margin-top:6px}
 
 /* Photos */
-.upload-zone{border:1.5px dashed #cbd5e1;border-radius:8px;padding:18px;text-align:center;cursor:pointer;font-size:13px;color:#94a3b8;transition:all 0.15s}
+.upload-zone{border:1.5px dashed #cbd5e1;border-radius:8px;padding:18px;text-align:center;cursor:pointer;font-size:13px;color:#94a3b8}
 .upload-zone:hover{border-color:#1e3a5f;color:#1e3a5f;background:#f8faff}
 .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:10px}
 .photo-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid #e5e5e5}
 .photo-thumb img{width:100%;height:100%;object-fit:cover}
-.photo-thumb button{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.photo-thumb button{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer}
+
+/* Stage buttons */
+.stage-btns{display:flex;gap:6px;flex-wrap:wrap}
+.stage-btn{padding:6px 13px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid #e0e0e0;background:#fff;color:#374151;font-family:inherit}
+.stage-btn.active{border-color:#1e3a5f;background:#1e3a5f;color:#fff}
+.stage-saved{font-size:12px;color:#059669;margin-top:6px;display:none}
 
 /* Submit */
-.submit-bar{padding:16px 20px;background:#f0f4ff;border-top:1px solid #bfdbfe;border-radius:0 0 10px 10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;bottom:0}
-.btn-submit{padding:12px 28px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
-.btn-submit:hover{background:#1e40af}
-.btn-submit:disabled{background:#93c5fd;cursor:not-allowed}
-.progress-box{background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-top:10px;display:none;width:100%}
+.submit-btn{width:100%;padding:14px;background:#1e3a5f;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:6px}
+.submit-btn:hover{background:#1e40af}
+.submit-btn:disabled{background:#93c5fd;cursor:not-allowed}
+.progress-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-top:10px;display:none}
 .progress-step{display:flex;align-items:center;gap:8px;font-size:12px;color:#64748b;margin-bottom:4px}
 .progress-step.done{color:#059669}
 .progress-step.active{color:#1e40af;font-weight:500}
@@ -138,204 +171,223 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .step-icon.active{background:#dbeafe;color:#1e40af}
 .step-icon.error{background:#fee2e2;color:#dc2626}
 
-/* Status update */
-.stage-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.stage-btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid #e0e0e0;background:#fff;color:#374151;font-family:inherit}
-.stage-btn.active{border-color:#1e3a5f;background:#1e3a5f;color:#fff}
-.stage-saved{font-size:12px;color:#059669;margin-top:6px;display:none}
-
 @media(max-width:600px){
-  .stats-grid{grid-template-columns:repeat(3,1fr)}
-  .row2,.row3,.pi-grid,.pi-grid2{grid-template-columns:1fr 1fr}
-  .tab-btn{padding:10px 12px;font-size:12px}
-  .submit-bar{flex-direction:column}
-  .btn-submit{width:100%}
+  .row2,.row3{grid-template-columns:1fr 1fr}
+  .info-grid{grid-template-columns:1fr 1fr}
+  .stats-row{grid-template-columns:repeat(3,1fr)}
 }
 </style>
 </head>
 <body>
 
 <div class="app-header">
-  <div>
-    <div class="app-title">Burgess Windows &amp; Doors</div>
-    <div class="app-subtitle">Sales Portal</div>
-  </div>
-  <div id="header-user" style="color:#93c5fd;font-size:13px;display:none"></div>
+  <div><div class="app-title">Burgess Windows &amp; Doors</div><div class="app-sub">Sales Portal</div></div>
+  <div class="header-user" id="header-user"></div>
 </div>
 
-<div class="container">
+<!-- Bottom navigation -->
+<nav class="bottom-nav" id="bottom-nav">
+  <div class="nav-items">
+    <button class="nav-item active" id="nav-appts" onclick="navTo('appts')">
+      <div class="nav-icon">📅</div>Appointments
+    </button>
+    <button class="nav-item" id="nav-deals" onclick="navTo('deals')">
+      <div class="nav-icon">💼</div>Deals
+    </button>
+    <button class="nav-item" id="nav-contacts" onclick="navTo('contacts')">
+      <div class="nav-icon">👥</div>Contacts
+    </button>
+    <button class="nav-item" id="nav-me" onclick="navTo('me')">
+      <div class="nav-icon">👤</div>Me
+    </button>
+  </div>
+</nav>
 
-  <!-- Login -->
-  <div class="login-screen" id="login-screen">
-    <div class="login-card">
-      <div class="login-logo">💼</div>
-      <div class="login-title">Sales Portal</div>
-      <div class="login-sub">Sign in to manage your deals and build quotes.</div>
-      <div class="login-field"><label>Your name</label><input type="text" id="login-name" placeholder="e.g. George Burgess" oninput="checkLogin()" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <div class="login-field"><label>Password</label><input type="password" id="login-pass" placeholder="Your password" oninput="checkLogin()" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <div class="login-error" id="login-error"></div>
-      <button class="login-btn" id="login-btn" onclick="doLogin()" disabled>Sign in</button>
+<!-- ═══════════════════════════════════════════ LOGIN ══ -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">💼</div>
+    <div class="login-title">Sales Portal</div>
+    <div class="login-sub">Sign in to manage your deals and quotes.</div>
+    <div class="lfield"><label>Your name</label><input type="text" id="ln" oninput="chkL()" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="lfield"><label>Password</label><input type="password" id="lp" oninput="chkL()" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-err" id="lerr"></div>
+    <button class="login-btn" id="lbtn" onclick="doLogin()" disabled>Sign in</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ APPOINTMENTS ══ -->
+<div class="page" id="page-appts">
+  <div id="appts-error" class="err-box" style="display:none"></div>
+  <div id="appts-today"></div>
+  <div id="appts-upcoming"></div>
+  <div id="appts-loading" class="loading"><div class="spinner"></div>Loading appointments...</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ DEALS ══ -->
+<div class="page" id="page-deals">
+  <div id="deals-stats" class="stats-row" style="grid-template-columns:repeat(5,1fr)"></div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">My deals</div>
+    </div>
+    <div style="padding:10px 16px 0">
+      <input class="search-box" id="deals-search" placeholder="Search deals..." oninput="renderDeals()">
+      <div class="filter-row">
+        <button class="ftab active" onclick="setDealsFilter('all',this)">All</button>
+        <button class="ftab" onclick="setDealsFilter('New',this)">New</button>
+        <button class="ftab" onclick="setDealsFilter('Appointment',this)">Appt</button>
+        <button class="ftab" onclick="setDealsFilter('Pricing',this)">Pricing</button>
+        <button class="ftab" onclick="setDealsFilter('Quote Sent',this)">Quoted</button>
+        <button class="ftab" onclick="setDealsFilter('Won',this)">Won</button>
+      </div>
+    </div>
+    <div id="deals-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ CONTACTS ══ -->
+<div class="page" id="page-contacts">
+  <div class="card">
+    <div class="card-header"><div class="card-title">Contacts</div></div>
+    <div style="padding:10px 16px 0">
+      <input class="search-box" id="contacts-search" placeholder="Search contacts..." oninput="renderContacts()">
+      <div class="filter-row">
+        <button class="ftab active" onclick="setContactsFilter('all',this)">All</button>
+        <button class="ftab" onclick="setContactsFilter('Client',this)">Clients</button>
+        <button class="ftab" onclick="setContactsFilter('Architect',this)">Architects</button>
+        <button class="ftab" onclick="setContactsFilter('Contractor',this)">Contractors</button>
+      </div>
+    </div>
+    <div id="contacts-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ ME ══ -->
+<div class="page" id="page-me">
+  <div class="card" style="padding:20px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+      <div style="width:52px;height:52px;border-radius:50%;background:#dbeafe;color:#1e40af;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0" id="me-avatar"></div>
+      <div><div style="font-size:16px;font-weight:600" id="me-name"></div><div style="font-size:12px;color:#64748b">Sales</div></div>
+    </div>
+    <button onclick="signOut()" style="width:100%;padding:11px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Sign out</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ CONTACT DETAIL ══ -->
+<div class="page" id="page-contact-detail">
+  <div class="detail-panel" id="contact-detail-panel" style="display:block">
+    <div class="detail-header">
+      <button class="detail-back" onclick="navTo('contacts')">← Contacts</button>
+      <div class="detail-title" id="cd-title">Contact</div>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="info-label">Phone</div><div class="info-value" id="cd-phone">—</div></div>
+      <div class="info-item"><div class="info-label">Email</div><div class="info-value" id="cd-email">—</div></div>
+      <div class="info-item" style="grid-column:span 2"><div class="info-label">Address</div><div class="info-value" id="cd-address">—</div></div>
+      <div class="info-item"><div class="info-label">Type</div><div class="info-value" id="cd-type">—</div></div>
+      <div class="info-item"><div class="info-label">Assigned to</div><div class="info-value" id="cd-assigned">—</div></div>
+    </div>
+    <div style="padding:14px 16px;border-bottom:1px solid #f0f0f0">
+      <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:8px">Comments</div>
+      <div style="font-size:13px;color:#374151" id="cd-comments">—</div>
+    </div>
+    <!-- Linked deals -->
+    <div style="padding:14px 16px">
+      <div style="font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:10px">LINKED DEALS</div>
+      <div id="cd-deals"><div style="font-size:12px;color:#94a3b8">No deals found for this contact.</div></div>
     </div>
   </div>
+</div>
 
-  <!-- Dashboard -->
-  <div class="dashboard" id="dashboard">
-    <div class="welcome-bar">
-      <div>
-        <div class="welcome-name" id="welcome-name"></div>
-        <div class="welcome-sub">Your deals</div>
+<!-- ═══════════════════════════════════════════ DEAL DETAIL / QUOTE ══ -->
+<div class="page" id="page-deal">
+  <div style="display:block">
+    <div class="detail-header" style="background:#1e3a5f;border-radius:12px 12px 0 0;display:flex;align-items:center;gap:10px;padding:13px 16px">
+      <button class="detail-back" id="deal-back-btn" onclick="navTo('deals')">← Deals</button>
+      <div class="detail-title" id="deal-title">Deal</div>
+      <span class="badge" id="deal-stage-badge"></span>
+    </div>
+    <div style="background:#fff;border:1px solid #e5e5e5;border-top:none;border-radius:0 0 12px 12px;margin-bottom:12px">
+      <!-- Contact info strip -->
+      <div class="info-grid" id="deal-info-grid">
+        <div class="info-item"><div class="info-label">Customer</div><div class="info-value" id="di-name">—</div></div>
+        <div class="info-item"><div class="info-label">Phone</div><div class="info-value" id="di-phone">—</div></div>
+        <div class="info-item"><div class="info-label">Email</div><div class="info-value" id="di-email">—</div></div>
+        <div class="info-item"><div class="info-label">Address</div><div class="info-value" id="di-address">—</div></div>
+        <div class="info-item"><div class="info-label">Appointment</div><div class="info-value" id="di-appt">—</div></div>
+        <div class="info-item"><div class="info-label">Stage</div><div class="info-value" id="di-stage">—</div></div>
       </div>
-      <div class="top-btns">
-        <button class="btn-refresh" onclick="loadDeals()">↻ Refresh</button>
-        <button class="btn-signout" onclick="signOut()">Sign out</button>
-      </div>
-    </div>
-
-    <div id="error-box" class="error-box" style="display:none"></div>
-
-    <div class="stats-grid">
-      <div class="stat-card s-new"><div class="stat-val" id="st-new">—</div><div class="stat-lbl">New</div></div>
-      <div class="stat-card s-appt"><div class="stat-val" id="st-appt">—</div><div class="stat-lbl">Appointment</div></div>
-      <div class="stat-card s-pricing"><div class="stat-val" id="st-pricing">—</div><div class="stat-lbl">Pricing</div></div>
-      <div class="stat-card s-won"><div class="stat-val" id="st-won">—</div><div class="stat-lbl">Won</div></div>
-      <div class="stat-card s-total"><div class="stat-val" id="st-total">—</div><div class="stat-lbl">Total</div></div>
-    </div>
-
-    <div class="deals-card">
-      <div class="deals-header">
-        <div class="deals-title">My deals</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <input class="search-input" id="search-input" placeholder="Search..." oninput="renderDeals()">
-          <div class="filter-bar">
-            <button class="ftab active" onclick="setFilter('all',this)">All</button>
-            <button class="ftab" onclick="setFilter('New',this)">New</button>
-            <button class="ftab" onclick="setFilter('Appointment',this)">Appt</button>
-            <button class="ftab" onclick="setFilter('Pricing',this)">Pricing</button>
-            <button class="ftab" onclick="setFilter('Quote Sent',this)">Quoted</button>
-            <button class="ftab" onclick="setFilter('Won',this)">Won</button>
-          </div>
-        </div>
-      </div>
-      <div id="deals-list"><div class="loading-box"><div class="spinner"></div>Loading deals...</div></div>
-    </div>
-  </div>
-
-  <!-- Visit / Quote tool -->
-  <div class="visit-tool" id="visit-tool">
-    <div class="vt-header">
-      <button class="vt-back" onclick="closeVisitTool()">← Back</button>
-      <div class="vt-title" id="vt-title">Deal</div>
-      <span class="stage-badge" id="vt-stage-badge" style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:5px"></span>
-    </div>
-    <div class="vt-body">
-      <div class="tab-nav">
-        <button class="tab-btn active" onclick="showTab('visit',this)">📋 Site visit</button>
-        <button class="tab-btn" onclick="showTab('products',this)">🪟 Products</button>
-        <button class="tab-btn" onclick="showTab('photos',this)">📸 Photos</button>
-        <button class="tab-btn" onclick="showTab('submit',this)">✅ Submit</button>
+      <!-- Quote tabs -->
+      <div class="qtabs">
+        <button class="qtab active" onclick="showQTab('visit',this)">📋 Visit</button>
+        <button class="qtab" onclick="showQTab('products',this)">🪟 Products</button>
+        <button class="qtab" onclick="showQTab('photos',this)">📸 Photos</button>
+        <button class="qtab" onclick="showQTab('stage',this)">🏷️ Stage</button>
+        <button class="qtab" onclick="showQTab('submit',this)">✅ Submit</button>
       </div>
 
-      <!-- TAB: Site visit -->
-      <div class="tab-panel active" id="tab-visit">
-        <div class="section">
-          <div class="sec-title">👤 Customer details</div>
-          <div id="contact-loaded" style="display:none;background:#f0fdf4;border:1px solid #6ee7b7;border-radius:7px;padding:7px 12px;font-size:12px;color:#065f46;margin-bottom:10px"></div>
-          <div class="row2">
-            <div class="field"><label>Customer name</label><input type="text" id="v-name"></div>
-            <div class="field"><label>Phone</label><input type="tel" id="v-phone"></div>
-          </div>
-          <div class="row2">
-            <div class="field"><label>Email</label><input type="email" id="v-email"></div>
-            <div class="field"><label>Visit date</label><input type="date" id="v-date"></div>
-          </div>
-          <div class="field"><label>Site address</label><input type="text" id="v-address"></div>
-          <div class="row2">
-            <div class="field"><label>Salesperson</label><input type="text" id="v-salesperson" readonly style="background:#f3f4f6"></div>
-            <div class="field"><label>Lead source</label>
-              <select id="v-lead-source">
-                <option value="">Select...</option>
-                <option>Website</option><option>Phone enquiry</option><option>Walk in</option>
-                <option>Internorm</option><option>VELFAC</option><option>Evolution</option>
-                <option>Manufacturer referral</option><option>Customer referral</option>
-                <option>Social media</option><option>Other</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
+      <!-- VISIT TAB -->
+      <div class="qtab-panel active" id="qtp-visit">
         <div class="section">
           <div class="sec-title">🏠 Property & project</div>
           <div class="row2">
-            <div class="field"><label>Property type</label>
-              <select id="v-property-type">
-                <option>Residential</option><option>Commercial</option>
-                <option>New build</option><option>Listed building</option><option>Other</option>
-              </select>
-            </div>
-            <div class="field"><label>Build type</label>
-              <select id="v-build-type">
-                <option>Refurbishment</option><option>New build</option>
-                <option>New openings</option><option>Refurb + new openings</option><option>Other</option>
-              </select>
-            </div>
+            <div class="field"><label>Property type</label><select id="q-proptype"><option>Residential</option><option>Commercial</option><option>New build</option><option>Listed building</option><option>Other</option></select></div>
+            <div class="field"><label>Build type</label><select id="q-buildtype"><option>Refurbishment</option><option>New build</option><option>New openings</option><option>Refurb + new openings</option><option>Other</option></select></div>
           </div>
           <div class="row2">
-            <div class="field"><label>Survey type</label>
-              <select id="v-survey-type"><option>Site survey</option><option>Virtual survey</option></select>
-            </div>
-            <div class="field"><label>Survey timeframe</label>
-              <select id="v-survey-timeframe">
-                <option>ASAP</option><option>4–6 weeks</option><option>6–8 weeks</option>
-                <option>Fast track</option><option>On hold</option>
-              </select>
-            </div>
+            <div class="field"><label>Survey type</label><select id="q-surveytype"><option>Site survey</option><option>Virtual survey</option></select></div>
+            <div class="field"><label>Survey timeframe</label><select id="q-surveytime"><option>ASAP</option><option>4–6 weeks</option><option>6–8 weeks</option><option>Fast track</option><option>On hold</option></select></div>
           </div>
           <div class="row2">
-            <div class="field"><label>VAT rate</label>
-              <select id="v-vat">
-                <option value="0.2">20% (Standard)</option>
-                <option value="0">0% (New build)</option>
-                <option value="0.05">5% (Reduced)</option>
-              </select>
-            </div>
-            <div class="field"><label>Payment terms</label>
-              <select id="v-payment-terms">
-                <option>100% on order</option><option>25/50/25</option>
-                <option>25/25/40/10</option><option>50/50</option><option>Other</option>
-              </select>
-            </div>
+            <div class="field"><label>VAT rate</label><select id="q-vat"><option value="0.2">20% Standard</option><option value="0">0% New build</option><option value="0.05">5% Reduced</option></select></div>
+            <div class="field"><label>Payment terms</label><select id="q-payment"><option>100% on order</option><option>25/50/25</option><option>25/25/40/10</option><option>50/50</option></select></div>
           </div>
           <div class="row2">
-            <div class="field"><label>Estimated fit days</label><input type="number" id="v-fit-days" min="0" value="1" step="0.5"></div>
-            <div class="field"><label>Level threshold required?</label>
-              <select id="v-threshold"><option>No</option><option>Yes</option></select>
-            </div>
+            <div class="field"><label>Fit days</label><input type="number" id="q-fitdays" min="0" value="1" step="0.5"></div>
+            <div class="field"><label>Level threshold?</label><select id="q-threshold"><option>No</option><option>Yes</option></select></div>
           </div>
-          <div class="field"><label>Builder / architect details (if required)</label>
-            <input type="text" id="v-builder" placeholder="Name and contact number">
-          </div>
-          <div class="field"><label>Lifting / scaffolding / access notes</label>
-            <input type="text" id="v-access" placeholder="Any special access requirements">
-          </div>
+          <div class="field"><label>Builder / architect (if required)</label><input type="text" id="q-builder" placeholder="Name and contact number"></div>
+          <div class="field"><label>Access / logistics notes</label><input type="text" id="q-access" placeholder="Scaffolding, lifting equipment etc."></div>
         </div>
-
         <div class="section">
-          <div class="sec-title">📝 Site visit notes</div>
-          <div class="field"><label>Description of works (shown on customer quote)</label>
-            <textarea id="v-works-desc" placeholder="Supply and installation of... e.g. 6 No. aluminium casement windows and 1 No. composite entrance door to the above property. All units to be double glazed with low-E coating. New cills and trims included where required." style="min-height:110px"></textarea>
-          </div>
-          <div class="field"><label>Internal notes (not shown on quote)</label>
-            <textarea id="v-internal-notes" placeholder="Any internal observations, concerns, special requirements, access issues etc..."></textarea>
-          </div>
-          <div class="field"><label>Customer requirements & preferences</label>
-            <textarea id="v-requirements" placeholder="Colours, finishes, hardware preferences, budget range, specific products mentioned..."></textarea>
+          <div class="sec-title">📝 Notes</div>
+          <div class="field"><label>Description of works (shown on customer quote)</label><textarea id="q-worksdesc" placeholder="Supply and installation of... e.g. 6 No. aluminium casement windows and 1 No. composite entrance door..." style="min-height:100px"></textarea></div>
+          <div class="field"><label>Internal notes</label><textarea id="q-internalnotes" placeholder="Internal observations, concerns, access issues, anything not for the customer..."></textarea></div>
+          <div class="field"><label>Customer requirements & preferences</label><textarea id="q-requirements" placeholder="Colours, finishes, hardware preferences, budget range, specific products..."></textarea></div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS TAB -->
+      <div class="qtab-panel" id="qtp-products">
+        <div style="font-size:12px;color:#64748b;margin-bottom:12px">Add each window, door or product. All sizes in mm.</div>
+        <div id="products-list"></div>
+        <button class="add-prod-btn" onclick="addProduct()">+ Add product</button>
+        <div class="section" style="margin-top:14px">
+          <div class="sec-title">💰 Quoted price</div>
+          <div class="row2">
+            <div class="field"><label>Total price (£ ex VAT)</label><input type="number" id="q-price" placeholder="0.00" style="font-size:18px;font-weight:600"></div>
+            <div class="field"><label>Quote valid (days)</label><input type="number" id="q-validity" value="30" min="1"></div>
           </div>
         </div>
+      </div>
 
-        <!-- Stage update -->
+      <!-- PHOTOS TAB -->
+      <div class="qtab-panel" id="qtp-photos">
+        <div class="section">
+          <div class="sec-title">📸 Site photos</div>
+          <div style="font-size:12px;color:#64748b;margin-bottom:10px">Upload photos of existing windows, doors, measurements and site details.</div>
+          <div class="upload-zone" onclick="document.getElementById('photo-input').click()">📷 Tap to upload photos</div>
+          <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
+          <div class="photo-grid" id="photo-grid"></div>
+        </div>
+      </div>
+
+      <!-- STAGE TAB -->
+      <div class="qtab-panel" id="qtp-stage">
         <div class="section">
           <div class="sec-title">🏷️ Update deal stage</div>
-          <div class="stage-btns" id="stage-btns">
+          <div class="stage-btns">
             <button class="stage-btn" onclick="updateStage('New')">New</button>
             <button class="stage-btn" onclick="updateStage('Appointment')">Appointment</button>
             <button class="stage-btn" onclick="updateStage('Pricing')">Pricing</button>
@@ -349,306 +401,397 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         </div>
       </div>
 
-      <!-- TAB: Products -->
-      <div class="tab-panel" id="tab-products">
-        <div style="font-size:13px;color:#64748b;margin-bottom:14px">Add each window, door or product. Sizes in mm.</div>
-        <div id="products-list"></div>
-        <button class="add-product-btn" onclick="addProduct()">+ Add product</button>
-
-        <!-- Quoted price -->
-        <div class="section" style="margin-top:16px">
-          <div class="sec-title">💰 Quoted price</div>
-          <div class="row2">
-            <div class="field"><label>Total quoted price (£ ex VAT)</label>
-              <input type="number" id="v-quoted-price" placeholder="0.00" style="font-size:18px;font-weight:600">
-            </div>
-            <div class="field"><label>Quote validity (days)</label>
-              <input type="number" id="v-validity" value="30" min="1">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB: Photos -->
-      <div class="tab-panel" id="tab-photos">
+      <!-- SUBMIT TAB -->
+      <div class="qtab-panel" id="qtp-submit">
         <div class="section">
-          <div class="sec-title">📸 Site photos</div>
-          <div style="font-size:12px;color:#64748b;margin-bottom:12px">Upload photos of existing windows, doors, the site and any relevant details. These will be included in the visit report.</div>
-          <div class="upload-zone" onclick="document.getElementById('photo-upload').click()">
-            📷 Tap to upload photos
-          </div>
-          <input type="file" id="photo-upload" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
-          <div class="photo-grid" id="photo-grid"></div>
-        </div>
-      </div>
-
-      <!-- TAB: Submit -->
-      <div class="tab-panel" id="tab-submit">
-        <div class="section">
-          <div class="sec-title">✅ Ready to submit</div>
-          <div style="font-size:13px;color:#64748b;margin-bottom:14px">This will generate a customer quote PDF and an internal visit report, upload both to Monday, and update the deal stage to Quote Sent.</div>
-
-          <!-- Summary -->
-          <div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:8px;padding:14px;margin-bottom:14px">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
-              <div><span style="color:#888">Customer</span><div style="font-weight:600" id="sum-name">—</div></div>
-              <div><span style="color:#888">Address</span><div style="font-weight:600" id="sum-address">—</div></div>
-              <div><span style="color:#888">Products</span><div style="font-weight:600" id="sum-products">—</div></div>
-              <div><span style="color:#888">Quoted price</span><div style="font-weight:600;color:#059669" id="sum-price">—</div></div>
+          <div class="sec-title">✅ Submit quote</div>
+          <div style="font-size:13px;color:#64748b;margin-bottom:12px">Generates a customer quote PDF and internal visit report, uploads both to Monday and sets stage to Quote Sent.</div>
+          <div style="background:#fff;border:1px solid #e5e5e5;border-radius:8px;padding:12px;margin-bottom:12px;font-size:13px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div><div style="color:#94a3b8;font-size:11px">Customer</div><div style="font-weight:600" id="s-name">—</div></div>
+              <div><div style="color:#94a3b8;font-size:11px">Products</div><div style="font-weight:600" id="s-prods">—</div></div>
+              <div><div style="color:#94a3b8;font-size:11px">Address</div><div style="font-weight:600" id="s-addr">—</div></div>
+              <div><div style="color:#94a3b8;font-size:11px">Quoted price</div><div style="font-weight:600;color:#059669" id="s-price">—</div></div>
             </div>
           </div>
-
-          <button class="btn-submit" id="submit-btn" onclick="submitQuote()" style="width:100%;padding:14px;font-size:15px">
-            Generate PDFs &amp; submit to Monday →
-          </button>
+          <button class="submit-btn" id="submit-btn" onclick="submitQuote()">Generate PDFs &amp; submit to Monday →</button>
           <div class="progress-box" id="progress-box">
             <div style="font-size:13px;font-weight:500;color:#1e40af;margin-bottom:8px" id="progress-title">Generating...</div>
             <div id="progress-steps"></div>
           </div>
         </div>
       </div>
-
     </div>
   </div>
-
 </div>
 
 <script>
-const BOARD_ID = '9998586607';
-const PROXY_API = '/monday-proxy';
-const AUTH_API = '/auth';
-const UPLOAD_API = '/monday-upload';
-const DAY_RATE = 550;
+const DEALS_BOARD = '9998586607';
+const CONTACTS_BOARD = '9998586586';
+const PROXY = '/monday-proxy';
+const AUTH = '/auth';
+const UPLOAD = '/monday-upload';
 
 let currentUser = '';
-let allDeals = [];
-let currentFilter = 'all';
-let selectedDeal = null;
-let products = [];
-let productCount = 0;
-let sitePhotos = [];
-let boardColumns = [];
+let allDeals = [], allContacts = [], boardCols = [], contactCols = [];
+let dealsFilter = 'all', contactsFilter = 'all';
+let selectedDeal = null, selectedContact = null;
+let products = [], productCount = 0, sitePhotos = [];
+let currentPage = 'appts';
 
 // ── Auth ──────────────────────────────────────────────────────
-function checkLogin() {
-  const n = document.getElementById('login-name').value.trim();
-  const p = document.getElementById('login-pass').value;
-  document.getElementById('login-btn').disabled = n.length < 2 || p.length < 1;
+function chkL() {
+  const n = document.getElementById('ln').value.trim();
+  const p = document.getElementById('lp').value;
+  document.getElementById('lbtn').disabled = n.length < 2 || p.length < 1;
 }
-
 async function doLogin() {
-  const name = document.getElementById('login-name').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  const err = document.getElementById('login-error');
+  const name = document.getElementById('ln').value.trim();
+  const pass = document.getElementById('lp').value;
+  const err = document.getElementById('lerr');
   err.style.display = 'none';
-  const btn = document.getElementById('login-btn');
+  const btn = document.getElementById('lbtn');
   btn.disabled = true; btn.textContent = 'Signing in...';
   try {
-    const res = await fetch(AUTH_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'login', name, password: pass, role: 'sales' }) });
+    const res = await fetch(AUTH, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'login', name, password: pass, role: 'sales' }) });
     const data = await res.json();
     if (data.success) {
       currentUser = data.name || name;
       localStorage.setItem('bwd_sales_user', currentUser);
       localStorage.setItem('bwd_sales_token', data.token);
-      showDashboard();
+      initApp();
     } else {
       err.textContent = data.error || 'Incorrect name or password';
       err.style.display = 'block';
       btn.disabled = false; btn.textContent = 'Sign in';
     }
   } catch (e) {
-    err.textContent = 'Could not connect. Please try again.';
+    err.textContent = 'Could not connect.';
     err.style.display = 'block';
     btn.disabled = false; btn.textContent = 'Sign in';
   }
 }
-
 function signOut() {
   const token = localStorage.getItem('bwd_sales_token');
-  if (token) fetch(AUTH_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'logout', token }) });
-  localStorage.removeItem('bwd_sales_user');
-  localStorage.removeItem('bwd_sales_token');
-  currentUser = ''; allDeals = [];
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('header-user').style.display = 'none';
-  document.getElementById('login-name').value = '';
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-btn').disabled = true;
+  if (token) fetch(AUTH, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'logout', token }) });
+  localStorage.removeItem('bwd_sales_user'); localStorage.removeItem('bwd_sales_token');
+  currentUser = ''; allDeals = []; allContacts = [];
+  document.getElementById('login-wrap').style.display = 'flex';
+  document.getElementById('bottom-nav').style.display = 'none';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('ln').value = ''; document.getElementById('lp').value = '';
+  document.getElementById('lbtn').disabled = true;
 }
-
-function showDashboard() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
-  document.getElementById('welcome-name').textContent = 'Welcome, ' + currentUser;
+function initApp() {
+  document.getElementById('login-wrap').style.display = 'none';
+  document.getElementById('bottom-nav').style.display = 'block';
   document.getElementById('header-user').textContent = currentUser;
   document.getElementById('header-user').style.display = 'block';
-  document.getElementById('v-salesperson').value = currentUser;
-  loadDeals();
+  document.getElementById('me-name').textContent = currentUser;
+  document.getElementById('me-avatar').textContent = currentUser.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  loadAll();
+  navTo('appts');
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function navTo(page) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + page);
+  const navEl = document.getElementById('nav-' + page);
+  if (pageEl) pageEl.classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  // Update submit summary when going to deal submit tab
+  if (page === 'deal') updateSubmitSummary();
+  window.scrollTo(0, 0);
 }
 
 // ── Monday ────────────────────────────────────────────────────
-async function mondayQuery(query) {
-  const res = await fetch(PROXY_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
+async function mq(query) {
+  const res = await fetch(PROXY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
   if (!res.ok) throw new Error('Server error ' + res.status);
   const data = await res.json();
   if (data.errors) throw new Error(data.errors[0].message);
   return data;
 }
 
-async function loadDeals() {
-  document.getElementById('deals-list').innerHTML = '<div class="loading-box"><div class="spinner"></div>Loading deals...</div>';
-  document.getElementById('error-box').style.display = 'none';
-  try {
-    const colData = await mondayQuery(`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`);
-    boardColumns = colData.data?.boards?.[0]?.columns || [];
-    const salesPersonColId = boardColumns.find(c => c.title === 'Sales Person')?.id || '';
-    const stageColId = boardColumns.find(c => c.title === 'Stage')?.id || '';
-    const addressColId = boardColumns.find(c => c.title === 'Address' || c.title === 'Location')?.id || '';
-    const phoneColId = boardColumns.find(c => c.title === 'Phone')?.id || '';
-    const emailColId = boardColumns.find(c => c.title === 'Email')?.id || '';
-    const contactsColId = boardColumns.find(c => c.title === 'Contacts')?.id || '';
+async function loadAll() {
+  await Promise.all([loadDeals(), loadContacts()]);
+}
 
-    const data = await mondayQuery(`query {
-      boards(ids:${BOARD_ID}){
+// ── Deals ─────────────────────────────────────────────────────
+async function loadDeals() {
+  try {
+    const colData = await mq(`query { boards(ids:${DEALS_BOARD}){ columns{ id title type } } }`);
+    boardCols = colData.data?.boards?.[0]?.columns || [];
+    const gc = (title) => boardCols.find(c => c.title === title)?.id || '';
+    const spId = gc('Sales Person'), stageId = gc('Stage');
+    const addrId = gc('Address') || gc('Location');
+    const phoneId = gc('Phone'), emailId = gc('Email');
+    const apptId = gc('Appointment');
+    const contactsId = gc('Contacts');
+
+    const data = await mq(`query {
+      boards(ids:${DEALS_BOARD}){
         items_page(limit:300){
           items{
             id name
             column_values{
               id text
               ... on StatusValue{ label }
-              ... on PeopleValue{ persons_and_teams{ id } }
+              ... on DateValue{ date time }
             }
           }
         }
       }
     }`);
-
     const items = data.data?.boards?.[0]?.items_page?.items || [];
-    const cv = (item, id) => item.column_values.find(c => c.id === id)?.text || '';
-    const cvLabel = (item, id) => item.column_values.find(c => c.id === id)?.label || item.column_values.find(c => c.id === id)?.text || '';
-
+    const cv = (item, id) => item.column_values.find(c => c.id === id) || {};
     allDeals = items
-      .filter(item => {
-        const sp = cv(item, salesPersonColId);
-        return sp.toLowerCase().includes(currentUser.toLowerCase());
-      })
-      .map(item => ({
-        id: item.id, name: item.name,
-        stage: cvLabel(item, stageColId),
-        address: cv(item, addressColId),
-        phone: cv(item, phoneColId),
-        email: cv(item, emailColId),
-        salesPerson: cv(item, salesPersonColId),
-        contactsText: cv(item, contactsColId),
-        stageColId, addressColId, phoneColId, emailColId, salesPersonColId, contactsColId
-      }));
-
+      .filter(item => (cv(item, spId).text || '').toLowerCase().includes(currentUser.toLowerCase()))
+      .map(item => {
+        const apptCol = cv(item, apptId);
+        return {
+          id: item.id, name: item.name,
+          stage: cv(item, stageId).label || cv(item, stageId).text || '',
+          address: cv(item, addrId).text || '',
+          phone: cv(item, phoneId).text || '',
+          email: cv(item, emailId).text || '',
+          apptDate: apptCol.date || '',
+          apptTime: apptCol.time || '',
+          spId, stageId, addrId, phoneId, emailId, apptId, contactsId
+        };
+      });
     renderDeals();
-    updateStats();
+    renderStats();
+    renderAppointments();
   } catch (err) {
-    document.getElementById('deals-list').innerHTML = '<div class="empty-state">Could not load deals: ' + err.message + '</div>';
-    document.getElementById('error-box').textContent = 'Error: ' + err.message;
-    document.getElementById('error-box').style.display = 'block';
+    document.getElementById('appts-error').textContent = 'Could not load deals: ' + err.message;
+    document.getElementById('appts-error').style.display = 'block';
+    document.getElementById('deals-list').innerHTML = '<div class="empty">Could not load: ' + err.message + '</div>';
   }
 }
 
-function stageBadgeClass(stage) {
-  const map = { 'New': 's-New', 'Appointment': 's-Appointment', 'Pricing': 's-Pricing', 'Quote Sent': 's-Quote-Sent', 'Prospect': 's-Prospect', 'Won': 's-Won', 'Lost': 's-Lost', 'Unsuccessful tender': 's-Unsuccessful' };
-  return map[stage] || 's-New';
+function stageBadge(stage) {
+  const map = { 'New': 'b-new', 'Appointment': 'b-appt', 'Pricing': 'b-pricing', 'Quote Sent': 'b-quotesent', 'Prospect': 'b-prospect', 'Won': 'b-won', 'Lost': 'b-lost', 'Unsuccessful tender': 'b-unsuccessful' };
+  return map[stage] || 'b-new';
 }
 
 function renderDeals() {
-  const list = document.getElementById('deals-list');
-  const search = document.getElementById('search-input').value.toLowerCase();
+  const search = (document.getElementById('deals-search')?.value || '').toLowerCase();
   let deals = allDeals;
-  if (currentFilter !== 'all') deals = deals.filter(d => d.stage === currentFilter);
-  if (search) deals = deals.filter(d => d.name.toLowerCase().includes(search) || (d.address || '').toLowerCase().includes(search));
-  if (deals.length === 0) { list.innerHTML = '<div class="empty-state"><div style="font-size:36px;margin-bottom:8px">💼</div><div style="font-weight:600;color:#64748b">No deals found</div></div>'; return; }
-  list.innerHTML = deals.map(d => {
-    const initials = d.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-    return `<div class="deal-row" onclick="openDeal('${d.id}')">
-      <div class="deal-avatar">${initials}</div>
-      <div class="deal-main">
-        <div class="deal-name">${d.name}</div>
-        <div class="deal-meta">${d.address || d.phone || 'No details'}</div>
+  if (dealsFilter !== 'all') deals = deals.filter(d => d.stage === dealsFilter);
+  if (search) deals = deals.filter(d => d.name.toLowerCase().includes(search) || d.address.toLowerCase().includes(search));
+  const el = document.getElementById('deals-list');
+  if (!el) return;
+  if (deals.length === 0) { el.innerHTML = '<div class="empty"><div style="font-size:32px;margin-bottom:8px">💼</div>No deals found</div>'; return; }
+  el.innerHTML = deals.map(d => {
+    const init = d.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const apptStr = d.apptDate ? formatDate(d.apptDate) + (d.apptTime ? ' at ' + formatTime(d.apptTime) : '') : '';
+    return `<div class="list-row" onclick="openDeal('${d.id}')">
+      <div class="row-avatar">${init}</div>
+      <div class="row-main">
+        <div class="row-name">${d.name}</div>
+        <div class="row-meta">${apptStr || d.address || d.phone || 'No details'}</div>
       </div>
-      <div class="deal-right">
-        <span class="stage-badge ${stageBadgeClass(d.stage)}">${d.stage || '—'}</span>
-      </div>
-      <div class="deal-arrow">›</div>
+      <div class="row-right"><span class="badge ${stageBadge(d.stage)}">${d.stage || '—'}</span></div>
+      <div class="row-arrow">›</div>
     </div>`;
   }).join('');
 }
 
-function updateStats() {
-  document.getElementById('st-total').textContent = allDeals.length;
-  document.getElementById('st-new').textContent = allDeals.filter(d => d.stage === 'New').length;
-  document.getElementById('st-appt').textContent = allDeals.filter(d => d.stage === 'Appointment').length;
-  document.getElementById('st-pricing').textContent = allDeals.filter(d => d.stage === 'Pricing' || d.stage === 'Quote Sent' || d.stage === 'Prospect').length;
-  document.getElementById('st-won').textContent = allDeals.filter(d => d.stage === 'Won').length;
+function renderStats() {
+  const el = document.getElementById('deals-stats');
+  if (!el) return;
+  const counts = { New: 0, Appointment: 0, Pricing: 0, Won: 0 };
+  allDeals.forEach(d => { if (counts[d.stage] !== undefined) counts[d.stage]++; else if (d.stage === 'Quote Sent' || d.stage === 'Prospect') counts.Pricing++; });
+  el.innerHTML = [
+    ['b-new', counts.New, 'New'],
+    ['b-appt', counts.Appointment, 'Appt'],
+    ['b-pricing', counts.Pricing, 'Pricing'],
+    ['b-won', counts.Won, 'Won'],
+    ['s-total', allDeals.length, 'Total'],
+  ].map(([cls, val, lbl]) => `<div class="stat-box"><div class="stat-val" style="color:${cls === 's-total' ? '#1e3a5f' : ''}">${val}</div><div class="stat-lbl">${lbl}</div></div>`).join('');
 }
 
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+function setDealsFilter(f, btn) {
+  dealsFilter = f;
+  document.querySelectorAll('#page-deals .ftab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   renderDeals();
 }
 
-async function openDeal(id) {
-  selectedDeal = allDeals.find(d => d.id === id);
-  if (!selectedDeal) return;
-  // Pre-fill visit form with deal data first
-  document.getElementById('v-name').value = selectedDeal.name || '';
-  document.getElementById('v-phone').value = selectedDeal.phone || '';
-  document.getElementById('v-email').value = selectedDeal.email || '';
-  document.getElementById('v-address').value = selectedDeal.address || '';
-  // Search Contacts board by deal name to find matching contact
+// ── Appointments ──────────────────────────────────────────────
+function formatDate(dateStr) {
+  if (!dateStr) return '';
   try {
-    const CONTACTS_BOARD = '9998586586';
-    const searchName = selectedDeal.name.trim();
-    const contactData = await mondayQuery(`query {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch (e) { return dateStr; }
+}
+function formatTime(timeStr) {
+  if (!timeStr) return '';
+  try { return timeStr.slice(0, 5); } catch (e) { return timeStr; }
+}
+
+function renderAppointments() {
+  const loadEl = document.getElementById('appts-loading');
+  if (loadEl) loadEl.style.display = 'none';
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const todayStr = today.toISOString().slice(0, 10);
+  const appts = allDeals.filter(d => d.apptDate).map(d => ({ ...d, dateObj: new Date(d.apptDate) })).sort((a, b) => a.dateObj - b.dateObj);
+  const todayAppts = appts.filter(d => d.apptDate === todayStr);
+  const upcomingAppts = appts.filter(d => d.apptDate > todayStr);
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  function apptHTML(d, isToday) {
+    const dt = d.dateObj;
+    return `<div class="appt-card${isToday ? ' today' : ''}" onclick="openDeal('${d.id}')">
+      <div class="appt-date-block">
+        <div class="appt-day">${dt.getDate()}</div>
+        <div class="appt-month">${months[dt.getMonth()]}</div>
+        <div class="appt-dow">${days[dt.getDay()]}</div>
+      </div>
+      <div class="appt-info">
+        <div class="appt-name">${d.name}</div>
+        ${d.apptTime ? `<div class="appt-time">🕐 ${formatTime(d.apptTime)}</div>` : ''}
+        <div class="appt-meta">${d.address || d.phone || ''}</div>
+        <span class="badge ${stageBadge(d.stage)}" style="margin-top:4px;display:inline-block">${d.stage}</span>
+      </div>
+    </div>`;
+  }
+
+  const todayEl = document.getElementById('appts-today');
+  const upcomingEl = document.getElementById('appts-upcoming');
+
+  if (todayAppts.length > 0) {
+    todayEl.innerHTML = `<div style="font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">Today</div>` + todayAppts.map(d => apptHTML(d, true)).join('');
+  } else {
+    todayEl.innerHTML = `<div style="background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:16px;text-align:center;color:#94a3b8;font-size:13px;margin-bottom:10px">No appointments today</div>`;
+  }
+
+  if (upcomingAppts.length > 0) {
+    upcomingEl.innerHTML = `<div style="font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:8px;margin-top:14px;text-transform:uppercase;letter-spacing:0.06em">Upcoming</div>` + upcomingAppts.map(d => apptHTML(d, false)).join('');
+  } else {
+    upcomingEl.innerHTML = '';
+  }
+
+  if (todayAppts.length === 0 && upcomingAppts.length === 0) {
+    upcomingEl.innerHTML = '<div class="empty"><div style="font-size:32px;margin-bottom:8px">📅</div>No upcoming appointments</div>';
+  }
+}
+
+// ── Contacts ──────────────────────────────────────────────────
+async function loadContacts() {
+  try {
+    const colData = await mq(`query { boards(ids:${CONTACTS_BOARD}){ columns{ id title type } } }`);
+    contactCols = colData.data?.boards?.[0]?.columns || [];
+    const gc = (title) => contactCols.find(c => c.title === title)?.id || '';
+    const assignedId = gc('Assigned');
+    const phoneId = gc('Phone'), emailId = gc('Email');
+    const locId = gc('Location') || gc('Address');
+    const typeId = gc('Client Type');
+    const commentsId = gc('Comments');
+
+    const data = await mq(`query {
       boards(ids:${CONTACTS_BOARD}){
-        items_page(limit:10, query_params:{rules:[{column_id:"name", compare_value:"${searchName.replace(/"/g,'')}"}]}){
-          items{ id name column_values{ id title text } }
+        items_page(limit:300){
+          items{ id name column_values{ id text ... on StatusValue{ label } ... on PeopleValue{ persons_and_teams{ id } } } }
         }
       }
     }`);
-    let contacts = contactData.data?.boards?.[0]?.items_page?.items || [];
-    // If no exact match, try a broader search
-    if (contacts.length === 0) {
-      const searchData = await mondayQuery(`query {
-        items_page_by_column_values(limit:5, board_id:${CONTACTS_BOARD}, columns:[{column_id:"name", column_values:["${searchName.replace(/"/g,'')}"]}]){
-          items{ id name column_values{ id title text } }
-        }
-      }`);
-      contacts = searchData.data?.items_page_by_column_values?.items || [];
-    }
-    if (contacts.length > 0) {
-      const contact = contacts[0];
-      const getCol = (...titles) => {
-        for (const t of titles) {
-          const val = contact.column_values.find(c => c.title === t)?.text;
-          if (val) return val;
-        }
-        return '';
-      };
-      if (!document.getElementById('v-phone').value) document.getElementById('v-phone').value = getCol('Phone');
-      if (!document.getElementById('v-email').value) document.getElementById('v-email').value = getCol('Email');
-      if (!document.getElementById('v-address').value) document.getElementById('v-address').value = getCol('Location','Address');
-      const ind = document.getElementById('contact-loaded');
-      ind.style.display = 'block';
-      ind.textContent = '✓ Contact details loaded: ' + contact.name;
-    }
-  } catch(e) { console.warn('Could not search contacts:', e); }
-  document.getElementById('v-date').value = new Date().toISOString().slice(0, 10);
-  document.getElementById('v-salesperson').value = currentUser;
-  // Stage badge
-  const badge = document.getElementById('vt-stage-badge');
+    const items = data.data?.boards?.[0]?.items_page?.items || [];
+    const cv = (item, id) => item.column_values.find(c => c.id === id)?.text || '';
+    const cvLabel = (item, id) => item.column_values.find(c => c.id === id)?.label || cv(item, id);
+    allContacts = items
+      .filter(item => (cv(item, assignedId) || '').toLowerCase().includes(currentUser.toLowerCase()))
+      .map(item => ({
+        id: item.id, name: item.name,
+        phone: cv(item, phoneId), email: cv(item, emailId),
+        address: cv(item, locId), clientType: cvLabel(item, typeId),
+        assigned: cv(item, assignedId), comments: cv(item, commentsId),
+        assignedId, phoneId, emailId, locId, typeId, commentsId
+      }));
+    renderContacts();
+  } catch (err) {
+    document.getElementById('contacts-list').innerHTML = '<div class="empty">Could not load: ' + err.message + '</div>';
+  }
+}
+
+function renderContacts() {
+  const search = (document.getElementById('contacts-search')?.value || '').toLowerCase();
+  let contacts = allContacts;
+  if (contactsFilter !== 'all') contacts = contacts.filter(c => c.clientType === contactsFilter);
+  if (search) contacts = contacts.filter(c => c.name.toLowerCase().includes(search) || c.address.toLowerCase().includes(search));
+  const el = document.getElementById('contacts-list');
+  if (!el) return;
+  if (contacts.length === 0) { el.innerHTML = '<div class="empty"><div style="font-size:32px;margin-bottom:8px">👥</div>No contacts found</div>'; return; }
+  el.innerHTML = contacts.map(c => {
+    const init = c.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const typeCls = { 'Client': 'b-client', 'Architect': 'b-architect', 'Contractor': 'b-contractor' }[c.clientType] || 'b-client';
+    return `<div class="list-row" onclick="openContact('${c.id}')">
+      <div class="row-avatar">${init}</div>
+      <div class="row-main">
+        <div class="row-name">${c.name}</div>
+        <div class="row-meta">${c.address || c.phone || 'No details'}</div>
+      </div>
+      <div class="row-right">${c.clientType ? `<span class="badge ${typeCls}">${c.clientType}</span>` : ''}</div>
+      <div class="row-arrow">›</div>
+    </div>`;
+  }).join('');
+}
+
+function setContactsFilter(f, btn) {
+  contactsFilter = f;
+  document.querySelectorAll('#page-contacts .ftab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderContacts();
+}
+
+function openContact(id) {
+  selectedContact = allContacts.find(c => c.id === id);
+  if (!selectedContact) return;
+  document.getElementById('cd-title').textContent = selectedContact.name;
+  document.getElementById('cd-phone').textContent = selectedContact.phone || '—';
+  document.getElementById('cd-email').textContent = selectedContact.email || '—';
+  document.getElementById('cd-address').textContent = selectedContact.address || '—';
+  document.getElementById('cd-type').textContent = selectedContact.clientType || '—';
+  document.getElementById('cd-assigned').textContent = selectedContact.assigned || '—';
+  document.getElementById('cd-comments').textContent = selectedContact.comments || '—';
+  // Show linked deals
+  const linked = allDeals.filter(d => d.name.toLowerCase().includes(selectedContact.name.toLowerCase()) || selectedContact.name.toLowerCase().includes(d.name.toLowerCase()));
+  const dealsEl = document.getElementById('cd-deals');
+  if (linked.length > 0) {
+    dealsEl.innerHTML = linked.map(d => `<div class="list-row" style="padding:10px 0" onclick="openDeal('${d.id}')">
+      <div class="row-main"><div class="row-name">${d.name}</div><div class="row-meta">${d.apptDate ? formatDate(d.apptDate) : 'No appointment'}</div></div>
+      <span class="badge ${stageBadge(d.stage)}">${d.stage || '—'}</span>
+      <div class="row-arrow">›</div>
+    </div>`).join('');
+  } else {
+    dealsEl.innerHTML = '<div style="font-size:12px;color:#94a3b8">No linked deals found.</div>';
+  }
+  document.getElementById('nav-contacts').classList.add('active');
+  navTo('contact-detail');
+}
+
+// ── Deal detail ───────────────────────────────────────────────
+function openDeal(id) {
+  selectedDeal = allDeals.find(d => d.id === id);
+  if (!selectedDeal) return;
+  document.getElementById('deal-title').textContent = selectedDeal.name;
+  const badge = document.getElementById('deal-stage-badge');
   badge.textContent = selectedDeal.stage || '—';
-  badge.className = 'stage-badge ' + stageBadgeClass(selectedDeal.stage);
-  // Highlight current stage btn
+  badge.className = 'badge ' + stageBadge(selectedDeal.stage);
+  document.getElementById('di-name').textContent = selectedDeal.name || '—';
+  document.getElementById('di-phone').textContent = selectedDeal.phone || '—';
+  document.getElementById('di-email').textContent = selectedDeal.email || '—';
+  document.getElementById('di-address').textContent = selectedDeal.address || '—';
+  document.getElementById('di-stage').textContent = selectedDeal.stage || '—';
+  const apptStr = selectedDeal.apptDate ? formatDate(selectedDeal.apptDate) + (selectedDeal.apptTime ? ' at ' + formatTime(selectedDeal.apptTime) : '') : '—';
+  document.getElementById('di-appt').textContent = apptStr;
+  // Highlight current stage
   document.querySelectorAll('.stage-btn').forEach(b => b.classList.toggle('active', b.textContent === selectedDeal.stage));
   // Reset products/photos
   products = []; productCount = 0; sitePhotos = [];
@@ -656,136 +799,107 @@ async function openDeal(id) {
   document.getElementById('photo-grid').innerHTML = '';
   document.getElementById('progress-box').style.display = 'none';
   document.getElementById('stage-saved').style.display = 'none';
-  document.getElementById('vt-title').textContent = selectedDeal.name;
-  showTab('visit', document.querySelector('.tab-btn'));
-  document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('visit-tool').style.display = 'block';
-  window.scrollTo(0, 0);
+  // Set back button based on where we came from
+  document.getElementById('deal-back-btn').onclick = () => navTo(currentPage === 'contact-detail' ? 'contact-detail' : 'deals');
+  showQTab('visit', document.querySelector('.qtab'));
+  navTo('deal');
+  // Try to pull phone/email/address from contacts board by name match
+  if (!selectedDeal.phone && !selectedDeal.email) loadContactDetails();
 }
 
-function closeVisitTool() {
-  document.getElementById('visit-tool').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
-  selectedDeal = null;
+async function loadContactDetails() {
+  try {
+    const match = allContacts.find(c =>
+      c.name.toLowerCase().includes(selectedDeal.name.toLowerCase()) ||
+      selectedDeal.name.toLowerCase().includes(c.name.toLowerCase())
+    );
+    if (match) {
+      if (!document.getElementById('di-phone').textContent || document.getElementById('di-phone').textContent === '—')
+        document.getElementById('di-phone').textContent = match.phone || '—';
+      if (!document.getElementById('di-email').textContent || document.getElementById('di-email').textContent === '—')
+        document.getElementById('di-email').textContent = match.email || '—';
+      if (!document.getElementById('di-address').textContent || document.getElementById('di-address').textContent === '—')
+        document.getElementById('di-address').textContent = match.address || '—';
+      // Update selectedDeal too
+      selectedDeal.phone = selectedDeal.phone || match.phone;
+      selectedDeal.email = selectedDeal.email || match.email;
+      selectedDeal.address = selectedDeal.address || match.address;
+    }
+  } catch (e) { console.warn('Contact match failed:', e); }
 }
 
-function showTab(tab, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
+function showQTab(tab, btn) {
+  document.querySelectorAll('.qtab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.qtab').forEach(b => b.classList.remove('active'));
+  document.getElementById('qtp-' + tab).classList.add('active');
   if (btn) btn.classList.add('active');
-  if (tab === 'submit') updateSummary();
-  window.scrollTo(0, 0);
+  if (tab === 'submit') updateSubmitSummary();
 }
 
 // ── Stage update ──────────────────────────────────────────────
 async function updateStage(newStage) {
   if (!selectedDeal) return;
   try {
-    const stageColId = selectedDeal.stageColId || boardColumns.find(c => c.title === 'Stage')?.id;
+    const stageColId = selectedDeal.stageId || boardCols.find(c => c.title === 'Stage')?.id;
     if (!stageColId) return;
     const val = JSON.stringify(JSON.stringify({ label: newStage }));
-    await mondayQuery(`mutation { change_column_value(board_id:${BOARD_ID}, item_id:${selectedDeal.id}, column_id:"${stageColId}", value:${val}) { id } }`);
+    await mq(`mutation { change_column_value(board_id:${DEALS_BOARD}, item_id:${selectedDeal.id}, column_id:"${stageColId}", value:${val}) { id } }`);
     selectedDeal.stage = newStage;
-    const badge = document.getElementById('vt-stage-badge');
-    badge.textContent = newStage;
-    badge.className = 'stage-badge ' + stageBadgeClass(newStage);
+    document.getElementById('deal-stage-badge').textContent = newStage;
+    document.getElementById('deal-stage-badge').className = 'badge ' + stageBadge(newStage);
+    document.getElementById('di-stage').textContent = newStage;
     document.querySelectorAll('.stage-btn').forEach(b => b.classList.toggle('active', b.textContent === newStage));
     document.getElementById('stage-saved').style.display = 'block';
     setTimeout(() => document.getElementById('stage-saved').style.display = 'none', 3000);
     const d = allDeals.find(x => x.id === selectedDeal.id);
     if (d) d.stage = newStage;
-    updateStats();
+    renderStats();
   } catch (err) { alert('Could not update stage: ' + err.message); }
 }
 
 // ── Products ──────────────────────────────────────────────────
-const PRODUCT_TYPES = ['Casement window', 'Tilt & turn window', 'Fixed window', 'Sash window', 'Composite door', 'Aluminium door', 'Timber door', 'Bifold door', 'Sliding door', 'Rooflight', 'Curtain walling', 'Internal door', 'French doors', 'Patio doors'];
-const FRAME_MATERIALS = ['UPVC', 'Aluminium', 'Timber', 'Timber alternative', 'Al-clad', 'Steel look', 'Composite'];
-const GLASS_TYPES = ['Double glazed — clear', 'Double glazed — low-E', 'Triple glazed', 'Obscure/frosted', 'Self-cleaning (Activ)', 'Solar control', 'Toughened', 'Laminated', 'Acoustic'];
-const FINISHES = ['White', 'Black', 'Anthracite grey', 'Cream', 'Light grey', 'Dark grey', 'Brown', 'Chartwell green', 'Rosewood', 'Golden oak', 'RAL colour', 'Dual colour', 'Bespoke'];
-const HANDLES = ['Standard lever', 'Espagnolette', 'Inline handle', 'Patio handle', 'D-bar handle', 'Monkey tail', 'Flush handle', 'Other'];
-const HINGES = ['Standard butt', 'Flag hinge', 'Concealed', 'Rebated', 'Dog bolt', 'Pivot', 'Standard'];
-const OPENING_STYLES = ['Left hand open', 'Right hand open', 'Top hung', 'Bottom hung', 'Centre pivot', 'Fixed', 'Inward opening', 'Outward opening', 'Sliding left', 'Sliding right'];
+const PROD_TYPES = ['Casement window','Tilt & turn window','Fixed window','Sash window','Composite door','Aluminium door','Timber door','Bifold door','Sliding door','Rooflight','Curtain walling','Internal door','French doors','Patio doors'];
+const MATERIALS = ['UPVC','Aluminium','Timber','Timber alternative','Al-clad','Steel look','Composite'];
+const GLASS = ['Double glazed — clear','Double glazed — low-E','Triple glazed','Obscure/frosted','Self-cleaning (Activ)','Solar control','Toughened','Laminated','Acoustic'];
+const FINISHES = ['White','Black','Anthracite grey','Cream','Light grey','Dark grey','Brown','Chartwell green','Rosewood','Golden oak','RAL colour','Dual colour','Bespoke'];
+const HANDLES = ['Standard lever','Espagnolette','Inline handle','Patio handle','D-bar handle','Monkey tail','Flush handle','Other'];
+const HINGES = ['Standard butt','Flag hinge','Concealed','Rebated','Dog bolt','Pivot','Standard'];
+const OPENINGS = ['Left hand open','Right hand open','Top hung','Bottom hung','Fixed','Inward opening','Outward opening','Sliding left','Sliding right'];
+
+function sel(arr) { return arr.map(a => `<option>${a}</option>`).join(''); }
 
 function addProduct() {
   productCount++;
   const id = 'p' + productCount;
-  products.push({ id, type: '', material: '', qty: 1, width: '', height: '', colour: '', glass: '', handle: '', hinge: '', opening: '', notes: '' });
+  products.push({ id, type: '', material: '', qty: 1, width: '', height: '', colour: '', glass: '', handle: '', hinge: '', opening: '', location: '', notes: '' });
   const div = document.createElement('div');
-  div.className = 'product-item';
-  div.id = id;
-  div.innerHTML = `
-    <button class="pi-remove" onclick="removeProduct('${id}')">×</button>
-    <div class="pi-num">Item ${productCount}</div>
-    <div class="pi-grid">
-      <div class="field" style="margin:0"><label>Product type</label>
-        <select onchange="updateProduct('${id}','type',this.value)">
-          <option value="">Select type...</option>
-          ${PRODUCT_TYPES.map(t => `<option>${t}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field" style="margin:0"><label>Frame material</label>
-        <select onchange="updateProduct('${id}','material',this.value)">
-          <option value="">Select...</option>
-          ${FRAME_MATERIALS.map(m => `<option>${m}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field" style="margin:0"><label>Qty</label>
-        <input type="number" value="1" min="1" style="width:100%" oninput="updateProduct('${id}','qty',this.value)">
-      </div>
+  div.className = 'prod-item'; div.id = id;
+  div.innerHTML = `<button class="prod-remove" onclick="removeProduct('${id}')">×</button>
+    <div class="prod-num">Item ${productCount}</div>
+    <div class="row3" style="margin-bottom:8px">
+      <div class="field" style="margin:0"><label>Type</label><select onchange="upd('${id}','type',this.value)"><option value="">Select...</option>${sel(PROD_TYPES)}</select></div>
+      <div class="field" style="margin:0"><label>Frame</label><select onchange="upd('${id}','material',this.value)"><option value="">Select...</option>${sel(MATERIALS)}</select></div>
+      <div class="field" style="margin:0"><label>Qty</label><input type="number" value="1" min="1" oninput="upd('${id}','qty',this.value)"></div>
     </div>
-    <div class="pi-grid2" style="margin-top:8px">
-      <div class="field" style="margin:0"><label>Width (mm)</label>
-        <input type="number" placeholder="e.g. 1200" oninput="updateProduct('${id}','width',this.value)">
-      </div>
-      <div class="field" style="margin:0"><label>Height (mm)</label>
-        <input type="number" placeholder="e.g. 1050" oninput="updateProduct('${id}','height',this.value)">
-      </div>
-      <div class="field" style="margin:0"><label>Colour / finish</label>
-        <select onchange="updateProduct('${id}','colour',this.value)">
-          <option value="">Select...</option>
-          ${FINISHES.map(f => `<option>${f}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field" style="margin:0"><label>Glass type</label>
-        <select onchange="updateProduct('${id}','glass',this.value)">
-          <option value="">Select...</option>
-          ${GLASS_TYPES.map(g => `<option>${g}</option>`).join('')}
-        </select>
-      </div>
+    <div class="row3" style="margin-bottom:8px">
+      <div class="field" style="margin:0"><label>Width (mm)</label><input type="number" placeholder="e.g. 1200" oninput="upd('${id}','width',this.value)"></div>
+      <div class="field" style="margin:0"><label>Height (mm)</label><input type="number" placeholder="e.g. 1050" oninput="upd('${id}','height',this.value)"></div>
+      <div class="field" style="margin:0"><label>Location / ref</label><input type="text" placeholder="e.g. Kitchen" oninput="upd('${id}','location',this.value)"></div>
     </div>
-    <div class="pi-grid2" style="margin-top:8px">
-      <div class="field" style="margin:0"><label>Handle</label>
-        <select onchange="updateProduct('${id}','handle',this.value)">
-          <option value="">Select...</option>
-          ${HANDLES.map(h => `<option>${h}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field" style="margin:0"><label>Hinge</label>
-        <select onchange="updateProduct('${id}','hinge',this.value)">
-          <option value="">Select...</option>
-          ${HINGES.map(h => `<option>${h}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field" style="margin:0"><label>Opening direction</label>
-        <select onchange="updateProduct('${id}','opening',this.value)">
-          <option value="">Select...</option>
-          ${OPENING_STYLES.map(o => `<option>${o}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field" style="margin:0"><label>Location / reference</label>
-        <input type="text" placeholder="e.g. Kitchen, Bedroom 1..." oninput="updateProduct('${id}','location',this.value)">
-      </div>
+    <div class="row3" style="margin-bottom:8px">
+      <div class="field" style="margin:0"><label>Colour</label><select onchange="upd('${id}','colour',this.value)"><option value="">Select...</option>${sel(FINISHES)}</select></div>
+      <div class="field" style="margin:0"><label>Glass</label><select onchange="upd('${id}','glass',this.value)"><option value="">Select...</option>${sel(GLASS)}</select></div>
+      <div class="field" style="margin:0"><label>Handle</label><select onchange="upd('${id}','handle',this.value)"><option value="">Select...</option>${sel(HANDLES)}</select></div>
     </div>
-    <div class="field" style="margin-top:8px;margin-bottom:0"><label>Additional notes / spec</label>
-      <input type="text" placeholder="Any extra specification, special requirements..." oninput="updateProduct('${id}','notes',this.value)">
+    <div class="row3">
+      <div class="field" style="margin:0"><label>Hinge</label><select onchange="upd('${id}','hinge',this.value)"><option value="">Select...</option>${sel(HINGES)}</select></div>
+      <div class="field" style="margin:0"><label>Opening</label><select onchange="upd('${id}','opening',this.value)"><option value="">Select...</option>${sel(OPENINGS)}</select></div>
+      <div class="field" style="margin:0"><label>Notes / spec</label><input type="text" placeholder="Special requirements..." oninput="upd('${id}','notes',this.value)"></div>
     </div>`;
   document.getElementById('products-list').appendChild(div);
 }
-
 function removeProduct(id) { products = products.filter(p => p.id !== id); document.getElementById(id)?.remove(); }
-function updateProduct(id, field, value) { const p = products.find(p => p.id === id); if (p) p[field] = value; }
+function upd(id, field, value) { const p = products.find(p => p.id === id); if (p) p[field] = value; }
 
 // ── Photos ────────────────────────────────────────────────────
 function handlePhotos(e) {
@@ -798,81 +912,74 @@ function handlePhotos(e) {
 }
 function renderPhotos() {
   document.getElementById('photo-grid').innerHTML = sitePhotos.map((p, i) =>
-    `<div class="photo-thumb"><img src="${p.dataUrl}" alt="${p.name}"><button onclick="removePhoto(${i})">×</button></div>`
-  ).join('');
+    `<div class="photo-thumb"><img src="${p.dataUrl}"><button onclick="removePhoto(${i})">×</button></div>`).join('');
 }
 function removePhoto(i) { sitePhotos.splice(i, 1); renderPhotos(); }
 
-// ── Summary ───────────────────────────────────────────────────
-function updateSummary() {
-  document.getElementById('sum-name').textContent = document.getElementById('v-name').value || '—';
-  document.getElementById('sum-address').textContent = document.getElementById('v-address').value || '—';
-  document.getElementById('sum-products').textContent = products.length + ' item(s)';
-  const price = document.getElementById('v-quoted-price').value;
-  document.getElementById('sum-price').textContent = price ? '£' + parseFloat(price).toLocaleString('en-GB', { minimumFractionDigits: 2 }) : '—';
+// ── Submit summary ────────────────────────────────────────────
+function updateSubmitSummary() {
+  document.getElementById('s-name').textContent = selectedDeal?.name || '—';
+  document.getElementById('s-addr').textContent = selectedDeal?.address || document.getElementById('di-address').textContent || '—';
+  document.getElementById('s-prods').textContent = products.length + ' item(s)';
+  const pv = document.getElementById('q-price').value;
+  document.getElementById('s-price').textContent = pv ? '£' + parseFloat(pv).toLocaleString('en-GB', { minimumFractionDigits: 2 }) : '—';
 }
 
-// ── PDF: Customer quote ───────────────────────────────────────
+// ── PDFs ──────────────────────────────────────────────────────
 function generateCustomerQuotePDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const name = document.getElementById('v-name').value || '—';
-  const address = document.getElementById('v-address').value || '';
-  const phone = document.getElementById('v-phone').value || '';
-  const email = document.getElementById('v-email').value || '';
-  const salesperson = document.getElementById('v-salesperson').value || currentUser;
+  const name = selectedDeal?.name || '—';
+  const address = document.getElementById('di-address').textContent || '';
+  const phone = document.getElementById('di-phone').textContent || '';
+  const email = document.getElementById('di-email').textContent || '';
+  const salesperson = currentUser;
   const dateStr = new Date().toLocaleDateString('en-GB');
-  const validity = parseInt(document.getElementById('v-validity').value) || 30;
+  const validity = parseInt(document.getElementById('q-validity').value) || 30;
   const validUntil = new Date(); validUntil.setDate(validUntil.getDate() + validity);
-  const validStr = validUntil.toLocaleDateString('en-GB');
-  const worksDesc = document.getElementById('v-works-desc').value || '';
-  const payTerms = document.getElementById('v-payment-terms').value || '';
-  const vatRate = parseFloat(document.getElementById('v-vat').value) || 0;
-  const soldValue = parseFloat(document.getElementById('v-quoted-price').value) || 0;
+  const vatRate = parseFloat(document.getElementById('q-vat').value) || 0;
+  const soldValue = parseFloat(document.getElementById('q-price').value) || 0;
   const vatAmt = soldValue * vatRate;
   const totalIncVat = soldValue + vatAmt;
   const refNum = 'BWD-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 9000) + 1000);
+  const worksDesc = document.getElementById('q-worksdesc').value || '';
+  const payTerms = document.getElementById('q-payment').value || '';
+  const surveyType = document.getElementById('q-surveytype').value || '';
+  const surveyTime = document.getElementById('q-surveytime').value || '';
 
-  // Header
   doc.setFillColor(30, 58, 95); doc.rect(0, 0, 210, 36, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22); doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255); doc.setFontSize(22); doc.setFont('helvetica', 'bold');
   doc.text('Burgess Windows & Doors', 14, 16);
   doc.setFontSize(9); doc.setFont('helvetica', 'normal');
   doc.text('Premium Window & Door Specialists', 14, 23);
   doc.text('Tel: 01234 567890  |  info@burgesswd.co.uk  |  www.burgesswd.co.uk', 14, 29);
-  // Amber badge
   doc.setFillColor(245, 158, 11); doc.rect(150, 0, 60, 36, 'F');
   doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.setFont('helvetica', 'bold');
   doc.text('QUOTATION', 152, 14);
   doc.setFontSize(8); doc.setFont('helvetica', 'normal');
   doc.text('Ref: ' + refNum, 152, 21);
   doc.text('Date: ' + dateStr, 152, 27);
-  doc.text('Valid: ' + validStr, 152, 33);
+  doc.text('Valid: ' + validUntil.toLocaleDateString('en-GB'), 152, 33);
 
-  // Customer block
   doc.setTextColor(30, 30, 30); let y = 46;
-  doc.setFillColor(248, 250, 252); doc.rect(10, y - 4, 88, 30, 'F');
-  doc.setFillColor(248, 250, 252); doc.rect(112, y - 4, 88, 30, 'F');
+  doc.setFillColor(248, 250, 252); doc.rect(10, y - 4, 88, 32, 'F');
+  doc.setFillColor(248, 250, 252); doc.rect(112, y - 4, 88, 32, 'F');
   doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 116, 139);
   doc.text('PREPARED FOR', 14, y); doc.text('QUOTE DETAILS', 116, y);
   y += 5;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(30, 30, 30);
   doc.text(name, 14, y);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
-  if (address) { const al = doc.splitTextToSize(address, 84); doc.text(al, 14, y + 5); }
-  if (phone) doc.text('T: ' + phone, 14, y + 13);
-  if (email) doc.text('E: ' + email, 14, y + 18);
+  if (address && address !== '—') { const al = doc.splitTextToSize(address, 84); doc.text(al, 14, y + 5); }
+  if (phone && phone !== '—') doc.text('T: ' + phone, 14, y + 15);
+  if (email && email !== '—') doc.text('E: ' + email, 14, y + 20);
   let ry = y;
-  doc.setFontSize(9);
   doc.text('Salesperson: ' + salesperson, 116, ry); ry += 5;
-  doc.text('Payment terms: ' + payTerms, 116, ry); ry += 5;
-  doc.text('Survey: ' + document.getElementById('v-survey-type').value, 116, ry); ry += 5;
-  doc.text('Timeframe: ' + document.getElementById('v-survey-timeframe').value, 116, ry);
-  y += 30;
-  doc.setDrawColor(226, 232, 240); doc.line(10, y, 200, y); y += 8;
+  doc.text('Payment: ' + payTerms, 116, ry); ry += 5;
+  doc.text('Survey: ' + surveyType, 116, ry); ry += 5;
+  doc.text('Timeframe: ' + surveyTime, 116, ry);
+  y += 32; doc.setDrawColor(226, 232, 240); doc.line(10, y, 200, y); y += 8;
 
-  // Description of works
   if (worksDesc) {
     doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 58, 95);
     doc.text('Description of Works', 14, y); y += 6;
@@ -882,33 +989,21 @@ function generateCustomerQuotePDF() {
     doc.setDrawColor(226, 232, 240); doc.line(10, y, 200, y); y += 8;
   }
 
-  // Products table
   if (products.length > 0) {
     doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 58, 95);
     doc.text('Schedule of Works', 14, y); y += 4;
-    const rows = products.map((p, i) => [
-      i + 1,
-      p.type || '—',
-      p.material || '—',
-      p.width && p.height ? p.width + ' × ' + p.height + 'mm' : 'TBC',
-      p.qty || 1,
-      p.colour || '—',
-      p.glass || '—',
-      [p.handle, p.hinge, p.opening, p.notes].filter(Boolean).join(', ') || '—'
-    ]);
     doc.autoTable({
       startY: y,
       head: [['#', 'Product', 'Frame', 'Size', 'Qty', 'Colour', 'Glass', 'Spec / notes']],
-      body: rows,
+      body: products.map((p, i) => [i + 1, p.type || '—', p.material || '—', p.width && p.height ? p.width + ' × ' + p.height + 'mm' : 'TBC', p.qty || 1, p.colour || '—', p.glass || '—', [p.handle, p.hinge, p.opening, p.location, p.notes].filter(Boolean).join(', ') || '—']),
       styles: { fontSize: 7.5, cellPadding: 2 },
       headStyles: { fillColor: [30, 58, 95], textColor: 255, fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [248, 250, 252] },
-      columnStyles: { 0: { cellWidth: 7 }, 1: { cellWidth: 30 }, 2: { cellWidth: 22 }, 3: { cellWidth: 22 }, 4: { cellWidth: 8 }, 5: { cellWidth: 20 }, 6: { cellWidth: 22 }, 7: { cellWidth: 47 } }
+      columnStyles: { 0: { cellWidth: 7 }, 1: { cellWidth: 30 }, 2: { cellWidth: 20 }, 3: { cellWidth: 22 }, 4: { cellWidth: 8 }, 5: { cellWidth: 20 }, 6: { cellWidth: 22 }, 7: { cellWidth: 49 } }
     });
     y = doc.lastAutoTable.finalY + 8;
   }
 
-  // Price
   if (soldValue > 0) {
     if (y > 230) { doc.addPage(); y = 20; }
     doc.setDrawColor(226, 232, 240); doc.line(10, y, 200, y); y += 8;
@@ -927,48 +1022,40 @@ function generateCustomerQuotePDF() {
       doc.setTextColor(255, 255, 255); doc.setFontSize(10); doc.setFont('helvetica', 'bold');
       doc.text('TOTAL INC VAT', bx + 4, y + 21);
       doc.text('£' + totalIncVat.toLocaleString('en-GB', { minimumFractionDigits: 2 }), bx + bw - 4, y + 21, { align: 'right' });
-      y += 32;
     } else {
       doc.setFillColor(30, 58, 95); doc.rect(bx, y + 6, bw, 11, 'F');
       doc.setTextColor(255, 255, 255); doc.setFontSize(10); doc.setFont('helvetica', 'bold');
       doc.text('TOTAL', bx + 4, y + 14);
       doc.text('£' + soldValue.toLocaleString('en-GB', { minimumFractionDigits: 2 }), bx + bw - 4, y + 14, { align: 'right' });
-      y += 22;
     }
-    y += 6;
+    y += 28;
   }
 
-  // T&Cs
-  if (y < 260) {
+  if (y < 255) {
     doc.setDrawColor(226, 232, 240); doc.line(10, y, 200, y); y += 6;
     doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 30, 30);
-    doc.text('Terms & Conditions', 14, y); y += 5;
+    doc.text('Terms & Conditions', 14, y); y += 4;
     doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139);
     ['• This quotation is valid for ' + validity + ' days from the date of issue.',
       '• All prices are subject to a formal survey. Final pricing may vary following survey.',
       '• A deposit is required to confirm your order. Payment terms: ' + payTerms + '.',
       '• Lead times are indicative and subject to supplier availability.',
-      '• All work carried out in accordance with current Building Regulations where applicable.',
-      '• Burgess Windows & Doors reserves the right to amend pricing prior to order confirmation.'
-    ].forEach(t => { if (y < 280) { doc.text(t, 14, y); y += 4.5; } });
+      '• All work carried out in accordance with current Building Regulations where applicable.'].forEach(t => { if (y < 280) { doc.text(t, 14, y); y += 4.5; } });
   }
 
-  // Footer
   const pc = doc.getNumberOfPages();
   for (let i = 1; i <= pc; i++) {
-    doc.setPage(i);
-    doc.setFillColor(30, 58, 95); doc.rect(0, 285, 210, 12, 'F');
+    doc.setPage(i); doc.setFillColor(30, 58, 95); doc.rect(0, 285, 210, 12, 'F');
     doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(147, 197, 253);
     doc.text('Burgess Windows & Doors  |  Ref: ' + refNum + '  |  ' + dateStr + '  |  Page ' + i + ' of ' + pc, 105, 292, { align: 'center' });
   }
   return doc.output('blob');
 }
 
-// ── PDF: Visit report ─────────────────────────────────────────
 function generateVisitReportPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const name = document.getElementById('v-name').value || '—';
+  const name = selectedDeal?.name || '—';
   const dateStr = new Date().toLocaleDateString('en-GB');
   doc.setFillColor(30, 58, 95); doc.rect(0, 0, 210, 28, 'F');
   doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.setFont('helvetica', 'bold');
@@ -977,56 +1064,47 @@ function generateVisitReportPDF() {
   doc.text('Site Visit Report — Internal', 14, 20);
   doc.setTextColor(30, 30, 30); let y = 36;
   doc.setFontSize(9);
-  doc.text('Customer: ' + name, 14, y); doc.text('Salesperson: ' + (document.getElementById('v-salesperson').value || currentUser), 120, y); y += 5;
-  doc.text('Address: ' + document.getElementById('v-address').value, 14, y); y += 5;
-  doc.text('Phone: ' + document.getElementById('v-phone').value, 14, y);
-  doc.text('Email: ' + document.getElementById('v-email').value, 80, y); y += 5;
-  doc.text('Visit date: ' + document.getElementById('v-date').value, 14, y);
-  doc.text('Lead source: ' + document.getElementById('v-lead-source').value, 80, y); y += 8;
-  // Checklist
+  doc.text('Customer: ' + name, 14, y); doc.text('Salesperson: ' + currentUser, 120, y); y += 5;
+  doc.text('Address: ' + (document.getElementById('di-address').textContent || ''), 14, y); y += 5;
+  doc.text('Phone: ' + (document.getElementById('di-phone').textContent || ''), 14, y);
+  doc.text('Email: ' + (document.getElementById('di-email').textContent || ''), 80, y); y += 5;
+  const appt = document.getElementById('di-appt').textContent;
+  if (appt && appt !== '—') { doc.text('Appointment: ' + appt, 14, y); y += 5; }
+  y += 3;
+  const checks = [
+    ['Property type', document.getElementById('q-proptype').value],
+    ['Build type', document.getElementById('q-buildtype').value],
+    ['Survey type', document.getElementById('q-surveytype').value],
+    ['Survey timeframe', document.getElementById('q-surveytime').value],
+    ['VAT rate', document.getElementById('q-vat').options[document.getElementById('q-vat').selectedIndex].text],
+    ['Payment terms', document.getElementById('q-payment').value],
+    ['Fit days', document.getElementById('q-fitdays').value],
+    ['Level threshold', document.getElementById('q-threshold').value],
+    ['Builder/Architect', document.getElementById('q-builder').value || 'N/A'],
+    ['Access notes', document.getElementById('q-access').value || 'N/A'],
+  ];
   doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text('Site Checklist', 14, y); y += 5;
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
-  const checks = [
-    ['Property type', document.getElementById('v-property-type').value],
-    ['Build type', document.getElementById('v-build-type').value],
-    ['Survey type', document.getElementById('v-survey-type').value],
-    ['Survey timeframe', document.getElementById('v-survey-timeframe').value],
-    ['VAT rate', document.getElementById('v-vat').options[document.getElementById('v-vat').selectedIndex].text],
-    ['Payment terms', document.getElementById('v-payment-terms').value],
-    ['Fit days', document.getElementById('v-fit-days').value],
-    ['Level threshold', document.getElementById('v-threshold').value],
-    ['Builder/Architect', document.getElementById('v-builder').value || 'N/A'],
-    ['Access notes', document.getElementById('v-access').value || 'N/A'],
-  ];
   checks.forEach(([l, v]) => { doc.text(l + ':', 14, y); doc.text(v || '—', 80, y); y += 5; });
   y += 3;
-  // Notes
-  [['Description of Works', 'v-works-desc'], ['Internal Notes', 'v-internal-notes'], ['Requirements', 'v-requirements']].forEach(([label, id]) => {
+  [['Description of Works', 'q-worksdesc'], ['Internal Notes', 'q-internalnotes'], ['Requirements', 'q-requirements']].forEach(([label, id]) => {
     const val = document.getElementById(id).value;
     if (val && y < 250) {
+      if (y > 240) { doc.addPage(); y = 20; }
       doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text(label, 14, y); y += 5;
       doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
       const lines = doc.splitTextToSize(val, 182);
       doc.text(lines, 14, y); y += lines.length * 4 + 5;
     }
   });
-  // Products
-  if (products.length > 0 && y < 230) {
+  if (products.length > 0) {
     if (y > 220) { doc.addPage(); y = 20; }
     doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text('Products', 14, y); y += 4;
-    doc.autoTable({
-      startY: y,
-      head: [['#', 'Type', 'Material', 'Size', 'Qty', 'Colour', 'Glass', 'Handle', 'Hinge', 'Opening', 'Notes']],
-      body: products.map((p, i) => [i + 1, p.type, p.material, p.width && p.height ? p.width + '×' + p.height : 'TBC', p.qty, p.colour, p.glass, p.handle, p.hinge, p.opening, p.notes]),
-      styles: { fontSize: 7, cellPadding: 1.5 },
-      headStyles: { fillColor: [30, 58, 95] }
-    });
+    doc.autoTable({ startY: y, head: [['#', 'Type', 'Frame', 'Size', 'Qty', 'Colour', 'Glass', 'Handle', 'Hinge', 'Opening', 'Location', 'Notes']], body: products.map((p, i) => [i + 1, p.type, p.material, p.width && p.height ? p.width + '×' + p.height : 'TBC', p.qty, p.colour, p.glass, p.handle, p.hinge, p.opening, p.location, p.notes]), styles: { fontSize: 7, cellPadding: 1.5 }, headStyles: { fillColor: [30, 58, 95] } });
     y = doc.lastAutoTable.finalY + 6;
   }
-  // Price
-  const pv = document.getElementById('v-quoted-price').value;
-  if (pv) { doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.text('Quoted price: £' + parseFloat(pv).toLocaleString(), 14, y + 4); }
-  // Photos
+  const pv = document.getElementById('q-price').value;
+  if (pv && y < 270) { doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.text('Quoted price: £' + parseFloat(pv).toLocaleString(), 14, y + 5); }
   if (sitePhotos.length > 0) {
     doc.addPage(); y = 20;
     doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 30, 30); doc.text('Site Photos', 14, y); y += 8;
@@ -1035,94 +1113,67 @@ function generateVisitReportPDF() {
       try {
         if (px + 62 > 200) { px = 14; y += 54; }
         if (y > 220) { doc.addPage(); y = 20; px = 14; }
-        doc.addImage(photo.dataUrl, 'JPEG', px, y, 56, 42);
-        px += 62;
+        doc.addImage(photo.dataUrl, 'JPEG', px, y, 56, 42); px += 62;
       } catch (e) { }
     });
   }
   const pc = doc.getNumberOfPages();
-  for (let i = 1; i <= pc; i++) {
-    doc.setPage(i); doc.setFontSize(8); doc.setTextColor(150, 150, 150);
-    doc.text('Burgess W&D — ' + name + ' — Site Visit — ' + dateStr + ' — Page ' + i + ' of ' + pc, 14, 290);
-  }
+  for (let i = 1; i <= pc; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(150, 150, 150); doc.text('Burgess W&D — ' + name + ' — Site Visit — ' + dateStr + ' — Page ' + i + ' of ' + pc, 14, 290); }
   return doc.output('blob');
 }
 
 // ── Submit ────────────────────────────────────────────────────
-async function uploadFile(itemId, columnId, fileName, blob) {
-  const base64 = await new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result.split(',')[1]);
-    r.onerror = () => rej(new Error('Read failed'));
-    r.readAsDataURL(blob);
-  });
-  const resp = await fetch(UPLOAD_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ itemId: String(itemId), columnId, fileName, fileBase64: base64 }) });
+async function uploadFile(itemId, colId, fileName, blob) {
+  const base64 = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = () => rej(new Error('Read failed')); r.readAsDataURL(blob); });
+  const resp = await fetch(UPLOAD, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ itemId: String(itemId), columnId: colId, fileName, fileBase64: base64 }) });
   if (!resp.ok) throw new Error('Upload error ' + resp.status);
   const data = await resp.json();
   if (data.error) throw new Error(data.error);
   return data;
 }
-
 function showProgress(steps) {
   document.getElementById('progress-box').style.display = 'block';
-  document.getElementById('progress-steps').innerHTML = steps.map((s, i) =>
-    `<div class="progress-step" id="ps${i}"><div class="step-icon" id="pi${i}">○</div><span id="pt${i}">${s}</span></div>`
-  ).join('');
+  document.getElementById('progress-steps').innerHTML = steps.map((s, i) => `<div class="progress-step" id="ps${i}"><div class="step-icon" id="pi${i}">○</div><span id="pt${i}">${s}</span></div>`).join('');
 }
 function setStep(i, status, text) {
   const s = document.getElementById('ps' + i), ic = document.getElementById('pi' + i), t = document.getElementById('pt' + i);
   if (!s) return;
-  s.className = 'progress-step ' + status;
-  ic.className = 'step-icon ' + status;
+  s.className = 'progress-step ' + status; ic.className = 'step-icon ' + status;
   ic.textContent = status === 'done' ? '✓' : status === 'error' ? '✗' : '…';
   if (text && t) t.textContent = text;
 }
-
 async function submitQuote() {
   if (!selectedDeal) { alert('No deal selected.'); return; }
-  const name = document.getElementById('v-name').value.trim();
-  if (!name) { alert('Please enter customer name.'); return; }
   const btn = document.getElementById('submit-btn');
   btn.disabled = true; btn.textContent = 'Generating...';
-  const steps = ['Generating customer quote PDF', 'Generating visit report PDF', 'Finding Files column', 'Uploading customer quote', 'Uploading visit report', 'Updating deal stage', 'Adding update note'];
+  const steps = ['Generating customer quote PDF', 'Generating visit report PDF', 'Finding Files column', 'Uploading customer quote', 'Uploading visit report', 'Updating stage to Quote Sent', 'Adding Monday update'];
   showProgress(steps);
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const safeName = name.replace(/[^a-z0-9]/gi, '_');
+  const safeName = selectedDeal.name.replace(/[^a-z0-9]/gi, '_');
   try {
-    setStep(0, 'active');
-    const quotePDF = generateCustomerQuotePDF();
-    setStep(0, 'done');
-    setStep(1, 'active');
-    const visitPDF = generateVisitReportPDF();
-    setStep(1, 'done');
+    setStep(0, 'active'); const quotePDF = generateCustomerQuotePDF(); setStep(0, 'done');
+    setStep(1, 'active'); const visitPDF = generateVisitReportPDF(); setStep(1, 'done');
     setStep(2, 'active');
-    const colData = await mondayQuery(`query { boards(ids:${BOARD_ID}){ columns{ id title type } } }`);
+    const colData = await mq(`query { boards(ids:${DEALS_BOARD}){ columns{ id title type } } }`);
     const cols = colData.data?.boards?.[0]?.columns || [];
     const filesCol = cols.find(c => c.title === 'Files') || cols.find(c => c.type === 'file');
     if (!filesCol) throw new Error('No Files column found on deals board');
-    setStep(2, 'done', `"${filesCol.title}" column`);
-    setStep(3, 'active');
-    await uploadFile(selectedDeal.id, filesCol.id, `${safeName}_Quote_${dateStr}.pdf`, quotePDF);
-    setStep(3, 'done');
-    setStep(4, 'active');
-    await uploadFile(selectedDeal.id, filesCol.id, `${safeName}_VisitReport_${dateStr}.pdf`, visitPDF);
-    setStep(4, 'done');
-    setStep(5, 'active');
-    await updateStage('Quote Sent');
-    setStep(5, 'done');
+    setStep(2, 'done', `"${filesCol.title}"`);
+    setStep(3, 'active'); await uploadFile(selectedDeal.id, filesCol.id, `${safeName}_Quote_${dateStr}.pdf`, quotePDF); setStep(3, 'done');
+    setStep(4, 'active'); await uploadFile(selectedDeal.id, filesCol.id, `${safeName}_VisitReport_${dateStr}.pdf`, visitPDF); setStep(4, 'done');
+    setStep(5, 'active'); await updateStage('Quote Sent'); setStep(5, 'done');
     setStep(6, 'active');
-    const pv = document.getElementById('v-quoted-price').value;
-    const note = `💼 Site visit completed by ${currentUser} on ${new Date().toLocaleDateString('en-GB')}.\\n\\nProducts: ${products.length} item(s)\\n${pv ? 'Quoted value: £' + parseFloat(pv).toLocaleString() : ''}\\n\\nCustomer quote PDF and site visit report uploaded.`;
-    await mondayQuery(`mutation { create_update(item_id:${selectedDeal.id}, body:"${note.replace(/"/g, '\\"')}") { id } }`);
+    const pv = document.getElementById('q-price').value;
+    const note = `💼 Site visit by ${currentUser} on ${new Date().toLocaleDateString('en-GB')}.\\n\\nProducts: ${products.length} item(s)\\n${pv ? 'Quoted: £' + parseFloat(pv).toLocaleString() : ''}\\n\\nCustomer quote and visit report uploaded.`;
+    await mq(`mutation { create_update(item_id:${selectedDeal.id}, body:"${note.replace(/"/g, '\\"')}") { id } }`);
     setStep(6, 'done');
-    document.getElementById('progress-title').textContent = 'Quote submitted successfully! ✓';
+    document.getElementById('progress-title').textContent = '✓ Quote submitted successfully!';
     document.getElementById('progress-title').style.color = '#059669';
     btn.textContent = 'Submitted ✓'; btn.style.background = '#10b981';
-    // Update local deal
     const d = allDeals.find(x => x.id === selectedDeal.id);
     if (d) d.stage = 'Quote Sent';
-    updateStats();
-    setTimeout(() => closeVisitTool(), 3000);
+    renderStats(); renderDeals();
+    setTimeout(() => navTo('deals'), 3000);
   } catch (err) {
     const fi = [0, 1, 2, 3, 4, 5, 6].find(i => document.getElementById('ps' + i)?.classList.contains('active'));
     if (fi !== undefined) setStep(fi, 'error', err.message);
@@ -1134,17 +1185,15 @@ async function submitQuote() {
 
 // ── Auto-login ────────────────────────────────────────────────
 window.addEventListener('load', async () => {
-  document.getElementById('v-date').value = new Date().toISOString().slice(0, 10);
   const savedToken = localStorage.getItem('bwd_sales_token');
   const savedUser = localStorage.getItem('bwd_sales_user');
   if (savedToken && savedUser) {
     try {
-      const res = await fetch(AUTH_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'validate', token: savedToken }) });
+      const res = await fetch(AUTH, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'validate', token: savedToken }) });
       const data = await res.json();
-      if (data.valid) { currentUser = data.name || savedUser; showDashboard(); return; }
+      if (data.valid) { currentUser = data.name || savedUser; initApp(); return; }
     } catch (e) { }
-    localStorage.removeItem('bwd_sales_token');
-    localStorage.removeItem('bwd_sales_user');
+    localStorage.removeItem('bwd_sales_token'); localStorage.removeItem('bwd_sales_user');
   }
 });
 </script>
