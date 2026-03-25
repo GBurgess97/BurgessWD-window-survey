@@ -1019,7 +1019,8 @@ function openDeal(id){
   document.getElementById('photo-grid').innerHTML='';
   document.getElementById('files-list').innerHTML='';
   document.getElementById('progress-box').style.display='none';
-  document.getElementById('stage-saved').style.display='none';
+  const ss=document.getElementById('stage-saved');if(ss)ss.style.display='none';
+  const as=document.getElementById('appt-saved');if(as)as.style.display='none';
   document.getElementById('deal-back-btn').onclick=()=>navTo('deals');
   showQTab('overview',document.querySelector('.qtab'));
   // Reset quote items when opening new deal
