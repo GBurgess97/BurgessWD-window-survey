@@ -97,16 +97,15 @@ export async function onRequest(context) {
 
     // ── Admin: change password ─────────────────────────────
     if (action === 'save_pricing') {
-      if (!await isAdmin(body.token, KV)) return json({ error: 'Unauthorized' }, 401);
+      if (!await isAdmin(token, KV)) return json({ error: 'Unauthorized' }, corsHeaders);
       await KV.put('bwd_pricing_settings', JSON.stringify(body.pricing));
-      return json({ success: true });
+      return json({ success: true }, corsHeaders);
     }
 
     if (action === 'get_pricing') {
-      // Pricing is public — any valid session can read it
       const raw = await KV.get('bwd_pricing_settings');
-      if (!raw) return json({ pricing: null });
-      return json({ pricing: JSON.parse(raw) });
+      if (!raw) return json({ pricing: null }, corsHeaders);
+      return json({ pricing: JSON.parse(raw) }, corsHeaders);
     }
 
     if (action === 'change_password') {
