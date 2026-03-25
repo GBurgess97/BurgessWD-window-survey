@@ -604,58 +604,44 @@ async function openDeal(id) {
   document.getElementById('v-phone').value = selectedDeal.phone || '';
   document.getElementById('v-email').value = selectedDeal.email || '';
   document.getElementById('v-address').value = selectedDeal.address || '';
-  // Fetch linked contact details from Contacts board
-  if (selectedDeal.contactsColId) {
-    try {
-      // Step 1 — get the linked item IDs from the Contacts column
-      const linkData = await mondayQuery(`query {
-        items(ids:${selectedDeal.id}){
-          column_values(ids:["${selectedDeal.contactsColId}"]){
-            id value text
-          }
+  // Search Contacts board by deal name to find matching contact
+  try {
+    const CONTACTS_BOARD = '9998586586';
+    const searchName = selectedDeal.name.trim();
+    const contactData = await mondayQuery(`query {
+      boards(ids:${CONTACTS_BOARD}){
+        items_page(limit:10, query_params:{rules:[{column_id:"name", compare_value:"${searchName.replace(/"/g,'')}"}]}){
+          items{ id name column_values{ id title text } }
+        }
+      }
+    }`);
+    let contacts = contactData.data?.boards?.[0]?.items_page?.items || [];
+    // If no exact match, try a broader search
+    if (contacts.length === 0) {
+      const searchData = await mondayQuery(`query {
+        items_page_by_column_values(limit:5, board_id:${CONTACTS_BOARD}, columns:[{column_id:"name", column_values:["${searchName.replace(/"/g,'')}"]}]){
+          items{ id name column_values{ id title text } }
         }
       }`);
-      const colVal = linkData.data?.items?.[0]?.column_values?.[0];
-      // Parse linked item IDs from value JSON
-      let linkedIds = [];
-      try {
-        const parsed = JSON.parse(colVal?.value || '{}');
-        linkedIds = (parsed.linkedPulseIds || parsed.item_ids || []).map(x => typeof x === 'object' ? x.linkedPulseId || x : x);
-      } catch(e) {}
-      // Also try text field which may contain the name
-      const contactNameFromText = colVal?.text || '';
-      if (linkedIds.length > 0) {
-        // Step 2 — fetch those items from the Contacts board
-        const contactData = await mondayQuery(`query {
-          items(ids:[${linkedIds.join(',')}]){
-            id name
-            column_values{ id title text }
-          }
-        }`);
-        const contact = contactData.data?.items?.[0];
-        if (contact) {
-          const getCol = (...titles) => {
-            for (const t of titles) {
-              const val = contact.column_values.find(c => c.title === t)?.text;
-              if (val) return val;
-            }
-            return '';
-          };
-          if (!document.getElementById('v-phone').value) document.getElementById('v-phone').value = getCol('Phone');
-          if (!document.getElementById('v-email').value) document.getElementById('v-email').value = getCol('Email');
-          if (!document.getElementById('v-address').value) document.getElementById('v-address').value = getCol('Location','Address');
-          const ind = document.getElementById('contact-loaded');
-          ind.style.display = 'block';
-          ind.textContent = '✓ Contact details loaded: ' + contact.name;
+      contacts = searchData.data?.items_page_by_column_values?.items || [];
+    }
+    if (contacts.length > 0) {
+      const contact = contacts[0];
+      const getCol = (...titles) => {
+        for (const t of titles) {
+          const val = contact.column_values.find(c => c.title === t)?.text;
+          if (val) return val;
         }
-      } else if (contactNameFromText) {
-        // At least show the contact name we have
-        const ind = document.getElementById('contact-loaded');
-        ind.style.display = 'block';
-        ind.textContent = '🔗 Linked contact: ' + contactNameFromText;
-      }
-    } catch(e) { console.warn('Could not load linked contact:', e); }
-  }
+        return '';
+      };
+      if (!document.getElementById('v-phone').value) document.getElementById('v-phone').value = getCol('Phone');
+      if (!document.getElementById('v-email').value) document.getElementById('v-email').value = getCol('Email');
+      if (!document.getElementById('v-address').value) document.getElementById('v-address').value = getCol('Location','Address');
+      const ind = document.getElementById('contact-loaded');
+      ind.style.display = 'block';
+      ind.textContent = '✓ Contact details loaded: ' + contact.name;
+    }
+  } catch(e) { console.warn('Could not search contacts:', e); }
   document.getElementById('v-date').value = new Date().toISOString().slice(0, 10);
   document.getElementById('v-salesperson').value = currentUser;
   // Stage badge
