@@ -313,9 +313,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <button class="qtab active" onclick="showQTab('overview',this)">📋 Overview</button>
       <button class="qtab" onclick="showQTab('products',this)">🪟 Products</button>
       <button class="qtab" onclick="showQTab('photos',this)">📸 Photos</button>
-      <button class="qtab" onclick="showQTab('files',this)">📁 Files</button>
-      <button class="qtab" onclick="showQTab('quote',this)">📄 Quote</button>
-      <button class="qtab" onclick="showQTab('stage',this)">🏷️ Stage</button>
+      <button class="qtab" onclick="showQTab('files',this);loadMondayFiles()">📁 Files</button>
       <button class="qtab" onclick="showQTab('submit',this)">✅ Submit</button>
     </div>
 
@@ -382,6 +380,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           <textarea id="q-requirements" placeholder="Colours, finishes, hardware, budget range..."></textarea>
         </div>
       </div>
+      <!-- APPOINTMENT & STAGE -->
+      <div class="section">
+        <div class="sec-title">📅 Appointment</div>
+        <div class="row2">
+          <div class="field"><label>Date</label>
+            <input type="date" id="q-appt-date" onchange="updateAppointment()">
+          </div>
+          <div class="field"><label>Time</label>
+            <input type="time" id="q-appt-time" onchange="updateAppointment()">
+          </div>
+        </div>
+        <div class="field"><label>Appointment type</label>
+          <select id="q-appttype-ov" onchange="updateApptType()">
+            <option value="">Select...</option>
+            <option>Virtual</option><option>Site</option><option>Phone</option><option>Showroom</option>
+          </select>
+        </div>
+        <div id="appt-saved" style="font-size:12px;color:#059669;display:none;margin-top:4px">✓ Appointment updated in Monday</div>
+      </div>
+
+      <div class="section">
+        <div class="sec-title">🏷️ Deal stage</div>
+        <div class="stage-btns">
+          <button class="stage-btn" onclick="updateStage('New')">New</button>
+          <button class="stage-btn" onclick="updateStage('Appointment')">Appointment</button>
+          <button class="stage-btn" onclick="updateStage('Pricing')">Pricing</button>
+          <button class="stage-btn" onclick="updateStage('Quote Sent')">Quote Sent</button>
+          <button class="stage-btn" onclick="updateStage('Prospect')">Prospect</button>
+          <button class="stage-btn" onclick="updateStage('Won')">Won</button>
+          <button class="stage-btn" onclick="updateStage('Lost')">Lost</button>
+          <button class="stage-btn" onclick="updateStage('Unsuccessful tender')">Unsuccessful tender</button>
+        </div>
+        <div class="stage-saved" id="stage-saved">✓ Stage updated in Monday</div>
+      </div>
+
       <!-- Profit checker -->
       <div class="section">
         <div class="sec-title">💰 Profit checker — Salesman estimate</div>
@@ -536,32 +569,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <div class="section">
           <div class="sec-title">📝 Quote introduction</div>
           <div class="field"><label>Intro / covering message</label>
-            <textarea id="qt-intro" style="min-height:80px">At Burgess Windows and Doors, we are proud to work with some of the UK and Europe's leading manufacturers of high-performance glazing systems. Following our discussions, please find enclosed your quotation for consideration. I trust I have interpreted your requirements correctly.</textarea>
+            <textarea id="dq-intro" style="min-height:80px">At Burgess Windows and Doors, we are proud to work with some of the UK and Europe's leading manufacturers of high-performance glazing systems. Following our discussions, please find enclosed your quotation for consideration. I trust I have interpreted your requirements correctly.</textarea>
           </div>
         </div>
         <!-- Line items -->
         <div class="section">
           <div class="sec-title">📋 Line items</div>
-          <div id="qt-items-list"></div>
-          <button onclick="addQuoteItem()" style="width:100%;padding:10px;border:1.5px dashed #93c5fd;background:#f8faff;color:#1e3a5f;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;margin-top:6px">+ Add line item</button>
+          <div id="dq-items-list"></div>
+          <button onclick="addDealQuoteItem()" style="width:100%;padding:10px;border:1.5px dashed #93c5fd;background:#f8faff;color:#1e3a5f;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;margin-top:6px">+ Add line item</button>
         </div>
         <!-- Pricing -->
         <div class="section">
           <div class="sec-title">💰 Pricing & terms</div>
           <div class="row2">
-            <div class="field"><label>Discount / adjustment (£)</label><input type="number" id="qt-discount" value="0" placeholder="0.00" oninput="updateQuoteTotals()"></div>
-            <div class="field"><label>Discount label</label><input type="text" id="qt-discount-label" value="Discount" placeholder="e.g. Promotional discount"></div>
+            <div class="field"><label>Discount / adjustment (£)</label><input type="number" id="dq-discount" value="0" placeholder="0.00" oninput="updateQuoteTotals()"></div>
+            <div class="field"><label>Discount label</label><input type="text" id="dq-discount-label" value="Discount" placeholder="e.g. Promotional discount"></div>
           </div>
           <div class="row2">
             <div class="field"><label>VAT rate</label>
-              <select id="qt-vat" onchange="updateQuoteTotals()">
+              <select id="dq-vat" onchange="updateQuoteTotals()">
                 <option value="0.2">20% Standard VAT</option>
                 <option value="0">0% Net Zero (New Build)</option>
                 <option value="0.05">5% Reduced VAT</option>
               </select>
             </div>
             <div class="field"><label>Payment terms</label>
-              <select id="qt-payment-terms">
+              <select id="dq-payment-terms">
                 <option value="25/25/40/10">25% deposit | 25% after survey | 40% on delivery | 10% on completion</option>
                 <option value="100">100% on order</option>
                 <option value="50/50">50% deposit | 50% on completion</option>
@@ -570,30 +603,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
               </select>
             </div>
           </div>
-          <div class="field" id="qt-custom-terms-wrap" style="display:none">
+          <div class="field" id="dq-custom-terms-wrap" style="display:none">
             <label>Custom payment terms</label>
-            <input type="text" id="qt-custom-terms" placeholder="Describe payment terms...">
+            <input type="text" id="dq-custom-terms" placeholder="Describe payment terms...">
           </div>
           <!-- Totals -->
           <div style="background:#1e3a5f;border-radius:10px;padding:14px;margin-top:10px">
             <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:6px">
-              <span>Subtotal</span><span id="qt-subtotal">£0.00</span>
+              <span>Subtotal</span><span id="dq-subtotal">£0.00</span>
             </div>
-            <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:6px" id="qt-discount-row">
-              <span id="qt-discount-row-label">Discount</span><span id="qt-discount-display">-£0.00</span>
+            <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:6px" id="dq-discount-row">
+              <span id="dq-discount-row-label">Discount</span><span id="dq-discount-display">-£0.00</span>
             </div>
             <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:8px">
-              <span id="qt-vat-label">VAT (20%)</span><span id="qt-vat-display">£0.00</span>
+              <span id="dq-vat-label">VAT (20%)</span><span id="dq-vat-display">£0.00</span>
             </div>
             <div style="display:flex;justify-content:space-between;color:#fff;font-size:16px;font-weight:700;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px">
-              <span>Total</span><span id="qt-total">£0.00</span>
+              <span>Total</span><span id="dq-total">£0.00</span>
             </div>
           </div>
         </div>
         <!-- Actions -->
-        <button onclick="generateAndDownloadQuote()" class="submit-btn" style="margin-bottom:8px">Download quote PDF</button>
-        <button onclick="generateAndUploadQuote()" style="width:100%;padding:12px;background:#f0f4ff;border:1px solid #bfdbfe;color:#1e3a5f;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Upload quote to Monday</button>
-        <div id="qt-upload-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
+        <button onclick="generateAndDownloadDealQuote()" class="submit-btn" style="margin-bottom:8px">Download quote PDF</button>
+        <button onclick="generateAndUploadDealQuote()" style="width:100%;padding:12px;background:#f0f4ff;border:1px solid #bfdbfe;color:#1e3a5f;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Upload quote to Monday</button>
+        <div id="dq-upload-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
       </div>
     </div>
 
@@ -605,32 +638,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <!-- Intro text -->
         <div class="field">
           <label>Intro / cover text</label>
-          <textarea id="qt-intro" style="min-height:90px">At Burgess Windows and Doors, we are proud to work with some of the UK and Europe's leading manufacturers of high-performance glazing systems. Following our discussions, please find enclosed your quotation for consideration. I trust I have interpreted your requirements correctly.</textarea>
+          <textarea id="dq-intro" style="min-height:90px">At Burgess Windows and Doors, we are proud to work with some of the UK and Europe's leading manufacturers of high-performance glazing systems. Following our discussions, please find enclosed your quotation for consideration. I trust I have interpreted your requirements correctly.</textarea>
         </div>
       </div>
       <!-- Line items -->
       <div class="section">
         <div class="sec-title">📋 Line items</div>
-        <div id="qt-items-list"></div>
-        <button onclick="addQuoteItem()" class="add-prod-btn" style="margin-top:6px">+ Add line item</button>
+        <div id="dq-items-list"></div>
+        <button onclick="addDealQuoteItem()" class="add-prod-btn" style="margin-top:6px">+ Add line item</button>
       </div>
       <!-- Pricing -->
       <div class="section">
         <div class="sec-title">💰 Pricing & terms</div>
         <div class="row2">
-          <div class="field"><label>Discount / adjustment (£)</label><input type="number" id="qt-discount" value="0" placeholder="0.00" oninput="updateQuoteTotals()"></div>
-          <div class="field"><label>Discount label</label><input type="text" id="qt-discount-label" value="Discount" placeholder="e.g. Promotional discount"></div>
+          <div class="field"><label>Discount / adjustment (£)</label><input type="number" id="dq-discount" value="0" placeholder="0.00" oninput="updateQuoteTotals()"></div>
+          <div class="field"><label>Discount label</label><input type="text" id="dq-discount-label" value="Discount" placeholder="e.g. Promotional discount"></div>
         </div>
         <div class="row2">
           <div class="field"><label>VAT rate</label>
-            <select id="qt-vat" onchange="updateQuoteTotals()">
+            <select id="dq-vat" onchange="updateQuoteTotals()">
               <option value="0.2">20% Standard VAT</option>
               <option value="0">0% Net Zero (New Build)</option>
               <option value="0.05">5% Reduced VAT</option>
             </select>
           </div>
           <div class="field"><label>Payment terms</label>
-            <select id="qt-payment-terms">
+            <select id="dq-payment-terms">
               <option value="std">25% deposit | 25% after survey | 40% on delivery | 10% on completion</option>
               <option value="100">100% on order</option>
               <option value="5050">50% deposit | 50% on completion</option>
@@ -639,23 +672,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
             </select>
           </div>
         </div>
-        <div class="field" id="qt-custom-terms-wrap" style="display:none">
+        <div class="field" id="dq-custom-terms-wrap" style="display:none">
           <label>Custom payment terms</label>
-          <input type="text" id="qt-custom-terms" placeholder="Describe your payment terms...">
+          <input type="text" id="dq-custom-terms" placeholder="Describe your payment terms...">
         </div>
         <!-- Totals -->
         <div style="background:#1e3a5f;border-radius:10px;padding:14px;margin-top:10px">
-          <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:6px"><span>Subtotal</span><span id="qt-subtotal">£0.00</span></div>
-          <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:6px;display:none" id="qt-discount-row"><span id="qt-discount-row-label">Discount</span><span id="qt-discount-display">-£0.00</span></div>
-          <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:8px"><span id="qt-vat-label">VAT (20%)</span><span id="qt-vat-display">£0.00</span></div>
-          <div style="display:flex;justify-content:space-between;color:#fff;font-size:16px;font-weight:700;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px"><span>Total</span><span id="qt-total">£0.00</span></div>
+          <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:6px"><span>Subtotal</span><span id="dq-subtotal">£0.00</span></div>
+          <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:6px;display:none" id="dq-discount-row"><span id="dq-discount-row-label">Discount</span><span id="dq-discount-display">-£0.00</span></div>
+          <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:8px"><span id="dq-vat-label">VAT (20%)</span><span id="dq-vat-display">£0.00</span></div>
+          <div style="display:flex;justify-content:space-between;color:#fff;font-size:16px;font-weight:700;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px"><span>Total</span><span id="dq-total">£0.00</span></div>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
-        <button onclick="generateAndDownloadQuote()" class="submit-btn">⬇️ Download PDF</button>
-        <button onclick="generateAndUploadQuote()" class="submit-btn" style="background:#059669">☁️ Save to Monday</button>
+        <button onclick="generateAndDownloadDealQuote()" class="submit-btn">⬇️ Download PDF</button>
+        <button onclick="generateAndUploadDealQuote()" class="submit-btn" style="background:#059669">☁️ Save to Monday</button>
       </div>
-      <div id="qt-upload-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
+      <div id="dq-upload-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
     </div>
 
 
@@ -1012,7 +1045,6 @@ function openDeal(id){
   document.getElementById('di-appt').textContent=apptStr;
   // Set current appt type in dropdown
   if(selectedDeal.apptType){const sel=document.getElementById('q-appttype');if(sel){for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===selectedDeal.apptType){sel.selectedIndex=i;break;}}}}
-  document.querySelectorAll('.stage-btn').forEach(b=>b.classList.toggle('active',b.textContent===selectedDeal.stage));
   products=[];productCount=0;sitePhotos=[];projectFiles=[];canvases={};drawingState={};activeTools={};activeColors={};
   initProfitChecker();
   document.getElementById('products-list').innerHTML='';
@@ -1024,9 +1056,13 @@ function openDeal(id){
   document.getElementById('deal-back-btn').onclick=()=>navTo('deals');
   showQTab('overview',document.querySelector('.qtab'));
   // Reset quote items when opening new deal
-  quoteItems2=[];quoteItemCount=0;
-  const qtList=document.getElementById('qt-items-list');if(qtList)qtList.innerHTML='';
-  updateQuoteTotals();
+  dealQuoteItems=[];dealQuoteItemCount=0;
+  const dqList=document.getElementById('dq-items-list');if(dqList)dqList.innerHTML='';
+  // Pre-fill deal quote client details
+  const dqName=document.getElementById('dq-client-name');if(dqName)dqName.value=selectedDeal.name||'';
+  const dqPhone=document.getElementById('dq-client-phone');if(dqPhone)dqPhone.value=selectedDeal.phone||'';
+  const dqEmail=document.getElementById('dq-client-email');if(dqEmail)dqEmail.value=selectedDeal.email||'';
+  const dqAddr=document.getElementById('dq-client-address');if(dqAddr)dqAddr.value=selectedDeal.address||'';
   navTo('deal');
   // Load files after navigation so a failure can't block deal opening
   setTimeout(function(){ loadMondayFiles(); }, 300);
@@ -1095,23 +1131,27 @@ async function bookAppointment(){
 
 // ── Appointment update ────────────────────────────────────────
 async function updateAppointment(){
-  if(!selectedDeal||!selectedDeal.apptId)return;
-  const date=document.getElementById('q-appt-date').value;
-  const time=document.getElementById('q-appt-time').value;
+  if(!selectedDeal)return;
+  const date=document.getElementById('q-appt-date')?.value||'';
+  const time=document.getElementById('q-appt-time')?.value||'';
   if(!date)return;
   try{
-    const val=JSON.stringify(JSON.stringify({date:date,time:time||'00:00:00'}));
-    await mq(`mutation{change_column_value(board_id:${DEALS_BOARD},item_id:${selectedDeal.id},column_id:"${selectedDeal.apptId}",value:${val}){id}}`);
+    // Find the Appointment column ID
+    const apptColId=selectedDeal.apptId||boardCols.find(c=>c.title==='Appointment')?.id;
+    if(!apptColId){console.warn('No Appointment column found');return;}
+    // Monday date column format: {"date":"YYYY-MM-DD","time":"HH:MM:SS"}
+    const val=JSON.stringify(JSON.stringify({date:date,time:time?time+':00':'00:00:00'}));
+    await mq(`mutation{change_column_value(board_id:${DEALS_BOARD},item_id:${selectedDeal.id},column_id:"${apptColId}",value:${val}){id}}`);
     selectedDeal.apptDate=date;
     selectedDeal.apptTime=time;
     // Update info strip
     let apptStr=fmtDate(date);
     if(time)apptStr+=' at '+fmtTime(time);
     if(selectedDeal.apptType)apptStr+=' ('+selectedDeal.apptType+')';
-    document.getElementById('di-appt').textContent=apptStr;
+    const diAppt=document.getElementById('di-appt');
+    if(diAppt)diAppt.textContent=apptStr;
     const saved=document.getElementById('appt-saved');
     if(saved){saved.style.display='block';setTimeout(()=>saved.style.display='none',3000);}
-    // Update local deal
     const d=allDeals.find(x=>x.id===selectedDeal.id);
     if(d){d.apptDate=date;d.apptTime=time;}
     renderAppointments();
@@ -1121,7 +1161,7 @@ async function updateAppointment(){
 // ── Appointment Type update ───────────────────────────────────
 async function updateApptType(){
   if(!selectedDeal||!selectedDeal.apptTypeId)return;
-  const newType=document.getElementById('q-appttype').value;
+  const newType=document.getElementById('q-appttype-ov')?.value||document.getElementById('q-appttype')?.value||'';
   if(!newType)return;
   try{
     const val=JSON.stringify(JSON.stringify({label:newType}));
@@ -2029,20 +2069,27 @@ document.addEventListener('change',function(e){if(e.target.id==='qt-payment-term
 function addQuoteItem(){
   quoteItemCount++;
   const id='qi'+quoteItemCount;
-  quoteItems2.push({id,name:'',description:'',price:0,qty:1});
+  quoteItems2.push({id:id,name:'',description:'',price:0,qty:1});
   const div=document.createElement('div');
   div.id=id;
   div.style.cssText='background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:13px;margin-bottom:8px;position:relative';
-  div.innerHTML=`<button onclick="removeQuoteItem('${id}')" style="position:absolute;top:8px;right:8px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;width:24px;height:24px;border-radius:5px;font-size:14px;cursor:pointer;font-family:inherit">×</button>
-    <div style="font-size:10px;font-weight:700;color:#1e3a5f;text-transform:uppercase;margin-bottom:8px">Item ${quoteItemCount}</div>
-    <div class="row2" style="margin-bottom:8px">
-      <div class="field" style="margin:0"><label>Name / product</label><input type="text" placeholder="e.g. Internorm" oninput="updQI('${id}','name',this.value)"></div>
-      <div class="row2" style="margin:0">
-        <div class="field" style="margin:0"><label>Price (£)</label><input type="number" placeholder="0.00" oninput="updQI('${id}','price',+this.value);updateQuoteTotals()"></div>
-        <div class="field" style="margin:0"><label>Qty</label><input type="number" value="1" min="1" oninput="updQI('${id}','qty',+this.value);updateQuoteTotals()"></div>
-      </div>
-    </div>
-    <div class="field" style="margin:0"><label>Description</label><textarea placeholder="Full description of supply and installation..." style="min-height:70px" oninput="updQI('${id}','description',this.value)"></textarea></div>`;
+  const num=quoteItemCount;
+  const q='"';
+  const removeBtn='<button onclick="removeQuoteItem('+q+id+q+')" style="position:absolute;top:8px;right:8px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;width:24px;height:24px;border-radius:5px;font-size:14px;cursor:pointer">&#x2715;</button>';
+  const numLabel='<div style="font-size:10px;font-weight:700;color:#1e3a5f;text-transform:uppercase;margin-bottom:8px">Item '+num+'</div>';
+  const nameInput='<input type="text" placeholder="e.g. Internorm" oninput="updQI('+q+id+q+','+q+'name'+q+',this.value)" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;width:100%">';
+  const priceInput='<input type="number" placeholder="0.00" oninput="updQI('+q+id+q+','+q+'price'+q+',+this.value);updateQuoteTotals()" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;width:100%">';
+  const qtyInput='<input type="number" value="1" min="1" oninput="updQI('+q+id+q+','+q+'qty'+q+',+this.value);updateQuoteTotals()" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;width:100%">';
+  const descInput='<textarea placeholder="Full description of supply and installation..." oninput="updQI('+q+id+q+','+q+'description'+q+',this.value)" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical"></textarea>';
+  div.innerHTML=[
+    removeBtn, numLabel,
+    '<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:8px">',
+    '<div><label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px">Name / product</label>'+nameInput+'</div>',
+    '<div><label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px">Price (£)</label>'+priceInput+'</div>',
+    '<div><label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px">Qty</label>'+qtyInput+'</div>',
+    '</div>',
+    '<div><label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px">Description</label>'+descInput+'</div>'
+  ].join('');
   document.getElementById('qt-items-list').appendChild(div);
   updateQuoteTotals();
 }
@@ -2930,6 +2977,190 @@ async function bookAppointment(){
     statusEl.style.display='block';
     btn.disabled=false;
     btn.textContent='📅 Book appointment & set stage to Appointment';
+  }
+}
+
+// ── Deal quote tab functions (use dq- prefix IDs) ────────────
+let dealQuoteItems=[], dealQuoteItemCount=0;
+
+function addDealQuoteItem(){
+  dealQuoteItemCount++;
+  const id='dqi'+dealQuoteItemCount;
+  dealQuoteItems.push({id:id,name:'',description:'',price:0,qty:1});
+  const div=document.createElement('div');
+  div.id=id;
+  div.style.cssText='background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:13px;margin-bottom:8px;position:relative';
+  const num=dealQuoteItemCount;
+
+  const rmBtn=document.createElement('button');
+  rmBtn.innerHTML='&#x2715;';
+  rmBtn.style.cssText='position:absolute;top:8px;right:8px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;width:24px;height:24px;border-radius:5px;font-size:14px;cursor:pointer';
+  rmBtn.onclick=function(){removeDealQuoteItem(id);};
+  div.appendChild(rmBtn);
+
+  const label=document.createElement('div');
+  label.style.cssText='font-size:10px;font-weight:700;color:#1e3a5f;margin-bottom:8px';
+  label.textContent='Item '+num;
+  div.appendChild(label);
+
+  // Name row
+  const row1=document.createElement('div');
+  row1.className='row2';row1.style.marginBottom='8px';
+
+  const nameField=document.createElement('div');
+  nameField.className='field';nameField.style.margin='0';
+  const nameLbl=document.createElement('label');nameLbl.textContent='Name / product';
+  const nameInp=document.createElement('input');nameInp.type='text';nameInp.placeholder='e.g. Internorm';
+  nameInp.oninput=function(){updDQI(id,'name',this.value);};
+  nameField.appendChild(nameLbl);nameField.appendChild(nameInp);
+  row1.appendChild(nameField);
+
+  const priceQtyWrap=document.createElement('div');
+  priceQtyWrap.className='row2';priceQtyWrap.style.margin='0';
+
+  const priceField=document.createElement('div');priceField.className='field';priceField.style.margin='0';
+  const priceLbl=document.createElement('label');priceLbl.textContent='Price (£)';
+  const priceInp=document.createElement('input');priceInp.type='number';priceInp.placeholder='0.00';
+  priceInp.oninput=function(){updDQI(id,'price',+this.value);updateDealQuoteTotals();};
+  priceField.appendChild(priceLbl);priceField.appendChild(priceInp);
+
+  const qtyField=document.createElement('div');qtyField.className='field';qtyField.style.margin='0';
+  const qtyLbl=document.createElement('label');qtyLbl.textContent='Qty';
+  const qtyInp=document.createElement('input');qtyInp.type='number';qtyInp.value='1';qtyInp.min='1';
+  qtyInp.oninput=function(){updDQI(id,'qty',+this.value);updateDealQuoteTotals();};
+  qtyField.appendChild(qtyLbl);qtyField.appendChild(qtyInp);
+
+  priceQtyWrap.appendChild(priceField);priceQtyWrap.appendChild(qtyField);
+  row1.appendChild(priceQtyWrap);
+  div.appendChild(row1);
+
+  // Description
+  const descField=document.createElement('div');descField.className='field';descField.style.margin='0';
+  const descLbl=document.createElement('label');descLbl.textContent='Description';
+  const descTa=document.createElement('textarea');descTa.placeholder='Full description of supply and installation...';descTa.style.minHeight='60px';
+  descTa.oninput=function(){updDQI(id,'description',this.value);};
+  descField.appendChild(descLbl);descField.appendChild(descTa);
+  div.appendChild(descField);
+
+  document.getElementById('dq-items-list').appendChild(div);
+  updateDealQuoteTotals();
+}
+function removeDealQuoteItem(id){
+  dealQuoteItems=dealQuoteItems.filter(i=>i.id!==id);
+  document.getElementById(id)?.remove();
+  updateDealQuoteTotals();
+}
+function updDQI(id,field,value){const i=dealQuoteItems.find(i=>i.id===id);if(i)i[field]=value;}
+
+function updateDealQuoteTotals(){
+  const subtotal=dealQuoteItems.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+  const discount=parseFloat(document.getElementById('dq-discount')?.value)||0;
+  const vatRate=parseFloat(document.getElementById('dq-vat')?.value)||0;
+  const afterDiscount=subtotal-discount;
+  const vatAmt=afterDiscount*vatRate;
+  const total=afterDiscount+vatAmt;
+  const vatEl=document.getElementById('dq-vat');
+  const vatText=vatEl?vatEl.options[vatEl.selectedIndex].text:'VAT';
+  const setEl=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val;};
+  setEl('dq-subtotal','£'+subtotal.toLocaleString('en-GB',{minimumFractionDigits:2}));
+  setEl('dq-discount-display','−£'+discount.toLocaleString('en-GB',{minimumFractionDigits:2}));
+  const dlEl=document.getElementById('dq-discount-row-label');if(dlEl)dlEl.textContent=document.getElementById('dq-discount-label')?.value||'Discount';
+  setEl('dq-vat-label',vatText);
+  setEl('dq-vat-display','£'+vatAmt.toLocaleString('en-GB',{minimumFractionDigits:2}));
+  setEl('dq-total','£'+total.toLocaleString('en-GB',{minimumFractionDigits:2}));
+  const dr=document.getElementById('dq-discount-row');if(dr)dr.style.display=discount>0?'flex':'none';
+}
+
+function buildDealQuotePDF(){
+  // Same as buildQuotePDF but uses dq- IDs and deal customer info
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const clientName=selectedDeal?.name||document.getElementById('dq-client-name')?.value||'—';
+  const clientAddress=document.getElementById('dq-client-address')?.value||selectedDeal?.address||'';
+  const clientPhone=document.getElementById('dq-client-phone')?.value||selectedDeal?.phone||'';
+  const clientEmail=document.getElementById('dq-client-email')?.value||selectedDeal?.email||'';
+  const intro=document.getElementById('dq-intro')?.value||'';
+  const discount=parseFloat(document.getElementById('dq-discount')?.value)||0;
+  const discountLabel=document.getElementById('dq-discount-label')?.value||'Discount';
+  const vatEl=document.getElementById('dq-vat');
+  const vatRate=parseFloat(vatEl?.value)||0;
+  const vatText=vatEl?vatEl.options[vatEl.selectedIndex].text:'VAT';
+  const ptEl=document.getElementById('dq-payment-terms');
+  const paymentTerms=ptEl?.value==='custom'?document.getElementById('dq-custom-terms')?.value||'':ptEl?ptEl.options[ptEl.selectedIndex].text:'';
+  const dateStr=new Date().toLocaleDateString('en-GB');
+  const refNum='BWD-'+String(Math.floor(Math.random()*900)+100)+'-y'+String(new Date().getFullYear()).slice(-2);
+  const subtotal=dealQuoteItems.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+  const afterDiscount=subtotal-discount;
+  const vatAmt=afterDiscount*vatRate;
+  const total=afterDiscount+vatAmt;
+
+  doc.setFillColor(255,255,255);doc.rect(0,0,210,297,'F');
+  try{doc.addImage(BWD_LOGO,'JPEG',14,10,60,18);}catch(e){doc.setFontSize(16);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);doc.text('BURGESS WINDOWS AND DOORS',14,22);}
+  doc.setFontSize(22);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);doc.text('Your Quotation',14,42);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);doc.text(refNum,14,49);doc.text('Issue Date: '+dateStr,14,55);
+  doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(14,60,196,60);
+  let y=68;
+  doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
+  doc.text('Client Information',14,y);doc.text('Burgess Windows and Doors Ltd',110,y);y+=5;
+  doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);
+  doc.text(clientName,14,y);doc.text('2 Ballmoor,',110,y);y+=5;
+  if(clientAddress){const al=doc.splitTextToSize(clientAddress,80);al.forEach(l=>{doc.text(l,14,y);y+=4;});}
+  doc.text('Buckingham Industrial Park,',110,y-15);doc.text('Buckingham,',110,y-10);doc.text('MK18 1RT',110,y-5);
+  if(clientPhone){doc.text(clientPhone,14,y);y+=4;}
+  if(clientEmail){doc.text(clientEmail,14,y);y+=4;}
+  y+=6;doc.setDrawColor(220,220,220);doc.line(14,y,196,y);y+=8;
+  if(intro){doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);const il=doc.splitTextToSize(intro,182);doc.text(il,14,y);y+=il.length*4.5+6;doc.setDrawColor(220,220,220);doc.line(14,y,196,y);y+=8;}
+  doc.autoTable({startY:y,head:[['Name','Description','Price','Qty','Total']],body:dealQuoteItems.map(i=>[''+( i.name||'—'),''+( i.description||'—'),'£'+(i.price||0).toLocaleString('en-GB',{minimumFractionDigits:2}),''+( i.qty||1),'£'+((i.price||0)*(i.qty||1)).toLocaleString('en-GB',{minimumFractionDigits:2})]),styles:{fontSize:8.5,cellPadding:3,textColor:[60,60,60]},headStyles:{fillColor:[245,245,245],textColor:[30,30,30],fontStyle:'bold'},columnStyles:{0:{cellWidth:28},1:{cellWidth:94},2:{cellWidth:22},3:{cellWidth:14},4:{cellWidth:22}}});
+  y=doc.lastAutoTable.finalY+6;
+  const totX=130,totW=66;
+  if(discount>0){doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);doc.text('Subtotal',totX,y);doc.text('£'+subtotal.toLocaleString('en-GB',{minimumFractionDigits:2}),totX+totW,y,{align:'right'});y+=5;doc.text(discountLabel,totX,y);doc.text('−£'+discount.toLocaleString('en-GB',{minimumFractionDigits:2}),totX+totW,y,{align:'right'});y+=5;}
+  doc.text(vatText,totX,y);doc.text(vatRate>0?'£'+vatAmt.toLocaleString('en-GB',{minimumFractionDigits:2}):'0%',totX+totW,y,{align:'right'});y+=2;
+  doc.setDrawColor(200,200,200);doc.line(totX,y,totX+totW,y);y+=5;
+  doc.setFillColor(240,240,240);doc.rect(totX-2,y-4,totW+4,9,'F');
+  doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
+  doc.text('Total',totX,y+2);doc.text('£'+total.toLocaleString('en-GB',{minimumFractionDigits:2}),totX+totW,y+2,{align:'right'});y+=12;
+  if(paymentTerms&&y<260){doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);const pl=doc.splitTextToSize('Payment terms: '+paymentTerms,182);doc.text(pl,14,y);y+=pl.length*4+6;}
+  doc.setFont('helvetica','italic');if(y<265)doc.text('This quotation is subject to a survey visit and our terms and conditions.',14,y);
+  // T&C pages
+  doc.addPage();
+  try{doc.addImage(BWD_LOGO,'JPEG',14,10,50,15);}catch(e){}
+  doc.setFontSize(14);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);doc.text('TERMS & CONDITIONS',14,34);
+  doc.setDrawColor(220,220,220);doc.line(14,37,196,37);
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);
+  const tcLines=doc.splitTextToSize(BWD_TC,182);let ty=44;
+  tcLines.forEach(line=>{if(ty>278){doc.addPage();ty=20;}doc.setFont('helvetica',line.match(/^\d+\./)?'bold':'normal');doc.text(line,14,ty);ty+=line.match(/^\d+\./)? 5.5:4;});
+  const pc=doc.getNumberOfPages();for(let i=1;i<=pc;i++){doc.setPage(i);doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(160,160,160);doc.text(i+' / '+pc,105,291,{align:'center'});}
+  return doc;
+}
+
+function generateAndDownloadDealQuote(){
+  if(dealQuoteItems.length===0){alert('Please add at least one line item.');return;}
+  const doc=buildDealQuotePDF();
+  const name=(selectedDeal?.name||'Quote').replace(/[^a-z0-9]/gi,'_');
+  doc.save('BWD_Quote_'+name+'_'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'.pdf');
+}
+
+async function generateAndUploadDealQuote(){
+  if(dealQuoteItems.length===0){alert('Please add at least one line item.');return;}
+  if(!selectedDeal){alert('No deal selected.');return;}
+  const statusEl=document.getElementById('dq-upload-status');
+  const btn=event.target;btn.disabled=true;btn.textContent='Uploading...';
+  try{
+    const doc=buildDealQuotePDF();
+    const blob=doc.output('blob');
+    const base64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Read failed'));r.readAsDataURL(blob);});
+    const colData=await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
+    const cols=colData.data?.boards?.[0]?.columns||[];
+    const filesCol=cols.find(c=>c.title==='PDF QUOTE')||cols.find(c=>c.title==='Files')||cols.find(c=>c.type==='file');
+    if(!filesCol)throw new Error('No Files column found');
+    const name=(selectedDeal.name||'Quote').replace(/[^a-z0-9]/gi,'_');
+    const fileName='BWD_Quote_'+name+'_'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'.pdf';
+    await fetch(UPLOAD,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:String(selectedDeal.id),columnId:filesCol.id,fileName,fileBase64:base64})});
+    if(statusEl){statusEl.textContent='✓ Quote uploaded to: '+selectedDeal.name;statusEl.style.color='#059669';statusEl.style.display='block';}
+    btn.textContent='✓ Uploaded';btn.style.background='#10b981';
+  }catch(err){
+    if(statusEl){statusEl.textContent='✗ '+err.message;statusEl.style.color='#dc2626';statusEl.style.display='block';}
+    btn.disabled=false;btn.textContent='☁️ Upload to Monday deal';
   }
 }
 
