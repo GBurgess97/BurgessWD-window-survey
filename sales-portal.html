@@ -1514,11 +1514,24 @@ async function loadMondayFiles(){
   const listEl=document.getElementById('monday-files-list');
   if(loadEl)loadEl.textContent='Loading...';
   try{
-    // Fetch all assets but filter out profit checker reports
-    const data=await mq(`query{items(ids:${selectedDeal.id}){assets{id name public_url file_extension}}}`);
+    // Only show files from PDF QUOTE and Supplier Specification Sheet columns
+    const colData=await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
+    const cols=colData.data?.boards?.[0]?.columns||[];
+    const visibleCols=cols.filter(c=>
+      c.title==='PDF QUOTE'||
+      c.title==='Supplier Specification Sheet'||
+      c.title==='Spec Sheet'
+    );
+    if(visibleCols.length===0){
+      if(loadEl)loadEl.style.display='none';
+      if(listEl)listEl.innerHTML='<div style="font-size:12px;color:#94a3b8">No file columns configured.</div>';
+      return;
+    }
+    const colIds=visibleCols.map(c=>'"'+c.id+'"').join(',');
+    const data=await mq(`query{items(ids:${selectedDeal.id}){assets{id name public_url file_extension column_id}}}`);
     const allAssets=data.data?.items?.[0]?.assets||[];
-    // Hide profit checker reports from sales people
-    const assets=allAssets.filter(a=>!a.name.toLowerCase().includes('profitreport')&&!a.name.toLowerCase().includes('profit_report')&&!a.name.toLowerCase().includes('profit checker'));
+    const allowedIds=new Set(visibleCols.map(c=>c.id));
+    const assets=allAssets.filter(a=>allowedIds.has(a.column_id));
     if(loadEl)loadEl.style.display='none';
     if(assets.length===0){if(listEl)listEl.innerHTML='<div style="font-size:12px;color:#94a3b8">No files uploaded yet.</div>';return;}
     const imgExts=['jpg','jpeg','png','gif','webp'];
