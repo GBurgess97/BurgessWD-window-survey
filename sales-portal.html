@@ -238,7 +238,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <!-- CONTACTS -->
 <div class="page" id="page-contacts">
   <div class="card">
-    <div class="card-header"><div class="card-title">Contacts</div></div>
+    <div class="card-header">
+      <div class="card-title">Contacts</div>
+      <button onclick="openNewContactForm()" style="padding:7px 14px;background:#1e3a5f;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ New contact</button>
+    </div>
     <div style="padding:10px 16px 0">
       <input class="search-box" id="contacts-search" placeholder="Search contacts..." oninput="renderContacts()">
       <div class="filter-row">
@@ -277,9 +280,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="info-item"><div class="info-label">Type</div><div class="info-value" id="cd-type">—</div></div>
       <div class="info-item"><div class="info-label">Comments</div><div class="info-value" id="cd-comments">—</div></div>
     </div>
-    <div style="padding:14px 16px;border-top:1px solid #f0f0f0">
-      <button onclick="createDealFromContact()" id="create-deal-btn" style="width:100%;padding:11px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">+ Create deal from this contact</button>
-      <div id="create-deal-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
+    <div style="padding:14px 16px;border-top:1px solid #f0f0f0;display:flex;flex-direction:column;gap:8px">
+      <button onclick="createDealFromContact()" id="create-deal-btn" style="width:100%;padding:11px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">💼 Create deal from this contact</button>
+      <button onclick="triggerCreateOpportunity()" id="create-opp-btn" style="width:100%;padding:11px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">🚀 Create opportunity in Monday</button>
+      <div id="create-deal-status" style="font-size:12px;margin-top:2px;display:none;text-align:center"></div>
     </div>
     <div style="padding:14px 16px;border-top:1px solid #f0f0f0">
       <div style="font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:10px">LINKED DEALS</div>
@@ -2339,6 +2343,186 @@ function exportProfitCheckerXLSX() {
   XLSX.writeFile(wb, filename);
 }
 
+// ── New contact form ──────────────────────────────────────────
+let newContactFiles = [];
+
+function openNewContactForm() {
+  newContactFiles = [];
+  document.getElementById('nc-name').value = '';
+  document.getElementById('nc-phone').value = '';
+  document.getElementById('nc-email').value = '';
+  document.getElementById('nc-location').value = '';
+  document.getElementById('nc-type').value = '';
+  document.getElementById('nc-leadsource').value = '';
+  document.getElementById('nc-comments').value = '';
+  document.getElementById('nc-files-list').innerHTML = '';
+  document.getElementById('nc-error').style.display = 'none';
+  document.getElementById('nc-assigned-display').textContent = currentUser;
+  document.getElementById('nc-save-btn').disabled = false;
+  document.getElementById('nc-save-btn').textContent = 'Save contact to Monday';
+  document.getElementById('nc-save-btn').style.background = '#1e3a5f';
+  document.getElementById('new-contact-modal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeNewContactForm() {
+  document.getElementById('new-contact-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function handleNewContactFiles(e) {
+  Array.from(e.target.files).forEach(file => {
+    const r = new FileReader();
+    r.onload = ev => {
+      newContactFiles.push({ name: file.name, dataUrl: ev.target.result, type: file.type });
+      renderNewContactFiles();
+    };
+    r.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+
+function renderNewContactFiles() {
+  document.getElementById('nc-files-list').innerHTML = newContactFiles.map((f, i) =>
+    '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#fff;border:1px solid #e5e5e5;border-radius:6px;margin-bottom:4px;font-size:12px">' +
+    '<span>' + (f.type && f.type.includes('pdf') ? '📄' : '📎') + '</span>' +
+    '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + f.name + '</span>' +
+    '<button onclick="newContactFiles.splice(' + i + ',1);renderNewContactFiles()" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:14px">&#x2715;</button>' +
+    '</div>'
+  ).join('');
+}
+
+async function saveNewContact() {
+  const name = document.getElementById('nc-name').value.trim();
+  if (!name) {
+    const errEl = document.getElementById('nc-error');
+    errEl.textContent = 'Please enter a contact name.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('nc-save-btn');
+  const errEl = document.getElementById('nc-error');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  errEl.style.display = 'none';
+  try {
+    // Get column IDs from contacts board
+    const colData = await mq('query{boards(ids:' + CONTACTS_BOARD + '){columns{id title type}}}');
+    const cols = colData.data?.boards?.[0]?.columns || [];
+    const gc = function(title) { const c = cols.find(function(c){ return c.title === title; }); return c ? c.id : ''; };
+    const phoneId = gc('Phone');
+    const emailId = gc('Email');
+    const locId = gc('Location') || gc('Address');
+    const typeId = gc('Client Type');
+    const commentsId = gc('Comments');
+    const leadSourceId = gc('Lead Source') || gc('Where did the lead come from') || gc('Lead source');
+    const spId = gc('Sales Person');
+    const filesColId = gc('Files');
+
+    // Build column values — text columns only (not People which needs user ID)
+    const colVals = {};
+    const phone = document.getElementById('nc-phone').value.trim();
+    const email = document.getElementById('nc-email').value.trim();
+    const location = document.getElementById('nc-location').value.trim();
+    const clientType = document.getElementById('nc-type').value;
+    const leadSource = document.getElementById('nc-leadsource').value.trim();
+    const comments = document.getElementById('nc-comments').value.trim();
+
+    if (phoneId && phone) colVals[phoneId] = phone;
+    if (emailId && email) colVals[emailId] = email;
+    if (locId && location) colVals[locId] = location;
+    if (typeId && clientType) colVals[typeId] = JSON.stringify({ label: clientType });
+    if (leadSourceId && leadSource) colVals[leadSourceId] = leadSource;
+    if (commentsId && comments) colVals[commentsId] = comments;
+
+    const cvStr = JSON.stringify(JSON.stringify(colVals));
+    const safeName = name.replace(/"/g, '\"');
+    const result = await mq('mutation{create_item(board_id:' + CONTACTS_BOARD + ',item_name:"' + safeName + '",column_values:' + cvStr + '){id}}');
+    const newId = result.data?.create_item?.id;
+    if (!newId) throw new Error('Could not create contact — no ID returned');
+
+    // Add salesperson as an update note (People column needs user ID which we don't have)
+    await mq('mutation{create_update(item_id:' + newId + ',body:"Contact added by ' + currentUser.replace(/"/g, '\"') + '."){id}}');
+
+    // Upload any files
+    if (newContactFiles.length > 0 && filesColId) {
+      btn.textContent = 'Uploading files...';
+      for (const f of newContactFiles) {
+        try {
+          const base64 = f.dataUrl.split(',')[1];
+          await fetch(UPLOAD, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ itemId: String(newId), columnId: filesColId, fileName: f.name, fileBase64: base64 })
+          });
+        } catch(e) { console.warn('File upload failed:', f.name, e); }
+      }
+    }
+
+    // Success
+    btn.textContent = '✓ Contact saved!';
+    btn.style.background = '#10b981';
+
+    // Add to local contacts list and re-render
+    const newContact = {
+      id: newId, name: name,
+      phone: phone, email: email,
+      address: location, clientType: clientType,
+      comments: comments, assigned: currentUser
+    };
+    allContacts.unshift(newContact);
+    renderContacts();
+
+    setTimeout(function() { closeNewContactForm(); }, 1500);
+
+  } catch(err) {
+    errEl.textContent = 'Could not save: ' + err.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Save contact to Monday';
+    btn.style.background = '#1e3a5f';
+  }
+}
+
+// ── Create Opportunity (trigger Monday button column) ──────────
+async function triggerCreateOpportunity() {
+  if (!selectedContact) return;
+  const btn = document.getElementById('create-opp-btn');
+  const statusEl = document.getElementById('create-deal-status');
+  btn.disabled = true;
+  btn.textContent = 'Triggering...';
+  statusEl.style.display = 'none';
+  try {
+    // Get the Create Opportunity button column ID
+    const colData = await mq('query{boards(ids:' + CONTACTS_BOARD + '){columns{id title type}}}');
+    const cols = colData.data?.boards?.[0]?.columns || [];
+    const btnCol = cols.find(function(c){ return c.title === 'Create Opportunity'; });
+    if (!btnCol) throw new Error('Could not find "Create Opportunity" column on Contacts board');
+
+    // Trigger the button column by setting its value
+    const val = JSON.stringify(JSON.stringify({}));
+    await mq('mutation{change_column_value(board_id:' + CONTACTS_BOARD + ',item_id:' + selectedContact.id + ',column_id:"' + btnCol.id + '",value:' + val + '){id}}');
+
+    btn.textContent = '✓ Opportunity created!';
+    btn.style.background = '#10b981';
+    statusEl.textContent = 'Monday automation triggered for ' + selectedContact.name;
+    statusEl.style.color = '#059669';
+    statusEl.style.display = 'block';
+    setTimeout(function() {
+      btn.disabled = false;
+      btn.textContent = '🚀 Create opportunity in Monday';
+      btn.style.background = '#059669';
+    }, 3000);
+  } catch(err) {
+    statusEl.textContent = 'Could not trigger: ' + err.message;
+    statusEl.style.color = '#dc2626';
+    statusEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '🚀 Create opportunity in Monday';
+    btn.style.background = '#059669';
+  }
+}
+
 // ── Auto-login ────────────────────────────────────────────────
 window.addEventListener('load',async()=>{
   const savedToken=localStorage.getItem('bwd_sales_token');
@@ -2353,5 +2537,84 @@ window.addEventListener('load',async()=>{
   }
 });
 </script>
+
+<!-- NEW CONTACT MODAL -->
+<div id="new-contact-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;overflow-y:auto;padding:20px">
+  <div style="background:#fff;border-radius:14px;max-width:520px;margin:0 auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2)">
+    <div style="background:#1e3a5f;padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:15px;font-weight:600;color:#fff">Add new contact</div>
+      <button onclick="closeNewContactForm()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:6px;font-size:16px;cursor:pointer;font-family:inherit">&#x2715;</button>
+    </div>
+    <div style="padding:20px">
+
+      <div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px">Contact details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Full name *</label>
+            <input type="text" id="nc-name" placeholder="e.g. Sally Evans" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Phone</label>
+            <input type="tel" id="nc-phone" placeholder="07700 000000" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px">
+          <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Email</label>
+          <input type="email" id="nc-email" placeholder="email@example.com" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px">
+          <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Location / address</label>
+          <input type="text" id="nc-location" placeholder="Town, County or full address" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Client type</label>
+            <select id="nc-type" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:#fff">
+              <option value="">Select...</option>
+              <option>Client</option>
+              <option>Architect</option>
+              <option>Contractor</option>
+              <option>Developer</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Lead source</label>
+            <input type="text" id="nc-leadsource" placeholder="e.g. Website, Referral..." style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px">Notes</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Comments</label>
+          <textarea id="nc-comments" placeholder="Any relevant notes about this contact..." style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;resize:vertical;min-height:80px"></textarea>
+        </div>
+      </div>
+
+      <div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px">Files</div>
+        <div onclick="document.getElementById('nc-files-input').click()" style="border:1.5px dashed #cbd5e1;border-radius:8px;padding:14px;text-align:center;cursor:pointer;font-size:13px;color:#94a3b8">
+          📎 Tap to attach files
+        </div>
+        <input type="file" id="nc-files-input" multiple style="display:none" onchange="handleNewContactFiles(event)">
+        <div id="nc-files-list" style="margin-top:8px"></div>
+      </div>
+
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#1e40af">
+        <strong>Sales person:</strong> <span id="nc-assigned-display"></span> — will be assigned automatically
+      </div>
+
+      <div id="nc-error" style="display:none;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;font-size:12px;color:#dc2626;margin-bottom:10px"></div>
+
+      <div style="display:flex;gap:10px">
+        <button onclick="closeNewContactForm()" style="flex:1;padding:12px;background:#f3f4f6;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:#374151">Cancel</button>
+        <button onclick="saveNewContact()" id="nc-save-btn" style="flex:2;padding:12px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Save contact to Monday</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
