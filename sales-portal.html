@@ -6,7 +6,6 @@
 <title>Sales Portal — Burgess Windows & Doors</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f0f4f8;min-height:100vh}
@@ -383,22 +382,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       </div>
       <!-- APPOINTMENT & STAGE -->
       <div class="section">
-        <div class="sec-title">📅 Appointment</div>
+        <div class="sec-title">📅 Book appointment</div>
         <div class="row2">
           <div class="field"><label>Date</label>
-            <input type="date" id="q-appt-date" onchange="updateAppointment()">
+            <input type="date" id="q-appt-date">
           </div>
           <div class="field"><label>Time</label>
-            <input type="time" id="q-appt-time" onchange="updateAppointment()">
+            <input type="time" id="q-appt-time">
           </div>
         </div>
         <div class="field"><label>Appointment type</label>
-          <select id="q-appttype-ov" onchange="updateApptType()">
+          <select id="q-appttype">
             <option value="">Select...</option>
             <option>Virtual</option><option>Site</option><option>Phone</option><option>Showroom</option>
           </select>
         </div>
-        <div id="appt-saved" style="font-size:12px;color:#059669;display:none;margin-top:4px">✓ Appointment updated in Monday</div>
+        <button onclick="bookAppointment()" id="book-appt-btn" style="width:100%;padding:12px;background:#0ea5e9;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px">
+          📅 Confirm appointment &amp; set stage to Appointment
+        </button>
+        <div id="book-appt-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
       </div>
 
       <div class="section">
@@ -519,9 +521,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           <div class="grade-lbl" id="grade-lbl">of recommended sale value</div>
           <div class="grade-detail" id="grade-detail"></div>
         </div>
-        <button onclick="exportProfitCheckerXLSX()" style="width:100%;padding:11px;background:#f0fdf4;border:1.5px solid #6ee7b7;color:#065f46;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px">
-          📊 Save profit checker as Excel
+        <button onclick="saveProfitReport()" id="profit-report-btn" style="width:100%;padding:12px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px">
+          💾 Save profit report to Monday (PDF)
         </button>
+        <div id="profit-report-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
       </div>
     </div>
 
@@ -531,12 +534,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div id="products-list"></div>
       <button class="add-prod-btn" onclick="addProduct()">+ Add product / item</button>
 
-      <div style="margin-top:16px;padding-top:16px;border-top:1px solid #e5e5e5">
-        <button onclick="saveProductRequest()" id="prod-request-btn" style="width:100%;padding:13px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">
-          📋 Save &amp; submit product request to Monday
-        </button>
-        <div id="prod-request-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
-      </div>
     </div>
 
     <!-- PHOTOS TAB -->
@@ -1137,39 +1134,12 @@ async function bookAppointment(){
   }
 }
 
-// ── Appointment update ────────────────────────────────────────
-async function updateAppointment(){
-  if(!selectedDeal)return;
-  const date=document.getElementById('q-appt-date')?.value||'';
-  const time=document.getElementById('q-appt-time')?.value||'';
-  if(!date)return;
-  try{
-    // Find the Appointment column ID
-    const apptColId=selectedDeal.apptId||boardCols.find(c=>c.title==='Appointment')?.id;
-    if(!apptColId){console.warn('No Appointment column found');return;}
-    // Monday date column format: {"date":"YYYY-MM-DD","time":"HH:MM:SS"}
-    const val=JSON.stringify(JSON.stringify({date:date,time:time?time+':00':'00:00:00'}));
-    await mq(`mutation{change_column_value(board_id:${DEALS_BOARD},item_id:${selectedDeal.id},column_id:"${apptColId}",value:${val}){id}}`);
-    selectedDeal.apptDate=date;
-    selectedDeal.apptTime=time;
-    // Update info strip
-    let apptStr=fmtDate(date);
-    if(time)apptStr+=' at '+fmtTime(time);
-    if(selectedDeal.apptType)apptStr+=' ('+selectedDeal.apptType+')';
-    const diAppt=document.getElementById('di-appt');
-    if(diAppt)diAppt.textContent=apptStr;
-    const saved=document.getElementById('appt-saved');
-    if(saved){saved.style.display='block';setTimeout(()=>saved.style.display='none',3000);}
-    const d=allDeals.find(x=>x.id===selectedDeal.id);
-    if(d){d.apptDate=date;d.apptTime=time;}
-    renderAppointments();
-  }catch(e){alert('Could not update appointment: '+e.message);}
-}
+
 
 // ── Appointment Type update ───────────────────────────────────
 async function updateApptType(){
   if(!selectedDeal||!selectedDeal.apptTypeId)return;
-  const newType=document.getElementById('q-appttype-ov')?.value||document.getElementById('q-appttype')?.value||'';
+  const newType=document.getElementById('q-appttype')?.value||document.getElementById('q-appttype')?.value||'';
   if(!newType)return;
   try{
     const val=JSON.stringify(JSON.stringify({label:newType}));
@@ -1210,9 +1180,6 @@ const SUPPLIER_SURCHARGES_DATA = {'Hyline Aluminium':0.055,'Q4Glass':0.055,'Sola
 
 let frameLines = [], glasLines = [], frameLineCount = 0, glassLineCount = 0;
 
-function selOpts2(arr, selected) {
-  return arr.map(a => '<option' + (a===selected?' selected':'') + '>' + a + '</option>').join('');
-}
 
 function addFrameLine(data) {
   frameLineCount++;
@@ -1779,6 +1746,45 @@ function generateSurveyorOrderPack(){
   return doc.output('blob');
 }
 
+// ── Save profit report to Monday ─────────────────────────────
+async function saveProfitReport(){
+  if(!selectedDeal){alert('Please open a deal first.');return;}
+  const btn=document.getElementById('profit-report-btn');
+  const statusEl=document.getElementById('profit-report-status');
+  btn.disabled=true;btn.textContent='Generating PDF...';
+  if(statusEl)statusEl.style.display='none';
+  try{
+    const blob=generateProfitReportPDF();
+    btn.textContent='Uploading to Monday...';
+    const colData=await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
+    const cols=colData.data?.boards?.[0]?.columns||[];
+    const profitCol=cols.find(c=>c.title==='PROFIT CHECKER REPORT')||cols.find(c=>c.title==='Profit Checker Report');
+    if(!profitCol)throw new Error('Could not find "PROFIT CHECKER REPORT" column — please check the column exists on your Deals board');
+    const dateStr=new Date().toISOString().slice(0,10).replace(/-/g,'');
+    const safeName=(selectedDeal.name||'deal').replace(/[^a-z0-9]/gi,'_');
+    const base64=await new Promise(function(res,rej){
+      const r=new FileReader();
+      r.onload=function(){res(r.result.split(',')[1]);};
+      r.onerror=function(){rej(new Error('Read failed'));};
+      r.readAsDataURL(blob);
+    });
+    const resp=await fetch(UPLOAD,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:String(selectedDeal.id),columnId:profitCol.id,fileName:safeName+'_ProfitReport_'+dateStr+'.pdf',fileBase64:base64})});
+    if(!resp.ok)throw new Error('Upload failed: '+resp.status);
+    const data=await resp.json();
+    if(data.error)throw new Error(data.error);
+    btn.textContent='✓ Profit report saved!';btn.style.background='#10b981';
+    if(statusEl){statusEl.textContent='✓ PDF saved to PROFIT CHECKER REPORT column in Monday';statusEl.style.color='#059669';statusEl.style.display='block';}
+    setTimeout(function(){
+      btn.disabled=false;btn.textContent='💾 Save profit report as PDF to Monday';
+      btn.style.background='#1e3a5f';
+      if(statusEl)statusEl.style.display='none';
+    },4000);
+  }catch(err){
+    if(statusEl){statusEl.textContent='✗ '+err.message;statusEl.style.color='#dc2626';statusEl.style.display='block';}
+    btn.disabled=false;btn.textContent='💾 Save profit report as PDF to Monday';btn.style.background='#1e3a5f';
+  }
+}
+
 // ── PDF: Profit breakdown report ─────────────────────────────
 function generateProfitReportPDF(){
   const{jsPDF}=window.jspdf;
@@ -2074,34 +2080,6 @@ let quoteItems2=[];let quoteItemCount=0;
 
 document.addEventListener('change',function(e){if(e.target.id==='qt-payment-terms'){document.getElementById('qt-custom-terms-wrap').style.display=e.target.value==='custom'?'block':'none';}});
 
-function addQuoteItem(){
-  quoteItemCount++;
-  const id='qi'+quoteItemCount;
-  quoteItems2.push({id:id,name:'',description:'',price:0,qty:1});
-  const div=document.createElement('div');
-  div.id=id;
-  div.style.cssText='background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:13px;margin-bottom:8px;position:relative';
-  const num=quoteItemCount;
-  const q='"';
-  const removeBtn='<button onclick="removeQuoteItem('+q+id+q+')" style="position:absolute;top:8px;right:8px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;width:24px;height:24px;border-radius:5px;font-size:14px;cursor:pointer">&#x2715;</button>';
-  const numLabel='<div style="font-size:10px;font-weight:700;color:#1e3a5f;text-transform:uppercase;margin-bottom:8px">Item '+num+'</div>';
-  const nameInput='<input type="text" placeholder="e.g. Internorm" oninput="updQI('+q+id+q+','+q+'name'+q+',this.value)" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;width:100%">';
-  const priceInput='<input type="number" placeholder="0.00" oninput="updQI('+q+id+q+','+q+'price'+q+',+this.value);updateQuoteTotals()" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;width:100%">';
-  const qtyInput='<input type="number" value="1" min="1" oninput="updQI('+q+id+q+','+q+'qty'+q+',+this.value);updateQuoteTotals()" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;width:100%">';
-  const descInput='<textarea placeholder="Full description of supply and installation..." oninput="updQI('+q+id+q+','+q+'description'+q+',this.value)" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;width:100%;min-height:70px;resize:vertical"></textarea>';
-  div.innerHTML=[
-    removeBtn, numLabel,
-    '<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:8px">',
-    '<div><label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px">Name / product</label>'+nameInput+'</div>',
-    '<div><label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px">Price (£)</label>'+priceInput+'</div>',
-    '<div><label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px">Qty</label>'+qtyInput+'</div>',
-    '</div>',
-    '<div><label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px">Description</label>'+descInput+'</div>'
-  ].join('');
-  document.getElementById('qt-items-list').appendChild(div);
-  updateQuoteTotals();
-}
-function removeQuoteItem(id){quoteItems2=quoteItems2.filter(i=>i.id!==id);document.getElementById(id)?.remove();updateQuoteTotals();}
 function updQI(id,field,value){const i=quoteItems2.find(i=>i.id===id);if(i)i[field]=value;}
 
 function updateQuoteTotals(){
@@ -2280,34 +2258,7 @@ function buildQuotePDF(){
   return doc;
 }
 
-async function generateAndDownloadQuote(){
-  if(quoteItems2.length===0){alert('Please add at least one line item.');return;}
-  const doc=buildQuotePDF();
-  const clientName=(document.getElementById('qt-client-name').value||'Quote').replace(/[^a-z0-9]/gi,'_');
-  const refNum='BWD_Quote_'+clientName+'_'+new Date().toISOString().slice(0,10).replace(/-/g,'');
-  doc.save(refNum+'.pdf');
-}
 
-async function generateAndUploadQuote(){
-  if(quoteItems2.length===0){alert('Please add at least one line item.');return;}
-  if(!selectedDeal){alert('Please open a deal first from the Deals tab, then come back here to upload.');return;}
-  const statusEl=document.getElementById('qt-upload-status');
-  const btn=event.target;btn.disabled=true;btn.textContent='Uploading...';statusEl.style.display='none';
-  try{
-    const doc=buildQuotePDF();
-    const blob=doc.output('blob');
-    const base64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Read failed'));r.readAsDataURL(blob);});
-    const colData=await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
-    const cols=colData.data?.boards?.[0]?.columns||[];
-    const filesCol=cols.find(c=>c.title==='PDF QUOTE')||cols.find(c=>c.title==='Files')||cols.find(c=>c.type==='file');
-    if(!filesCol)throw new Error('No Files column found on deals board');
-    const clientName=(document.getElementById('qt-client-name').value||'Quote').replace(/[^a-z0-9]/gi,'_');
-    const fileName='BWD_Quote_'+clientName+'_'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'.pdf';
-    await fetch(UPLOAD,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:String(selectedDeal.id),columnId:filesCol.id,fileName,fileBase64:base64})});
-    statusEl.textContent='✓ Quote uploaded to: '+selectedDeal.name;statusEl.style.color='#059669';statusEl.style.display='block';
-    btn.textContent='✓ Uploaded';btn.style.background='#10b981';
-  }catch(err){statusEl.textContent='✗ '+err.message;statusEl.style.color='#dc2626';statusEl.style.display='block';btn.disabled=false;btn.textContent='☁️ Upload to Monday deal';}
-}
 
 // ── Quote generator (inside deal) ────────────────────────────
 document.addEventListener('change',function(e){
@@ -2316,403 +2267,7 @@ document.addEventListener('change',function(e){
   }
 });
 
-function initQuoteForDeal(){
-  // Pre-populate quote with deal info — called when deal is opened
-  quoteItems2=[];quoteItemCount2=0;
-  const el=document.getElementById('qt-items-list');
-  if(el)el.innerHTML='';
-  updateQuoteTotals();
-}
 
-function addQuoteItem(){
-  quoteItemCount2++;
-  const id='qi'+quoteItemCount2;
-  quoteItems2.push({id,name:'',description:'',price:0,qty:1});
-  const div=document.createElement('div');
-  div.id=id;
-  div.style.cssText='background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:13px;margin-bottom:8px;position:relative';
-  div.innerHTML='<button onclick="removeQuoteItem(\''+id+'\');" style="position:absolute;top:8px;right:8px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;width:24px;height:24px;border-radius:5px;font-size:14px;cursor:pointer;font-family:inherit">x</button>'
-    +'<div style="font-size:10px;font-weight:700;color:#1e3a5f;text-transform:uppercase;margin-bottom:8px">Item '+quoteItemCount2+'</div>'
-    +'<div class="row2" style="margin-bottom:8px">'
-    +'<div class="field" style="margin:0"><label>Name / product</label><input type="text" placeholder="e.g. Internorm" oninput="updQI(\''+id+'\',\'name\',this.value)"></div>'
-    +'<div class="row2" style="margin:0">'
-    +'<div class="field" style="margin:0"><label>Price (£)</label><input type="number" placeholder="0.00" oninput="updQI(\''+id+'\',\'price\',+this.value);updateQuoteTotals()"></div>'
-    +'<div class="field" style="margin:0"><label>Qty</label><input type="number" value="1" min="1" oninput="updQI(\''+id+'\',\'qty\',+this.value);updateQuoteTotals()"></div>'
-    +'</div></div>'
-    +'<div class="field" style="margin:0"><label>Description</label><textarea placeholder="Full description..." style="min-height:60px" oninput="updQI(\''+id+'\',\'description\',this.value)"></textarea></div>';
-  document.getElementById('qt-items-list').appendChild(div);
-  updateQuoteTotals();
-}
-
-function removeQuoteItem(id){quoteItems2=quoteItems2.filter(function(i){return i.id!==id;});var el=document.getElementById(id);if(el)el.remove();updateQuoteTotals();}
-function updQI(id,field,value){var i=quoteItems2.find(function(i){return i.id===id;});if(i)i[field]=value;}
-
-function updateQuoteTotals(){
-  var subtotal=quoteItems2.reduce(function(s,i){return s+(i.price||0)*(i.qty||1);},0);
-  var discount=parseFloat(document.getElementById('qt-discount').value)||0;
-  var vatEl=document.getElementById('qt-vat');
-  var vatRate=parseFloat(vatEl.value)||0;
-  var vatText=vatEl.options[vatEl.selectedIndex].text;
-  var afterDiscount=subtotal-discount;
-  var vatAmt=afterDiscount*vatRate;
-  var total=afterDiscount+vatAmt;
-  document.getElementById('qt-subtotal').textContent='£'+subtotal.toLocaleString('en-GB',{minimumFractionDigits:2});
-  document.getElementById('qt-discount-display').textContent='-£'+discount.toLocaleString('en-GB',{minimumFractionDigits:2});
-  document.getElementById('qt-discount-row-label').textContent=document.getElementById('qt-discount-label').value||'Discount';
-  document.getElementById('qt-vat-label').textContent=vatText;
-  document.getElementById('qt-vat-display').textContent='£'+vatAmt.toLocaleString('en-GB',{minimumFractionDigits:2});
-  document.getElementById('qt-total').textContent='£'+total.toLocaleString('en-GB',{minimumFractionDigits:2});
-  var discRow=document.getElementById('qt-discount-row');
-  if(discRow)discRow.style.display=discount>0?'flex':'none';
-}
-
-function getPaymentTermsText(){
-  var sel=document.getElementById('qt-payment-terms');
-  var val=sel.value;
-  if(val==='custom')return document.getElementById('qt-custom-terms').value||'';
-  return sel.options[sel.selectedIndex].text;
-}
-
-function buildQuotePDF(){
-  var jsPDF=window.jspdf.jsPDF;
-  var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  var name=selectedDeal?selectedDeal.name:'Client';
-  var address=document.getElementById('di-address').textContent||'';
-  var phone=document.getElementById('di-phone').textContent||'';
-  var email=document.getElementById('di-email').textContent||'';
-  var intro=document.getElementById('qt-intro').value||'';
-  var discount=parseFloat(document.getElementById('qt-discount').value)||0;
-  var discountLabel=document.getElementById('qt-discount-label').value||'Discount';
-  var vatEl=document.getElementById('qt-vat');
-  var vatRate=parseFloat(vatEl.value)||0;
-  var vatText=vatEl.options[vatEl.selectedIndex].text;
-  var payTerms=getPaymentTermsText();
-  var dateStr=new Date().toLocaleDateString('en-GB');
-  var refNum='BWD-'+String(Math.floor(Math.random()*900)+100)+'-y'+String(new Date().getFullYear()).slice(-2);
-  var subtotal=quoteItems2.reduce(function(s,i){return s+(i.price||0)*(i.qty||1);},0);
-  var afterDiscount=subtotal-discount;
-  var vatAmt=afterDiscount*vatRate;
-  var total=afterDiscount+vatAmt;
-
-  // White background
-  doc.setFillColor(255,255,255);doc.rect(0,0,210,297,'F');
-
-  // Logo — larger, white background, top right
-  try{doc.addImage(BWD_LOGO,'JPEG',130,12,66,22);}catch(e){
-    doc.setFontSize(16);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
-    doc.text('BURGESS',140,22);doc.setFontSize(8);doc.setFont('helvetica','normal');
-    doc.text('WINDOWS AND DOORS',140,28);
-  }
-
-  // Quote title
-  doc.setFontSize(22);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
-  doc.text('Your Quotation',14,22);
-  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);
-  doc.text(refNum,14,30);
-  doc.text('Issue Date: '+dateStr,14,37);
-
-  // Thin divider
-  doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(14,42,196,42);
-
-  // Client + BWD address
-  var y=50;
-  doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
-  doc.text('Client Information',14,y);doc.text('Burgess Windows and Doors Ltd',110,y);y+=5;
-  doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);
-  doc.text(name,14,y);doc.text('2 Ballmoor,',110,y);y+=4;
-  if(address&&address!='No details'&&address!='-'){var al=doc.splitTextToSize(address,80);doc.text(al,14,y);y+=al.length*4;}
-  else y+=4;
-  doc.text('Buckingham Industrial Park,',110,y-8);
-  doc.text('Buckingham, MK18 1RT',110,y-4);
-  doc.text('Tel: 01280 815493',110,y);
-  if(phone&&phone!='--')doc.text(phone,14,y);
-  y+=4;
-  if(email&&email!='--')doc.text(email,14,y);
-  y+=8;
-
-  doc.setDrawColor(220,220,220);doc.line(14,y,196,y);y+=8;
-
-  // Intro
-  if(intro){
-    doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);
-    var introLines=doc.splitTextToSize(intro,182);
-    doc.text(introLines,14,y);y+=introLines.length*4.5+8;
-    doc.setDrawColor(220,220,220);doc.line(14,y,196,y);y+=8;
-  }
-
-  // Line items table
-  if(quoteItems2.length>0){
-    doc.autoTable({
-      startY:y,
-      head:[['Name','Description','Price','Qty','Total']],
-      body:quoteItems2.map(function(i){return[
-        i.name||'',
-        i.description||'',
-        '£'+(i.price||0).toLocaleString('en-GB',{minimumFractionDigits:2}),
-        String(i.qty||1),
-        '£'+((i.price||0)*(i.qty||1)).toLocaleString('en-GB',{minimumFractionDigits:2})
-      ];}),
-      styles:{fontSize:8.5,cellPadding:3,textColor:[60,60,60]},
-      headStyles:{fillColor:[245,245,245],textColor:[30,30,30],fontStyle:'bold',lineColor:[220,220,220],lineWidth:0.3},
-      bodyStyles:{lineColor:[240,240,240],lineWidth:0.2},
-      columnStyles:{0:{cellWidth:28},1:{cellWidth:92},2:{cellWidth:22},3:{cellWidth:16},4:{cellWidth:22}},
-      alternateRowStyles:{fillColor:[252,252,252]}
-    });
-    y=doc.lastAutoTable.finalY+6;
-  }
-
-  // Totals — right aligned
-  var totX=130,totW=66;
-  if(discount>0){
-    doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);
-    doc.text('Subtotal',totX,y);doc.text('£'+subtotal.toLocaleString('en-GB',{minimumFractionDigits:2}),totX+totW,y,{align:'right'});y+=5;
-    doc.text(discountLabel,totX,y);doc.text('-£'+discount.toLocaleString('en-GB',{minimumFractionDigits:2}),totX+totW,y,{align:'right'});y+=5;
-  }
-  doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(100,100,100);
-  doc.text(vatText,totX,y);
-  doc.text(vatRate>0?'£'+vatAmt.toLocaleString('en-GB',{minimumFractionDigits:2}):'0%',totX+totW,y,{align:'right'});y+=2;
-  doc.setDrawColor(200,200,200);doc.line(totX,y,totX+totW,y);y+=5;
-  doc.setFillColor(240,240,240);doc.rect(totX-2,y-4,totW+4,9,'F');
-  doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
-  doc.text('Total',totX,y+2);doc.text('£'+total.toLocaleString('en-GB',{minimumFractionDigits:2}),totX+totW,y+2,{align:'right'});y+=14;
-
-  // Logo watermark
-  try{doc.addImage(BWD_LOGO,'JPEG',14,y,38,12);}catch(e){}
-  y+=16;
-  doc.setDrawColor(220,220,220);doc.line(14,y,196,y);y+=7;
-
-  // Notes
-  var notes=[
-    ['Specification & Lead Time','Please review the attached specification sheet for full details. Current estimated lead time is approximately 12 weeks from survey. Once materials are received we will confirm an installation date.'],
-    ['Performance & Survey Confirmation','U-values and energy ratings are subject to site survey. All sizes, thresholds and cills are provisional and will be confirmed at formal survey.'],
-    ['Certification & Validity','FENSA certification is registered upon receipt of final payment. This quotation is valid for 14 days. Burgess Windows and Doors is a proud member of the Consumer Protection Association (CPA) and FENSA accredited (No. 38737).']
-  ];
-  notes.forEach(function(n){
-    if(y>250){doc.addPage();y=20;}
-    doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(60,60,60);doc.text(n[0],14,y);y+=4;
-    doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
-    var lines=doc.splitTextToSize(n[1],182);doc.text(lines,14,y);y+=lines.length*4+5;
-  });
-
-  // Payment terms
-  if(y>255){doc.addPage();y=20;}
-  doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(60,60,60);doc.text('Payment Terms',14,y);y+=5;
-  doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
-  var ptLines=doc.splitTextToSize(payTerms,182);doc.text(ptLines,14,y);y+=ptLines.length*4+5;
-  doc.setFont('helvetica','italic');doc.text('This quotation is subject to a survey visit and our terms and conditions.',14,y);y+=7;
-  doc.setFont('helvetica','normal');doc.text('We look forward to hearing from you.',14,y);y+=5;
-  doc.setFont('helvetica','bold');doc.text('Yours sincerely, Burgess Windows and Doors',14,y);
-
-  // T&C page
-  doc.addPage();
-  try{doc.addImage(BWD_LOGO,'JPEG',14,10,50,16);}catch(e){}
-  doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);
-  doc.text('TERMS & CONDITIONS',14,34);
-  doc.setDrawColor(220,220,220);doc.line(14,37,196,37);
-  doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);
-  var tcLines=doc.splitTextToSize(BWD_TC,182);
-  var ty=44;
-  tcLines.forEach(function(line){
-    if(ty>278){doc.addPage();ty=20;try{doc.addImage(BWD_LOGO,'JPEG',14,8,40,13);}catch(e){}ty=26;}
-    var isBold=line.match(/^[0-9]+\./) || line.match(/^[A-Z]{4,}/);
-    doc.setFont('helvetica',isBold?'bold':'normal');
-    doc.setFontSize(isBold?8:7.5);
-    doc.text(line,14,ty);ty+=isBold?5:4;
-  });
-
-  // Page numbers
-  var pc=doc.getNumberOfPages();
-  for(var i=1;i<=pc;i++){
-    doc.setPage(i);doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(160,160,160);
-    doc.text(i+' / '+pc,105,291,{align:'center'});
-  }
-  return doc;
-}
-
-async function generateAndDownloadQuote(){
-  if(quoteItems2.length===0){alert('Please add at least one line item.');return;}
-  var doc=buildQuotePDF();
-  var clientName=(selectedDeal?selectedDeal.name:'Quote').replace(/[^a-z0-9]/gi,'_');
-  doc.save('BWD_Quote_'+clientName+'_'+new Date().toISOString().slice(0,10)+'.pdf');
-}
-
-async function generateAndUploadQuote(){
-  if(quoteItems2.length===0){alert('Please add at least one line item.');return;}
-  if(!selectedDeal){alert('No deal selected.');return;}
-  var statusEl=document.getElementById('qt-upload-status');
-  var btn=event.target;btn.disabled=true;btn.textContent='Saving...';statusEl.style.display='none';
-  try{
-    var doc=buildQuotePDF();
-    var blob=doc.output('blob');
-    var base64=await new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result.split(',')[1]);};r.onerror=function(){rej(new Error('Read failed'));};r.readAsDataURL(blob);});
-    var colData=await mq('query{boards(ids:'+DEALS_BOARD+'){columns{id title type}}}');
-    var cols=colData.data&&colData.data.boards&&colData.data.boards[0]&&colData.data.boards[0].columns||[];
-    var filesCol=cols.find(function(c){return c.title==='PDF QUOTE';})||cols.find(function(c){return c.title==='Files';})||cols.find(function(c){return c.type==='file';});
-    if(!filesCol)throw new Error('No Files column found');
-    var clientName=(selectedDeal.name||'Quote').replace(/[^a-z0-9]/gi,'_');
-    var fileName='BWD_Quote_'+clientName+'_'+new Date().toISOString().slice(0,10)+'.pdf';
-    await fetch(UPLOAD,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:String(selectedDeal.id),columnId:filesCol.id,fileName:fileName,fileBase64:base64})});
-    statusEl.textContent='Saved to Monday: '+selectedDeal.name;statusEl.style.color='#059669';statusEl.style.display='block';
-    btn.textContent='Saved';btn.style.background='#10b981';
-    setTimeout(function(){btn.disabled=false;btn.textContent='Save to Monday';btn.style.background='';},3000);
-  }catch(err){statusEl.textContent='Error: '+err.message;statusEl.style.color='#dc2626';statusEl.style.display='block';btn.disabled=false;btn.textContent='Save to Monday';}
-}
-
-// Save & Send per product
-async function saveAndSendProduct(id){
-  if(!selectedDeal){alert('No deal selected.');return;}
-  var p=products.find(function(p){return p.id===id;});
-  if(!p){return;}
-  var statusEl=document.getElementById(id+'-send-status');
-  try{
-    // Build simple product spec text
-    var itemDesc=(p.type||'')+(p.location?' at '+p.location:'');
-    var sizeDesc=p.width&&p.height?p.width+'mm x '+p.height+'mm':'TBC';
-    var glassDesc=(p.glazing||'')+(p.glassFinish==='Obscure'?' Obscure':'');
-    var lines=['PRODUCT SPECIFICATION','Deal: '+selectedDeal.name,'Date: '+new Date().toLocaleDateString('en-GB'),'','Item: '+itemDesc,'System: '+(p.system||''),'Size: '+sizeDesc,'Qty: '+(p.qty||1),'Colour: '+(p.colour||''),'Glass: '+glassDesc,'Hinge: '+(p.hinge||''),'Cill: '+(p.cill||'')];
-    if(p.notes)lines.push('Notes: '+p.notes);
-    var note=lines.join('\n');
-    await mq('mutation{create_update(item_id:'+selectedDeal.id+',body:"'+note.replace(/"/g,'\"')+'"){id}}');
-    if(statusEl){statusEl.style.display='block';setTimeout(function(){if(statusEl)statusEl.style.display='none';},3000);}
-  }catch(err){alert('Could not send: '+err.message);}
-}
-
-// ── Export profit checker to Excel ────────────────────────────
-function exportProfitCheckerXLSX() {
-  if (typeof XLSX === 'undefined') { alert('Excel library not loaded yet. Please wait a moment and try again.'); return; }
-
-  const dealName = selectedDeal ? selectedDeal.name : 'Unknown Deal';
-  const dateStr = new Date().toLocaleDateString('en-GB');
-  const salesperson = currentUser || '';
-  const productSel = document.getElementById('pc-product');
-  const productType = productSel ? productSel.options[productSel.selectedIndex].text : '';
-  const margin = parseFloat(productSel ? productSel.value : 0.4) || 0.4;
-  const g = id => { const el = document.getElementById(id); return el ? (parseFloat(el.value) || 0) : 0; };
-  const gs = id => { const el = document.getElementById(id); return el ? el.value : ''; };
-
-  // Recalculate all values
-  let framesTotal = 0;
-  const frameRows = frameLines.map(f => {
-    const afterDiscount = (f.listPrice||0) * (1 - (f.discount||0)/100);
-    const surchargeRate = SUPPLIER_SURCHARGES_DATA[f.supplier] || 0;
-    const supplierSurcharge = (f.listPrice||0) * surchargeRate;
-    const framePrice = afterDiscount + (f.surcharge||0) + supplierSurcharge;
-    framesTotal += framePrice;
-    return [f.supplier||'', f.listPrice||0, (f.discount||0)+'%', f.surcharge||0, framePrice];
-  });
-
-  let glassTotal = 0;
-  const glassRows = glasLines.map(g2 => {
-    const linePrice = (g2.sqm||0)*(g2.pricePerSqm||0) + (g2.manualOversize||0) + (g2.extras||0);
-    glassTotal += linePrice;
-    return [g2.supplier||'', g2.sqm||0, g2.pricePerSqm||0, g2.manualOversize||0, g2.extras||0, linePrice];
-  });
-
-  const fitDays = g('pc-fitdays'), dayRate = g('pc-dayrate'), loadOut = g('pc-loadout');
-  const lifting = g('pc-lifting'), distanceFuel = parseFloat(gs('pc-distance'))||0;
-  const transport = g('pc-transport'), subcontract = g('pc-subcontract');
-  const fitCost = subcontract > 0 ? subcontract : (fitDays + loadOut) * dayRate;
-  const installTotal = fitCost + (lifting * 550) + distanceFuel + transport;
-
-  const cillM = g('pc-cill-m'), comp650 = g('pc-comp650'), comp652 = g('pc-comp652');
-  const scaffolding = g('pc-scaffolding'), building = g('pc-building');
-  const otherCost = g('pc-other-cost'), delivery = g('pc-delivery');
-  const ancillaries = (cillM*50) + (comp650*6) + (comp652*8.5) + scaffolding + building + otherCost;
-
-  const productTotal = framesTotal + glassTotal + delivery;
-  const totalCosts = productTotal + installTotal + ancillaries;
-  const contingencyMargin = Math.min(margin + 0.02, 0.99);
-  const recommended = margin < 1 ? totalCosts / (1 - contingencyMargin) : 0;
-  const sold = g('pc-sold');
-  const marginVal = sold > 0 ? sold - totalCosts : 0;
-  const marginPct = sold > 0 ? (marginVal/sold)*100 : 0;
-
-  // Build worksheet data
-  const rows = [];
-  const h = (text) => ({ v: text, t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: '1E3A5F' } }, fontColor: { rgb: 'FFFFFF' } } });
-  const money = v => ({ v: v, t: 'n', z: '"£"#,##0.00' });
-  const pct = v => ({ v: v/100, t: 'n', z: '0.00%' });
-
-  rows.push(['BURGESS WINDOWS & DOORS — PROFIT CHECKER', '', '', '', '']);
-  rows.push(['', '', '', '', '']);
-  rows.push(['Customer / Deal:', dealName, '', 'Date:', dateStr]);
-  rows.push(['Salesperson:', salesperson, '', 'Product type:', productType]);
-  rows.push(['Expected margin:', Math.round(margin*100)+'%', '', '', '']);
-  rows.push(['', '', '', '', '']);
-
-  // Frame suppliers header
-  rows.push(['FRAME SUPPLIERS', '', '', '', '']);
-  rows.push(['Supplier / Product', 'List Price', 'Discount', 'Surcharge', 'Frame Price']);
-  frameRows.forEach(r => rows.push([r[0], r[1], r[2], r[3], r[4]]));
-  rows.push(['Supplier delivery fee', '', '', '', delivery]);
-  rows.push(['FRAMES TOTAL', '', '', '', framesTotal]);
-  rows.push(['', '', '', '', '']);
-
-  // Glass suppliers header
-  rows.push(['GLASS SUPPLIERS', '', '', '', '']);
-  rows.push(['Supplier / Product', 'Qty (m²)', 'Price/m²', 'Oversize Surcharge', 'Extras', 'Glass Price']);
-  glassRows.forEach(r => rows.push([r[0], r[1], r[2], r[3], r[4], r[5]]));
-  rows.push(['GLASS TOTAL', '', '', '', '', glassTotal]);
-  rows.push(['', '', '', '', '']);
-
-  // Installation
-  rows.push(['INSTALLATION COSTS', '', '', '', '']);
-  rows.push(['Fitting days', fitDays, 'Day rate', dayRate, fitCost]);
-  rows.push(['Load out days', loadOut, '', '', '']);
-  rows.push(['Lifting equipment days', lifting, '@ £550/day', '', lifting*550]);
-  rows.push(['Site distance fuel surcharge', gs('pc-distance')+'mi', '', '', distanceFuel]);
-  rows.push(['Transport / logistics', '', '', '', transport]);
-  if (subcontract > 0) rows.push(['Subcontract fit (manual override)', '', '', '', subcontract]);
-  rows.push(['INSTALLATION TOTAL', '', '', '', installTotal]);
-  rows.push(['', '', '', '', '']);
-
-  // Ancillaries
-  rows.push(['ANCILLARIES', '', '', '', '']);
-  rows.push(['Cill / Pressings', cillM+'m', '@ £50/m', '', cillM*50]);
-  rows.push(['Compriband TP650', comp650+'m', '@ £6/m', '', comp650*6]);
-  rows.push(['Compriband TP652', comp652+'m', '@ £8.50/m', '', comp652*8.5]);
-  rows.push(['Scaffolding', '', '', '', scaffolding]);
-  rows.push(['Building works', '', '', '', building]);
-  rows.push(['Other costs', '', '', '', otherCost]);
-  rows.push(['ANCILLARIES TOTAL', '', '', '', ancillaries]);
-  rows.push(['', '', '', '', '']);
-
-  // Summary
-  rows.push(['COST SUMMARY', '', '', '', '']);
-  rows.push(['Total product costs', '', '', '', productTotal]);
-  rows.push(['Total installation costs', '', '', '', installTotal]);
-  rows.push(['Ancillaries', '', '', '', ancillaries]);
-  rows.push(['TOTAL COSTS', '', '', '', totalCosts]);
-  rows.push(['', '', '', '', '']);
-  rows.push(['RECOMMENDED MINIMUM SALE VALUE', '', '', '', recommended]);
-  rows.push(['', '', '', '', '']);
-  if (sold > 0) {
-    rows.push(['SOLD / QUOTED VALUE', '', '', '', sold]);
-    rows.push(['Margin value', '', '', '', marginVal]);
-    rows.push(['Margin %', '', '', '', marginPct/100]);
-    rows.push(['Grade vs recommended', '', '', '', sold>=recommended?'Excellent (at/above)':sold>=(recommended*0.9)?'Good (90%+)':sold>=(recommended*0.75)?'Below target (75-90%)':'Significantly under (<75%)']);
-  }
-
-  // Create workbook
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-
-  // Column widths
-  ws['!cols'] = [{wch:40},{wch:15},{wch:15},{wch:20},{wch:15},{wch:15}];
-
-  // Style key rows
-  const bold_rows = [0, 6, 7, 12, 13, 20, 21, 29, 30, 37, 38, 45, 46, 53, 54];
-  const total_rows = [11, 19, 28, 36, 44, 52, 55, 57];
-
-  XLSX.utils.book_append_sheet(wb, ws, 'Profit Checker');
-
-  // Generate filename
-  const safeName = dealName.replace(/[^a-z0-9]/gi, '_');
-  const dateFile = new Date().toISOString().slice(0,10).replace(/-/g,'');
-  const filename = 'BWD_ProfitChecker_' + safeName + '_' + dateFile + '.xlsx';
-
-  XLSX.writeFile(wb, filename);
-}
 
 // ── New contact form ──────────────────────────────────────────
 let newContactFiles = [];
@@ -2917,74 +2472,6 @@ async function triggerCreateOpportunity() {
     btn.disabled = false;
     btn.textContent = '🚀 Create opportunity in Monday';
     btn.style.background = '#059669';
-  }
-}
-
-// ── Book appointment ──────────────────────────────────────────
-async function bookAppointment(){
-  if(!selectedDeal) return;
-  const date = document.getElementById('q-appt-date').value;
-  const time = document.getElementById('q-appt-time').value;
-  const type = document.getElementById('q-appttype').value;
-  const btn = document.getElementById('book-appt-btn');
-  const statusEl = document.getElementById('book-appt-status');
-  if(!date){ statusEl.textContent='Please select a date.'; statusEl.style.color='#dc2626'; statusEl.style.display='block'; return; }
-  btn.disabled=true; btn.textContent='Saving...'; statusEl.style.display='none';
-  try{
-    // Get column IDs
-    const colData = await mq('query{boards(ids:'+DEALS_BOARD+'){columns{id title type}}}');
-    const cols = colData.data?.boards?.[0]?.columns||[];
-    const gc = function(t){ const c=cols.find(function(c){return c.title===t;}); return c?c.id:''; };
-    const apptColId = gc('Appointment');
-    const apptTypeColId = gc('Appointment Type');
-    const stageColId = gc('Stage');
-    const mutations = [];
-    // Set appointment date+time
-    if(apptColId){
-      const apptVal = time ? JSON.stringify({date:date,time:time+':00'}) : JSON.stringify({date:date});
-      mutations.push('apptDate: change_column_value(board_id:'+DEALS_BOARD+',item_id:'+selectedDeal.id+',column_id:"'+apptColId+'",value:'+JSON.stringify(apptVal)+'){id}');
-    }
-    // Set appointment type
-    if(apptTypeColId && type){
-      mutations.push('apptType: change_column_value(board_id:'+DEALS_BOARD+',item_id:'+selectedDeal.id+',column_id:"'+apptTypeColId+'",value:'+JSON.stringify(JSON.stringify({label:type}))+'){id}');
-    }
-    // Set stage to Appointment
-    if(stageColId){
-      mutations.push('stage: change_column_value(board_id:'+DEALS_BOARD+',item_id:'+selectedDeal.id+',column_id:"'+stageColId+'",value:'+JSON.stringify(JSON.stringify({label:'Appointment'}))+'){id}');
-    }
-    if(mutations.length>0){
-      await mq('mutation{'+mutations.join(' ')+'}');
-    }
-    // Update local state
-    selectedDeal.apptDate=date;
-    selectedDeal.apptTime=time;
-    selectedDeal.apptType=type;
-    selectedDeal.stage='Appointment';
-    // Update info strip
-    let apptStr=fmtDate(date);
-    if(time) apptStr+=' at '+time;
-    if(type) apptStr+=' ('+type+')';
-    document.getElementById('di-appt').textContent=apptStr;
-    document.getElementById('deal-stage-badge').textContent='Appointment';
-    document.getElementById('deal-stage-badge').className='badge b-appt';
-    document.getElementById('di-stage').textContent='Appointment';
-    document.querySelectorAll('.stage-btn').forEach(function(b){b.classList.toggle('active',b.textContent==='Appointment');});
-    // Update deals list
-    const d=allDeals.find(function(x){return x.id===selectedDeal.id;});
-    if(d){d.stage='Appointment';d.apptDate=date;d.apptTime=time;d.apptType=type;}
-    renderStats(); renderDeals(); renderAppointments();
-    statusEl.textContent='✓ Appointment booked and stage set to Appointment';
-    statusEl.style.color='#059669';
-    statusEl.style.display='block';
-    btn.textContent='✓ Booked';
-    btn.style.background='#10b981';
-    setTimeout(function(){btn.disabled=false;btn.textContent='📅 Book appointment & set stage to Appointment';btn.style.background='#0ea5e9';},3000);
-  }catch(err){
-    statusEl.textContent='Could not save: '+err.message;
-    statusEl.style.color='#dc2626';
-    statusEl.style.display='block';
-    btn.disabled=false;
-    btn.textContent='📅 Book appointment & set stage to Appointment';
   }
 }
 
