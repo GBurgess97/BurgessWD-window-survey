@@ -102,6 +102,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <button id="tab-surveyor" onclick="switchRole('surveyor')" style="padding:8px 20px;border:1px solid #1e40af;border-radius:8px;background:#1e40af;color:#fff;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">Surveyors</button>
       <button id="tab-installer" onclick="switchRole('installer')" style="padding:8px 20px;border:1px solid #e0e0e0;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">Installers</button>
       <button id="tab-sales" onclick="switchRole('sales')" style="padding:8px 20px;border:1px solid #e0e0e0;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">Sales</button>
+      <button id="tab-pricing" onclick="switchRole('pricing')" style="padding:8px 20px;border:1px solid #e0e0e0;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500">💰 Pricing</button>
     </div>
 
     <!-- Add user -->
@@ -124,6 +125,92 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
     <!-- User list -->
     <div class="section">
+      <!-- Pricing panel -->
+      <div id="pricing-panel" style="display:none">
+        <div class="sec-title">💰 Profit checker — price settings</div>
+        <p style="font-size:12px;color:#64748b;margin-bottom:14px">These prices are used in the sales portal profit checker. Changes take effect immediately for all salespeople.</p>
+
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px">Ancillaries</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">Cill / pressings (£ per metre)</label>
+            <input type="number" id="price-cill" value="50" step="0.01" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">Compriband TP650 (£ per metre)</label>
+            <input type="number" id="price-comp650" value="6" step="0.01" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">Compriband TP652 (£ per metre)</label>
+            <input type="number" id="price-comp652" value="8.50" step="0.01" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">Lifting equipment (£ per day)</label>
+            <input type="number" id="price-lifting" value="550" step="1" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px">Installation day rates</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">Standard day rate (£)</label>
+            <input type="number" id="price-dayrate" value="550" step="1" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">Contingency buffer (%)</label>
+            <input type="number" id="price-contingency" value="2" min="0" max="20" step="0.5" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px">Site distance fuel surcharges (£)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">0–25 miles</label>
+            <input type="number" id="price-fuel-0" value="0" step="1" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">26–50 miles</label>
+            <input type="number" id="price-fuel-30" value="30" step="1" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">51–79 miles</label>
+            <input type="number" id="price-fuel-60" value="60" step="1" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">80–100 miles</label>
+            <input type="number" id="price-fuel-90" value="90" step="1" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">100+ miles</label>
+            <input type="number" id="price-fuel-120" value="120" step="1" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px">Product margins (%)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">Aluminium</label>
+            <input type="number" id="price-margin-alu" value="40" min="0" max="100" step="0.5" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">UPVC</label>
+            <input type="number" id="price-margin-upvc" value="42" min="0" max="100" step="0.5" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">Timber / Timber-Alt</label>
+            <input type="number" id="price-margin-timber" value="40" min="0" max="100" step="0.5" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b">Composite Door</label>
+            <input type="number" id="price-margin-comp" value="40" min="0" max="100" step="0.5" style="padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:14px;font-family:inherit">
+          </div>
+        </div>
+
+        <button onclick="savePricing()" style="width:100%;padding:12px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">💾 Save pricing settings</button>
+        <div id="pricing-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
+      </div>
+
+      <div id="user-management-section">
       <div class="sec-title" id="list-title">👥 Surveyor accounts</div>
       <div id="users-list"><div class="empty-users">Loading...</div></div>
     </div>
@@ -177,7 +264,13 @@ function switchRole(role){
   document.getElementById('tab-sales').style.background=role==='sales'?'#1e3a5f':'transparent';
   document.getElementById('tab-sales').style.color=role==='sales'?'#fff':'#888';
   document.getElementById('tab-sales').style.borderColor=role==='sales'?'#1e3a5f':'#e0e0e0';
+  document.getElementById('tab-pricing').style.background=role==='pricing'?'#92400e':'transparent';
+  document.getElementById('tab-pricing').style.color=role==='pricing'?'#fff':'#888';
+  document.getElementById('tab-pricing').style.borderColor=role==='pricing'?'#92400e':'#e0e0e0';
   const titles={'surveyor':'➕ Add new surveyor','installer':'➕ Add new installer','sales':'➕ Add new salesperson'};
+  document.getElementById('pricing-panel').style.display = role==='pricing' ? 'block' : 'none';
+  const userSection = document.getElementById('user-management-section');
+  if(userSection) userSection.style.display = role==='pricing' ? 'none' : 'block';
   const listTitles={'surveyor':'👥 Surveyor accounts','installer':'🔧 Installer accounts','sales':'💼 Sales accounts'};
   document.getElementById('add-title').textContent=titles[role]||titles.surveyor;
   document.getElementById('list-title').textContent=listTitles[role]||listTitles.surveyor;
