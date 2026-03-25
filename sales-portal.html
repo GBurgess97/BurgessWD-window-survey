@@ -604,31 +604,55 @@ async function openDeal(id) {
   document.getElementById('v-phone').value = selectedDeal.phone || '';
   document.getElementById('v-email').value = selectedDeal.email || '';
   document.getElementById('v-address').value = selectedDeal.address || '';
-  // Try to fetch linked contact details to fill in missing info
+  // Fetch linked contact details from Contacts board
   if (selectedDeal.contactsColId) {
     try {
-      const contactData = await mondayQuery(`query {
+      // Step 1 — get the linked item IDs from the Contacts column
+      const linkData = await mondayQuery(`query {
         items(ids:${selectedDeal.id}){
           column_values(ids:["${selectedDeal.contactsColId}"]){
-            id
-            ... on BoardRelationValue { linked_items { id name column_values { id title text } } }
+            id value text
           }
         }
       }`);
-      const linked = contactData.data?.items?.[0]?.column_values?.[0]?.linked_items || [];
-      if (linked.length > 0) {
-        const contact = linked[0];
-        const getCol = (title) => contact.column_values.find(c => c.title === title)?.text || '';
-        // Only fill if deal doesn't already have the value
-        if (!document.getElementById('v-phone').value) document.getElementById('v-phone').value = getCol('Phone');
-        if (!document.getElementById('v-email').value) document.getElementById('v-email').value = getCol('Email');
-        if (!document.getElementById('v-address').value) document.getElementById('v-address').value = getCol('Location') || getCol('Address');
-        // Show contact name if deal name is generic
-        const contactName = contact.name;
-        if (contactName && !document.getElementById('v-name').value) document.getElementById('v-name').value = contactName;
-        // Show a small indicator that contact was loaded
-        document.getElementById('contact-loaded').style.display = 'block';
-        document.getElementById('contact-loaded').textContent = '✓ Contact details loaded from: ' + contactName;
+      const colVal = linkData.data?.items?.[0]?.column_values?.[0];
+      // Parse linked item IDs from value JSON
+      let linkedIds = [];
+      try {
+        const parsed = JSON.parse(colVal?.value || '{}');
+        linkedIds = (parsed.linkedPulseIds || parsed.item_ids || []).map(x => typeof x === 'object' ? x.linkedPulseId || x : x);
+      } catch(e) {}
+      // Also try text field which may contain the name
+      const contactNameFromText = colVal?.text || '';
+      if (linkedIds.length > 0) {
+        // Step 2 — fetch those items from the Contacts board
+        const contactData = await mondayQuery(`query {
+          items(ids:[${linkedIds.join(',')}]){
+            id name
+            column_values{ id title text }
+          }
+        }`);
+        const contact = contactData.data?.items?.[0];
+        if (contact) {
+          const getCol = (...titles) => {
+            for (const t of titles) {
+              const val = contact.column_values.find(c => c.title === t)?.text;
+              if (val) return val;
+            }
+            return '';
+          };
+          if (!document.getElementById('v-phone').value) document.getElementById('v-phone').value = getCol('Phone');
+          if (!document.getElementById('v-email').value) document.getElementById('v-email').value = getCol('Email');
+          if (!document.getElementById('v-address').value) document.getElementById('v-address').value = getCol('Location','Address');
+          const ind = document.getElementById('contact-loaded');
+          ind.style.display = 'block';
+          ind.textContent = '✓ Contact details loaded: ' + contact.name;
+        }
+      } else if (contactNameFromText) {
+        // At least show the contact name we have
+        const ind = document.getElementById('contact-loaded');
+        ind.style.display = 'block';
+        ind.textContent = '🔗 Linked contact: ' + contactNameFromText;
       }
     } catch(e) { console.warn('Could not load linked contact:', e); }
   }
