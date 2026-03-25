@@ -528,12 +528,19 @@ async function loadAll() {
 // ── Deals ─────────────────────────────────────────────────────
 async function loadDeals() {
   try {
-    // Get Monday user ID for reliable People column filtering
+    // Get Monday user ID by searching users list for name match
     let mondayUserId = null;
     try {
-      const meData = await mq(`query { me { id name } }`);
-      mondayUserId = meData.data?.me?.id;
-    } catch(e) { console.warn('Could not get Monday user ID:', e); }
+      const usersData = await mq(`query { users { id name email } }`);
+      const users = usersData.data?.users || [];
+      const match = users.find(u => 
+        u.name.toLowerCase().includes(currentUser.toLowerCase()) ||
+        currentUser.toLowerCase().includes(u.name.toLowerCase().split(' ')[0])
+      );
+      if (match) mondayUserId = match.id;
+      console.log('Monday users:', users.map(u => u.name + ':' + u.id));
+      console.log('Matched user:', match?.name, match?.id);
+    } catch(e) { console.warn('Could not get Monday users:', e); }
 
     const colData = await mq(`query { boards(ids:${DEALS_BOARD}){ columns{ id title type } } }`);
     boardCols = colData.data?.boards?.[0]?.columns || [];
@@ -553,7 +560,6 @@ async function loadDeals() {
               id text
               ... on StatusValue{ label }
               ... on DateValue{ date time }
-              ... on PeopleValue{ persons_and_teams{ id kind } }
             }
           }
         }
@@ -561,12 +567,8 @@ async function loadDeals() {
     }`);
     const items = data.data?.boards?.[0]?.items_page?.items || [];
     const cv = (item, id) => item.column_values.find(c => c.id === id) || {};
-    const cvPeople = (item, id) => item.column_values.find(c => c.id === id)?.persons_and_teams || [];
     allDeals = items
-      .filter(item => {
-        if (!mondayUserId) return (cv(item, spId).text || '').toLowerCase().includes(currentUser.toLowerCase());
-        return cvPeople(item, spId).some(p => String(p.id) === String(mondayUserId));
-      })
+      .filter(item => (cv(item, spId).text || '').toLowerCase().includes(currentUser.toLowerCase()))
       .map(item => {
         const apptCol = cv(item, apptId);
         return {
