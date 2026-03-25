@@ -1514,15 +1514,11 @@ async function loadMondayFiles(){
   const listEl=document.getElementById('monday-files-list');
   if(loadEl)loadEl.textContent='Loading...';
   try{
-    // Only fetch from the "Files" column — never show PROFIT CHECKER REPORT
-    const colData=await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
-    const cols=colData.data?.boards?.[0]?.columns||[];
-    const filesCol=cols.find(c=>c.title==='Files')||cols.find(c=>c.type==='file'&&c.title!=='PROFIT CHECKER REPORT');
-    if(!filesCol){if(loadEl)loadEl.textContent='No files column found.';return;}
-    const data=await mq(`query{items(ids:${selectedDeal.id}){column_values(ids:["${filesCol.id}"]){...on FileValue{files{id name url file_extension}}}}}`);
-    const fileVals=data.data?.items?.[0]?.column_values?.[0]?.files||[];
-    // Map to same shape as assets
-    const assets=fileVals.map(f=>({id:f.id,name:f.name,public_url:f.url,file_extension:f.file_extension}));
+    // Fetch all assets but filter out profit checker reports
+    const data=await mq(`query{items(ids:${selectedDeal.id}){assets{id name public_url file_extension}}}`);
+    const allAssets=data.data?.items?.[0]?.assets||[];
+    // Hide profit checker reports from sales people
+    const assets=allAssets.filter(a=>!a.name.toLowerCase().includes('profitreport')&&!a.name.toLowerCase().includes('profit_report')&&!a.name.toLowerCase().includes('profit checker'));
     if(loadEl)loadEl.style.display='none';
     if(assets.length===0){if(listEl)listEl.innerHTML='<div style="font-size:12px;color:#94a3b8">No files uploaded yet.</div>';return;}
     const imgExts=['jpg','jpeg','png','gif','webp'];
