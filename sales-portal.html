@@ -6,6 +6,7 @@
 <title>Sales Portal — Burgess Windows & Doors</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f0f4f8;min-height:100vh}
@@ -169,6 +170,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .step-icon.done{background:#d1fae5;color:#059669}
 .step-icon.active{background:#dbeafe;color:#1e40af}
 .step-icon.error{background:#fee2e2;color:#dc2626}
+
 @media(max-width:600px){
   .row2,.row3{grid-template-columns:1fr 1fr}
   .stats-row{grid-template-columns:repeat(3,1fr)}
@@ -378,138 +380,110 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       </div>
       <!-- Profit checker -->
       <div class="section">
-        <div class="sec-title">💰 Profit checker</div>
+        <div class="sec-title">💰 Profit checker — Salesman estimate</div>
         <div class="row2">
           <div class="field"><label>Product type</label>
-            <select id="pc-product" onchange="onProductChange();calcProfit()">
-              <option value="">Select...</option>
-              <option>UPVC</option><option>Aluminium</option><option>Al-Clad</option>
-              <option>Timber</option><option>Timber-Alternative</option><option>Steel</option>
-              <option>Steel-Look</option><option>Curtain-Walling</option><option>Rooflights</option><option>Composite Doors</option>
+            <select id="pc-product" onchange="calcProfit()">
+              <option value="0.4">Aluminium (40%)</option>
+              <option value="0.4">Al-Clad (40%)</option>
+              <option value="0.42">UPVC (42%)</option>
+              <option value="0.42">Timber-Alt (42%)</option>
+              <option value="0.4">Timber (40%)</option>
+              <option value="0.4">Composite Door (40%)</option>
+              <option value="0.4">Steel / Steel-Look (40%)</option>
+              <option value="0.4">Curtain Walling (40%)</option>
+              <option value="0.4">Rooflights (40%)</option>
             </select>
           </div>
-          <div class="field"><label>Frame supplier</label>
-            <select id="pc-supplier" onchange="onSupplierChange();calcProfit()">
-              <option value="">Select...</option>
-              <option>Affordable Aluminium</option><option>Allan Brothers</option><option>Aluplast HST</option>
-              <option>Aluco</option><option>AluProf</option><option>Arkay</option><option>Bereco Timber</option>
-              <option>Compdoor</option><option>Crittal Steel</option><option>Emplas</option>
-              <option>Everglade Aluminum</option><option>Evolution Timber-Alt</option><option>Glideline</option>
-              <option>Holdens Supaseal</option><option>Hyline Aluminium</option><option>Internorm Al-Clad</option>
-              <option>Liniar UPVC Windows</option><option>Masterframe Timber Alt</option><option>Origin Aluminium</option>
-              <option>Q4Glass</option><option>Rationel Dovista Al-Clad</option><option>Residence Collection R7</option>
-              <option>Residence Collection R9</option><option>Solarlux Aluminium</option><option>Solidor</option>
-              <option>Sunflex Aluminium</option><option>Velfac Dovista Al-Clad</option><option>Other</option>
-            </select>
+          <div class="field"><label>Expected margin</label>
+            <div id="pc-expected-margin" style="padding:9px 12px;background:#f0fdf4;border:1.5px solid #6ee7b7;border-radius:8px;font-weight:600;color:#065f46;font-size:14px">40%</div>
           </div>
         </div>
-        <div id="pc-margin-display" style="display:none;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:8px 12px;font-size:12px;color:#1e3a5f;margin-bottom:10px">
-          Target margin: <strong id="pc-margin-val"></strong> &nbsp;|&nbsp; Supplier surcharge: <strong id="pc-surcharge-rate-val"></strong>
-        </div>
-        <div class="row3">
-          <div class="field"><label>Frame list price (£)</label><input type="number" id="pc-frame" placeholder="0" oninput="calcProfit()"></div>
-          <div class="field"><label>Discount (%)</label><input type="number" id="pc-discount" value="0" min="0" max="100" oninput="calcProfit()"></div>
-          <div class="field"><label>Supplier surcharge (£)</label><input type="number" id="pc-surcharge" value="0" oninput="calcProfit()"></div>
+
+        <!-- Frame suppliers -->
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;margin-top:4px">Frame suppliers</div>
+        <div id="pc-frame-lines"></div>
+        <button onclick="addFrameLine()" style="width:100%;padding:8px;border:1.5px dashed #93c5fd;background:#f8faff;color:#1e3a5f;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;margin-bottom:14px">+ Add frame supplier</button>
+
+        <!-- Glass suppliers -->
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px">Glass suppliers</div>
+        <div id="pc-glass-lines"></div>
+        <button onclick="addGlassLine()" style="width:100%;padding:8px;border:1.5px dashed #93c5fd;background:#f8faff;color:#1e3a5f;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;margin-bottom:14px">+ Add glass supplier</button>
+
+        <!-- Installation -->
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px">Installation costs</div>
+        <div class="row2">
+          <div class="field"><label>Fitting days</label><input type="number" id="pc-fitdays" value="1" min="0" step="0.5" oninput="calcProfit()"></div>
+          <div class="field"><label>Day rate (£)</label><input type="number" id="pc-dayrate" value="550" oninput="calcProfit()"></div>
         </div>
         <div class="row2">
-          <div class="field"><label>Glass specification (£/m²)</label>
-            <select id="pc-glass-spec" onchange="onGlassSpecChange();calcProfit()">
-              <option value="0">Select glass spec...</option>
-              <option value="47.01">28mm DGU Float Soft Coat/Float Clear — £47.01</option>
-              <option value="60.29">28mm DGU Tough Soft-Coat/Tough Clear — £60.29</option>
-              <option value="66.41">28mm DGU Float Soft-Coat/Obscure Float — £66.41</option>
-              <option value="79.70">28mm DGU Tough Soft-Coat/Obscure Tough — £79.70</option>
-              <option value="73.22">28mm DGU Sunguard/Tough Clear — £73.22</option>
-              <option value="75.36">28mm DGU Activ Blue/Tough Clear — £75.36</option>
-              <option value="58.54">32mm DGU Float Soft Coat/Float Clear — £58.54</option>
-              <option value="71.82">32mm DGU Tough Soft-Coat/Tough Clear — £71.82</option>
-              <option value="84.75">32mm DGU Sunguard/Tough Clear — £84.75</option>
-              <option value="86.89">32mm DGU Activ Blue/Tough Clear — £86.89</option>
-              <option value="118.37">32mm TGU Float Soft Coat/Tough Clear — £118.37</option>
-              <option value="124.14">32mm TGU Tough Soft-Coat/Tough Clear — £124.14</option>
-              <option value="0">Custom — enter manually</option>
-            </select>
-          </div>
-          <div class="field"><label>Glass price override (£/m²)</label><input type="number" id="pc-glass-manual" placeholder="Or enter manually" oninput="calcProfit()"></div>
+          <div class="field"><label>Load out days</label><input type="number" id="pc-loadout" value="0" min="0" step="0.5" oninput="calcProfit()"></div>
+          <div class="field"><label>Lifting equipment days</label><input type="number" id="pc-lifting" value="0" min="0" oninput="calcProfit()"></div>
         </div>
-        <div class="row3">
-          <div class="field"><label>Total m²</label><input type="number" id="pc-sqm" placeholder="0.00" step="0.01" oninput="calcProfit()"></div>
-          <div class="field"><label>Glass add-on</label>
-            <select id="pc-glass-addon" onchange="calcProfit()">
-              <option value="0">None</option>
-              <option value="1.54">Argon Fill +£1.54/m²</option>
-              <option value="3.08">Argon Fill Triple +£3.08/m²</option>
-              <option value="2.46">Spacer 28mm +£2.46/m²</option>
-              <option value="13.44">Spacer 32mm +£13.44/m²</option>
-              <option value="24.64">TGU Surcharge +£24.64/m²</option>
-              <option value="15.21">Float Clear 4mm +£15.21/m²</option>
-              <option value="19.65">Tough Clear 4mm +£19.65/m²</option>
-              <option value="22.36">Float Soft Coat 4mm +£22.36/m²</option>
-              <option value="30.57">Tough Soft Coat 4mm +£30.57/m²</option>
-              <option value="33.69">Float Obscure Satin 4mm +£33.69/m²</option>
-              <option value="42.88">Tough Sunguard 4mm +£42.88/m²</option>
-              <option value="44.92">Active Blue 4mm +£44.92/m²</option>
-            </select>
-          </div>
-          <div class="field"><label>Oversize multiplier</label>
-            <select id="pc-oversize" onchange="calcProfit()">
-              <option value="1">Standard (under 3m²)</option>
-              <option value="1.25">3–4m² ×1.25</option>
-              <option value="1.35">4–5m² ×1.35</option>
-              <option value="1.50">5–6m² ×1.50</option>
-            </select>
-          </div>
-        </div>
-        <div class="row3">
-          <div class="field"><label>Fit type</label>
-            <select id="pc-fit-type" onchange="onFitTypeChange();calcProfit()">
-              <option value="">Select...</option>
-              <option value="90">New Build UPVC £90/m²</option>
-              <option value="95">Refurb UPVC £95/m²</option>
-              <option value="95">New Build Alu £95/m²</option>
-              <option value="100">Refurb Alu £100/m²</option>
-              <option value="100">New Build Al-Clad £100/m²</option>
-              <option value="110">Refurb Al-Clad £110/m²</option>
-              <option value="0">Custom rate</option>
-            </select>
-          </div>
-          <div class="field"><label>Fit rate (£/m²)</label><input type="number" id="pc-fit-rate" placeholder="Auto" oninput="calcProfit()"></div>
+        <div class="row2">
           <div class="field"><label>Site distance</label>
-            <select id="pc-fuel" onchange="calcProfit()">
-              <option value="0">0–25 miles</option>
-              <option value="30">26–50 miles +£30</option>
-              <option value="60">51–79 miles +£60</option>
-              <option value="90">80–100 miles +£90</option>
-              <option value="120">100+ miles +£120</option>
+            <select id="pc-distance" onchange="calcProfit()">
+              <option value="0">0 - 25 miles</option>
+              <option value="30">26 - 50 miles (+£30)</option>
+              <option value="60">51 - 79 miles (+£60)</option>
+              <option value="90">80 - 100 miles (+£90)</option>
+              <option value="120">100+ miles (+£120)</option>
             </select>
           </div>
+          <div class="field"><label>Transport / logistics (£)</label><input type="number" id="pc-transport" value="0" oninput="calcProfit()"></div>
+        </div>
+        <div class="field"><label>Subcontract fit — manual override (£, leave 0 to use day rate)</label><input type="number" id="pc-subcontract" value="0" oninput="calcProfit()"></div>
+
+        <!-- Ancillaries -->
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin:8px 0">Ancillaries</div>
+        <div class="row2">
+          <div class="field"><label>Cill / pressings (m @ £50/m)</label><input type="number" id="pc-cill-m" value="0" min="0" oninput="calcProfit()"></div>
+          <div class="field"><label>Compriband TP650 (m @ £6/m)</label><input type="number" id="pc-comp650" value="0" min="0" oninput="calcProfit()"></div>
         </div>
         <div class="row2">
-          <div class="field"><label>Delivery fee (£)</label><input type="number" id="pc-delivery" value="0" oninput="calcProfit()"></div>
-          <div class="field"><label>Other costs (£)</label><input type="number" id="pc-other" value="0" oninput="calcProfit()"></div>
+          <div class="field"><label>Compriband TP652 (m @ £8.50/m)</label><input type="number" id="pc-comp652" value="0" min="0" oninput="calcProfit()"></div>
+          <div class="field"><label>Scaffolding (£)</label><input type="number" id="pc-scaffolding" value="0" oninput="calcProfit()"></div>
         </div>
-        <!-- Matrix -->
-        <div class="profit-matrix">
-          <div class="profit-row"><span class="profit-label">Frame cost</span><span class="profit-val" id="pm-frame">£0</span></div>
-          <div class="profit-row"><span class="profit-label">Glass cost</span><span class="profit-val" id="pm-glass">£0</span></div>
-          <div class="profit-row"><span class="profit-label">Fit cost</span><span class="profit-val" id="pm-fit">£0</span></div>
-          <div class="profit-row"><span class="profit-label">Fuel surcharge</span><span class="profit-val" id="pm-fuel">£0</span></div>
-          <div class="profit-row"><span class="profit-label">Delivery + other</span><span class="profit-val" id="pm-delivery">£0</span></div>
-          <div class="profit-row" style="border-top:1px solid rgba(255,255,255,0.2);margin-top:6px;padding-top:6px"><span class="profit-label" style="font-weight:600">Total cost</span><span class="profit-val" id="pm-total" style="font-weight:600">£0</span></div>
-          <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.3);display:flex;justify-content:space-between;align-items:center">
-            <span style="color:#6ee7b7;font-size:14px;font-weight:600">Recommended sale price</span>
-            <span style="color:#6ee7b7;font-size:22px;font-weight:700" id="pm-recommended">£0</span>
+        <div class="row2">
+          <div class="field"><label>Building works (£)</label><input type="number" id="pc-building" value="0" oninput="calcProfit()"></div>
+          <div class="field"><label>Other costs (£)</label><input type="number" id="pc-other-cost" value="0" oninput="calcProfit()"></div>
+        </div>
+        <div class="field"><label>Supplier delivery fee (£)</label><input type="number" id="pc-delivery" value="0" oninput="calcProfit()"></div>
+
+        <!-- Live matrix -->
+        <div class="profit-matrix" style="margin-top:14px">
+          <div style="font-size:11px;font-weight:600;color:#93c5fd;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Cost summary</div>
+          <div class="profit-row"><span class="profit-label">Frames total</span><span class="profit-val" id="pm-frames">£0</span></div>
+          <div class="profit-row"><span class="profit-label">Glass total</span><span class="profit-val" id="pm-glass-total">£0</span></div>
+          <div class="profit-row"><span class="profit-label">Total product costs</span><span class="profit-val" id="pm-product-total">£0</span></div>
+          <div class="profit-row"><span class="profit-label">Installation costs</span><span class="profit-val" id="pm-install">£0</span></div>
+          <div class="profit-row"><span class="profit-label">Ancillaries</span><span class="profit-val" id="pm-ancillaries">£0</span></div>
+          <div class="profit-row" style="border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;margin-top:6px">
+            <span class="profit-label" style="font-size:14px">Total costs</span>
+            <span class="profit-val" style="font-size:14px" id="pm-total">£0</span>
+          </div>
+          <div class="profit-row" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.3)">
+            <span style="color:#6ee7b7;font-size:14px;font-weight:600">Recommended minimum sale value</span>
+            <span style="color:#6ee7b7;font-size:18px;font-weight:700" id="pm-recommended">£0</span>
           </div>
         </div>
-        <div class="field" style="margin-top:12px">
-          <label>Quoted / sold price (£)</label>
-          <input type="number" id="pc-sold" placeholder="Price given to customer" oninput="calcProfit()" style="font-size:20px;font-weight:600;color:#1e3a5f;border-color:#1e3a5f">
+
+        <!-- Sold value & grade -->
+        <div class="field" style="margin-top:14px">
+          <label>Sold / quoted value (£)</label>
+          <input type="number" id="pc-sold" placeholder="Price given to customer" oninput="calcProfit()" style="font-size:18px;font-weight:600">
+        </div>
+        <div id="pc-margin-row" style="display:none;background:#f8fafc;border:1px solid #e5e5e5;border-radius:8px;padding:10px 12px;margin-top:6px;font-size:13px">
+          Margin value: <strong id="pc-margin-val"></strong> &nbsp;|&nbsp; Margin %: <strong id="pc-margin-pct"></strong>
         </div>
         <div id="grade-box" style="display:none;border-radius:10px;padding:16px;text-align:center;margin-top:10px">
-          <div class="grade-pct" id="grade-pct">--</div>
-          <div class="grade-lbl" id="grade-lbl">of recommended price</div>
+          <div class="grade-pct" id="grade-pct"></div>
+          <div class="grade-lbl" id="grade-lbl">of recommended sale value</div>
           <div class="grade-detail" id="grade-detail"></div>
         </div>
+        <button onclick="exportProfitCheckerXLSX()" style="width:100%;padding:11px;background:#f0fdf4;border:1.5px solid #6ee7b7;color:#065f46;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px">
+          📊 Save profit checker as Excel
+        </button>
       </div>
     </div>
 
@@ -1034,6 +1008,7 @@ function openDeal(id){
   if(selectedDeal.apptType){const sel=document.getElementById('q-appttype');for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===selectedDeal.apptType){sel.selectedIndex=i;break;}}}
   document.querySelectorAll('.stage-btn').forEach(b=>b.classList.toggle('active',b.textContent===selectedDeal.stage));
   products=[];productCount=0;sitePhotos=[];projectFiles=[];canvases={};drawingState={};activeTools={};activeColors={};
+  initProfitChecker();
   document.getElementById('products-list').innerHTML='';
   document.getElementById('photo-grid').innerHTML='';
   document.getElementById('files-list').innerHTML='';
@@ -1061,6 +1036,7 @@ function showQTab(tab,btn){
   if(btn)btn.classList.add('active');
   if(tab==='submit')updateSubmitSummary();
 }
+
 
 // ── Appointment Type update ───────────────────────────────────
 async function updateApptType(){
@@ -1095,94 +1071,203 @@ async function updateStage(newStage){
 }
 
 // ── Profit checker ────────────────────────────────────────────
-function onProductChange(){
-  const product=document.getElementById('pc-product').value;
-  const margin=MARGINS[product];
-  const supplier=document.getElementById('pc-supplier').value;
-  const surchargeRate=SUPPLIER_LIST[supplier]||0;
-  const display=document.getElementById('pc-margin-display');
-  const marginVal=document.getElementById('pc-margin-val');
-  const surchargeVal=document.getElementById('pc-surcharge-rate-val');
-  if(product){
-    display.style.display='block';
-    marginVal.textContent=margin?Math.round(margin*100)+'%':'N/A';
-    surchargeVal.textContent=surchargeRate>0?(surchargeRate*100).toFixed(1)+'%':'None';
-  }else{display.style.display='none';}
+const MARGINS_DATA = {
+  'Aluminium (40%)':0.4,'Al-Clad (40%)':0.4,'UPVC (42%)':0.42,
+  'Timber-Alt (42%)':0.42,'Timber (40%)':0.4,'Composite Door (40%)':0.4,
+  'Steel / Steel-Look (40%)':0.4,'Curtain Walling (40%)':0.4,'Rooflights (40%)':0.4
+};
+const FRAME_SUPPLIERS_LIST = ['Affordable Aluminium','Allan Brothers','Aluplast HST','Aluco','AluProf','Arkay','ArtSteel','Atlas Customade','Bereco Timber','Bygone Vertical Sliders','Compdoor','Crittal Steel','Duplus Architectural','Emplas','Everglade Aluminum','Everglade Timber-Alt','Evolution Timber-Alt','Garrards Windows','Glideline','Holdens Supaseal','Hyline Aluminium','Internorm Al-Clad','Liniar UPVC Windows','Masterframe Timber Alt','Morley Glass & Glazing','Origin Aluminium','Q4Glass','QFort','Raico','Rationel Dovista Al-Clad','Rationel Dovista Timber','RK Door Systems Aluminium','Residence Collection R7','Residence Collection R9','Solarlux Aluminium','Solidor','Sunflex Aluminium','Velfac Dovista Al-Clad','Other'];
+const GLASS_SUPPLIERS_LIST = ['Safeguard','Morley Glass & Glazing','Q4Glass','Other'];
+const SUPPLIER_SURCHARGES_DATA = {'Hyline Aluminium':0.055,'Q4Glass':0.055,'Solarlux Aluminium':0.068};
+
+let frameLines = [], glasLines = [], frameLineCount = 0, glassLineCount = 0;
+
+function selOpts2(arr, selected) {
+  return arr.map(a => '<option' + (a===selected?' selected':'') + '>' + a + '</option>').join('');
 }
-function onSupplierChange(){
-  const supplier=document.getElementById('pc-supplier').value;
-  const surchargeRate=SUPPLIER_LIST[supplier]||0;
-  const frameList=parseFloat(document.getElementById('pc-frame').value)||0;
-  if(surchargeRate>0&&frameList>0){
-    document.getElementById('pc-surcharge').value=(frameList*surchargeRate).toFixed(2);
+
+function addFrameLine(data) {
+  frameLineCount++;
+  const id = 'fl' + frameLineCount;
+  frameLines.push({id:id, supplier:'', listPrice:0, discount:0, surcharge:0});
+  const div = document.createElement('div');
+  div.id = id;
+  div.style.cssText = 'background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:12px;margin-bottom:8px;position:relative';
+  const num = frameLineCount;
+  const sup = data && data.supplier ? data.supplier : '';
+  const lp = data && data.listPrice ? data.listPrice : 0;
+  const disc = data && data.discount ? data.discount : 0;
+  const sur = data && data.surcharge ? data.surcharge : 0;
+  const opts = FRAME_SUPPLIERS_LIST.map(function(s){ return '<option' + (s===sup?' selected':'') + '>' + s + '</option>'; }).join('');
+  div.innerHTML = [
+    '<button onclick="removeFrameLine(\''+id+'\');" style="position:absolute;top:8px;right:8px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;width:22px;height:22px;border-radius:4px;font-size:12px;cursor:pointer">&#x2715;</button>',
+    '<div style="font-size:10px;font-weight:700;color:#1e3a5f;margin-bottom:8px">Frame supplier '+num+'</div>',
+    '<div class="row2" style="margin-bottom:6px">',
+    '<div class="field" style="margin:0"><label>Supplier / product</label><select onchange="updFL(\''+id+'\',\'supplier\',this.value);calcProfit()"><option value="">Select...</option>'+opts+'</select></div>',
+    '<div class="field" style="margin:0"><label>Frame list price (£)</label><input type="number" placeholder="0" value="'+lp+'" oninput="updFL(\''+id+'\',\'listPrice\',+this.value);calcProfit()"></div>',
+    '</div><div class="row2">',
+    '<div class="field" style="margin:0"><label>Discount (%)</label><input type="number" value="'+disc+'" min="0" max="100" oninput="updFL(\''+id+'\',\'discount\',+this.value);calcProfit()"></div>',
+    '<div class="field" style="margin:0"><label>Supplier surcharge (£)</label><input type="number" value="'+sur+'" oninput="updFL(\''+id+'\',\'surcharge\',+this.value);calcProfit()"></div>',
+    '</div>',
+    '<div style="font-size:11px;color:#64748b;margin-top:6px">Frame price: <strong id="'+id+'-result">£0</strong></div>'
+  ].join('');
+  document.getElementById('pc-frame-lines').appendChild(div);
+  if (data && data.supplier) { const f = frameLines[frameLines.length-1]; f.supplier=data.supplier; f.listPrice=data.listPrice||0; f.discount=data.discount||0; f.surcharge=data.surcharge||0; }
+  calcProfit();
+}
+function removeFrameLine(id) {
+  frameLines = frameLines.filter(f => f.id !== id);
+  document.getElementById(id)?.remove();
+  calcProfit();
+}
+function updFL(id, field, value) {
+  const f = frameLines.find(f => f.id === id);
+  if (f) f[field] = value;
+}
+
+function addGlassLine(data) {
+  glassLineCount++;
+  const id = 'gl' + glassLineCount;
+  glasLines.push({id:id, supplier:'', sqm:0, pricePerSqm:0, manualOversize:0, extras:0});
+  const div = document.createElement('div');
+  div.id = id;
+  div.style.cssText = 'background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:12px;margin-bottom:8px;position:relative';
+  const num = glassLineCount;
+  const sup = data && data.supplier ? data.supplier : '';
+  const sqm = data && data.sqm ? data.sqm : 0;
+  const ppm = data && data.pricePerSqm ? data.pricePerSqm : 0;
+  const mos = data && data.manualOversize ? data.manualOversize : 0;
+  const ext = data && data.extras ? data.extras : 0;
+  const opts = GLASS_SUPPLIERS_LIST.map(function(s){ return '<option' + (s===sup?' selected':'') + '>' + s + '</option>'; }).join('');
+  div.innerHTML = [
+    '<button onclick="removeGlassLine(\''+id+'\');" style="position:absolute;top:8px;right:8px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;width:22px;height:22px;border-radius:4px;font-size:12px;cursor:pointer">&#x2715;</button>',
+    '<div style="font-size:10px;font-weight:700;color:#1e3a5f;margin-bottom:8px">Glass supplier '+num+'</div>',
+    '<div class="row2" style="margin-bottom:6px">',
+    '<div class="field" style="margin:0"><label>Supplier / product</label><select onchange="updGL(\''+id+'\',\'supplier\',this.value);calcProfit()"><option value="">Select...</option>'+opts+'</select></div>',
+    '<div class="field" style="margin:0"><label>Quantity (m²)</label><input type="number" placeholder="0" value="'+sqm+'" step="0.01" oninput="updGL(\''+id+'\',\'sqm\',+this.value);calcProfit()"></div>',
+    '</div><div class="row2" style="margin-bottom:6px">',
+    '<div class="field" style="margin:0"><label>Price per m² (£)</label><input type="number" placeholder="0" value="'+ppm+'" step="0.01" oninput="updGL(\''+id+'\',\'pricePerSqm\',+this.value);calcProfit()"></div>',
+    '<div class="field" style="margin:0"><label>Oversize surcharge (£)</label><input type="number" placeholder="0" value="'+mos+'" oninput="updGL(\''+id+'\',\'manualOversize\',+this.value);calcProfit()"></div>',
+    '</div>',
+    '<div class="field" style="margin:0"><label>Glass extras — astragal bars etc. (£)</label><input type="number" placeholder="0" value="'+ext+'" oninput="updGL(\''+id+'\',\'extras\',+this.value);calcProfit()"></div>',
+    '<div style="font-size:11px;color:#64748b;margin-top:6px">Glass line price: <strong id="'+id+'-result">£0</strong></div>'
+  ].join('');
+  document.getElementById('pc-glass-lines').appendChild(div);
+  if (data && data.supplier) { const g = glasLines[glasLines.length-1]; g.supplier=data.supplier; g.sqm=data.sqm||0; g.pricePerSqm=data.pricePerSqm||0; g.manualOversize=data.manualOversize||0; g.extras=data.extras||0; }
+  calcProfit();
+}
+function removeGlassLine(id) {
+  glasLines = glasLines.filter(g => g.id !== id);
+  document.getElementById(id)?.remove();
+  calcProfit();
+}
+function updGL(id, field, value) {
+  const g = glasLines.find(g => g.id === id);
+  if (g) g[field] = value;
+}
+
+function calcProfit() {
+  const productSel = document.getElementById('pc-product');
+  const productName = productSel.options[productSel.selectedIndex].text;
+  const margin = MARGINS_DATA[productName] || 0.4;
+  const marginEl = document.getElementById('pc-expected-margin');
+  if (marginEl) marginEl.textContent = Math.round(margin*100) + '%';
+
+  // Frame costs
+  let framesTotal = 0;
+  frameLines.forEach(f => {
+    const surchargeRate = SUPPLIER_SURCHARGES_DATA[f.supplier] || 0;
+    const afterDiscount = (f.listPrice||0) * (1 - (f.discount||0)/100);
+    const supplierSurcharge = (f.listPrice||0) * surchargeRate;
+    const framePrice = afterDiscount + (f.surcharge||0) + supplierSurcharge;
+    framesTotal += framePrice;
+    const el = document.getElementById(f.id + '-result');
+    if (el) el.textContent = '£' + framePrice.toFixed(2);
+  });
+
+  // Glass costs
+  let glassTotal = 0;
+  glasLines.forEach(g => {
+    const linePrice = (g.sqm||0)*(g.pricePerSqm||0) + (g.manualOversize||0) + (g.extras||0);
+    glassTotal += linePrice;
+    const el = document.getElementById(g.id + '-result');
+    if (el) el.textContent = '£' + linePrice.toFixed(2);
+  });
+
+  const delivery = parseFloat(document.getElementById('pc-delivery')?.value)||0;
+  const productTotal = framesTotal + glassTotal + delivery;
+
+  // Installation
+  const fitDays = parseFloat(document.getElementById('pc-fitdays')?.value)||0;
+  const dayRate = parseFloat(document.getElementById('pc-dayrate')?.value)||550;
+  const loadOut = parseFloat(document.getElementById('pc-loadout')?.value)||0;
+  const lifting = parseFloat(document.getElementById('pc-lifting')?.value)||0;
+  const distanceFuel = parseFloat(document.getElementById('pc-distance')?.value)||0;
+  const transport = parseFloat(document.getElementById('pc-transport')?.value)||0;
+  const subcontract = parseFloat(document.getElementById('pc-subcontract')?.value)||0;
+  const fitCost = subcontract > 0 ? subcontract : (fitDays + loadOut) * dayRate;
+  const installTotal = fitCost + (lifting * 550) + distanceFuel + transport;
+
+  // Ancillaries
+  const cillM = parseFloat(document.getElementById('pc-cill-m')?.value)||0;
+  const comp650 = parseFloat(document.getElementById('pc-comp650')?.value)||0;
+  const comp652 = parseFloat(document.getElementById('pc-comp652')?.value)||0;
+  const scaffolding = parseFloat(document.getElementById('pc-scaffolding')?.value)||0;
+  const building = parseFloat(document.getElementById('pc-building')?.value)||0;
+  const otherCost = parseFloat(document.getElementById('pc-other-cost')?.value)||0;
+  const ancillaries = (cillM*50) + (comp650*6) + (comp652*8.5) + scaffolding + building + otherCost;
+
+  const totalCosts = productTotal + installTotal + ancillaries;
+  const recommended = margin < 1 ? totalCosts / (1 - margin) : 0;
+
+  // Update matrix
+  const f2 = v => '£' + v.toFixed(2);
+  const setEl = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = f2(val); };
+  setEl('pm-frames', framesTotal);
+  setEl('pm-glass-total', glassTotal);
+  setEl('pm-product-total', productTotal);
+  setEl('pm-install', installTotal);
+  setEl('pm-ancillaries', ancillaries);
+  setEl('pm-total', totalCosts);
+  setEl('pm-recommended', recommended);
+
+  // Sold value & grade
+  const sold = parseFloat(document.getElementById('pc-sold')?.value)||0;
+  const marginRow = document.getElementById('pc-margin-row');
+  const gradeBox = document.getElementById('grade-box');
+  if (sold > 0) {
+    const marginVal = sold - totalCosts;
+    const marginPct = sold > 0 ? (marginVal/sold)*100 : 0;
+    if (marginRow) {
+      marginRow.style.display = 'block';
+      const mvEl = document.getElementById('pc-margin-val');
+      const mpEl = document.getElementById('pc-margin-pct');
+      if (mvEl) mvEl.textContent = f2(marginVal);
+      if (mpEl) mpEl.textContent = marginPct.toFixed(1) + '%';
+    }
+    if (gradeBox && recommended > 0) {
+      gradeBox.style.display = 'block';
+      const pct = (sold/recommended)*100;
+      document.getElementById('grade-pct').textContent = pct.toFixed(1) + '%';
+      document.getElementById('grade-detail').textContent = 'Quoted £' + sold.toLocaleString() + ' vs recommended £' + recommended.toFixed(0);
+      if (pct>=100){gradeBox.style.cssText='display:block;background:#d1fae5;border:1px solid #6ee7b7;border-radius:10px;padding:16px;text-align:center;margin-top:10px';document.getElementById('grade-pct').style.color='#059669';document.getElementById('grade-lbl').textContent='of recommended — excellent';}
+      else if(pct>=90){gradeBox.style.cssText='display:block;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:16px;text-align:center;margin-top:10px';document.getElementById('grade-pct').style.color='#d97706';document.getElementById('grade-lbl').textContent='of recommended — good';}
+      else if(pct>=75){gradeBox.style.cssText='display:block;background:#fff7ed;border:1px solid #fdba74;border-radius:10px;padding:16px;text-align:center;margin-top:10px';document.getElementById('grade-pct').style.color='#ea580c';document.getElementById('grade-lbl').textContent='of recommended — below target';}
+      else{gradeBox.style.cssText='display:block;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:16px;text-align:center;margin-top:10px';document.getElementById('grade-pct').style.color='#dc2626';document.getElementById('grade-lbl').textContent='of recommended — significantly under';}
+    }
+  } else {
+    if (marginRow) marginRow.style.display = 'none';
+    if (gradeBox) gradeBox.style.display = 'none';
   }
-  onProductChange();
 }
-function onGlassSpecChange(){
-  const specPrice=parseFloat(document.getElementById('pc-glass-spec').value)||0;
-  if(specPrice>0)document.getElementById('pc-glass-manual').value='';
-}
-function onFitTypeChange(){
-  const fitRate=parseFloat(document.getElementById('pc-fit-type').value)||0;
-  if(fitRate>0)document.getElementById('pc-fit-rate').value=fitRate;
-}
-function calcProfit(){
-  const product=document.getElementById('pc-product').value;
-  const margin=MARGINS[product]||0.4;
-  const frameList=parseFloat(document.getElementById('pc-frame').value)||0;
-  const discount=parseFloat(document.getElementById('pc-discount').value)||0;
-  const surcharge=parseFloat(document.getElementById('pc-surcharge').value)||0;
-  const supplier=document.getElementById('pc-supplier').value;
-  const supplierRate=SUPPLIER_LIST[supplier]||0;
-  const frameCost=frameList*(1-(discount/100))+surcharge+(frameList*supplierRate);
-  // Glass
-  const specPrice=parseFloat(document.getElementById('pc-glass-spec').value)||0;
-  const manualPrice=parseFloat(document.getElementById('pc-glass-manual').value)||0;
-  const glassPricePerM2=manualPrice>0?manualPrice:specPrice;
-  const addon=parseFloat(document.getElementById('pc-glass-addon').value)||0;
-  const oversize=parseFloat(document.getElementById('pc-oversize').value)||1;
-  const sqm=parseFloat(document.getElementById('pc-sqm').value)||0;
-  const glassCost=(glassPricePerM2+addon)*sqm*oversize;
-  // Fit
-  const fitRate=parseFloat(document.getElementById('pc-fit-rate').value)||0;
-  const fitDays=parseFloat(document.getElementById('pc-fitdays').value)||0;
-  const fitCost=fitRate*fitDays;
-  // Fuel & delivery
-  const fuel=parseFloat(document.getElementById('pc-fuel').value)||0;
-  const delivery=parseFloat(document.getElementById('pc-delivery').value)||0;
-  const other=parseFloat(document.getElementById('pc-other').value)||0;
-  const totalCost=frameCost+glassCost+fitCost+fuel+delivery+other;
-  const recommended=totalCost>0?totalCost/(1-margin):0;
-  const sold=parseFloat(document.getElementById('pc-sold').value)||0;
-  // Update display
-  document.getElementById('pm-frame').textContent='£'+frameCost.toFixed(2);
-  document.getElementById('pm-glass').textContent='£'+glassCost.toFixed(2);
-  document.getElementById('pm-fit').textContent='£'+fitCost.toFixed(2);
-  document.getElementById('pm-fuel').textContent='£'+fuel.toFixed(2);
-  document.getElementById('pm-delivery').textContent='£'+(delivery+other).toFixed(2);
-  document.getElementById('pm-total').textContent='£'+totalCost.toFixed(2);
-  document.getElementById('pm-recommended').textContent='£'+recommended.toFixed(2);
-  // Grade
-  const gradeBox=document.getElementById('grade-box');
-  if(sold>0&&recommended>0){
-    const pct=(sold/recommended)*100;
-    gradeBox.style.display='block';
-    document.getElementById('grade-pct').textContent=pct.toFixed(1)+'%';
-    document.getElementById('grade-detail').textContent='Quoted £'+sold.toLocaleString()+' vs recommended £'+Math.round(recommended).toLocaleString();
-    let bg,border,col,lbl;
-    if(pct>=100){bg='#d1fae5';border='#6ee7b7';col='#059669';lbl='Excellent — at or above recommended';}
-    else if(pct>=90){bg='#fffbeb';border='#fcd34d';col='#d97706';lbl='Good — within 10% of recommended';}
-    else if(pct>=75){bg='#fff7ed';border='#fdba74';col='#ea580c';lbl='Below target — review with management';}
-    else{bg='#fef2f2';border='#fca5a5';col='#dc2626';lbl='Significantly under — approval needed';}
-    gradeBox.style.cssText='display:block;background:'+bg+';border:1px solid '+border+';border-radius:10px;padding:16px;text-align:center;margin-top:10px';
-    document.getElementById('grade-pct').style.color=col;
-    document.getElementById('grade-lbl').textContent=lbl;
-  }else{gradeBox.style.display='none';}
-  // Sync to quote sold price if empty
-  if(sold>0&&!document.getElementById('pc-sold-synced')){
-    const qtPrice=document.getElementById('qt-qt-price');
-    // Don't auto-fill quote price
-  }
+
+// Initialise with one frame and one glass line on deal open
+function initProfitChecker() {
+  frameLines = []; glasLines = []; frameLineCount = 0; glassLineCount = 0;
+  document.getElementById('pc-frame-lines').innerHTML = '';
+  document.getElementById('pc-glass-lines').innerHTML = '';
+  addFrameLine();
+  addGlassLine();
 }
 
 // ── Products ──────────────────────────────────────────────────
@@ -2116,6 +2201,142 @@ async function saveAndSendProduct(id){
     await mq('mutation{create_update(item_id:'+selectedDeal.id+',body:"'+note.replace(/"/g,'\"')+'"){id}}');
     if(statusEl){statusEl.style.display='block';setTimeout(function(){if(statusEl)statusEl.style.display='none';},3000);}
   }catch(err){alert('Could not send: '+err.message);}
+}
+
+// ── Export profit checker to Excel ────────────────────────────
+function exportProfitCheckerXLSX() {
+  if (typeof XLSX === 'undefined') { alert('Excel library not loaded yet. Please wait a moment and try again.'); return; }
+
+  const dealName = selectedDeal ? selectedDeal.name : 'Unknown Deal';
+  const dateStr = new Date().toLocaleDateString('en-GB');
+  const salesperson = currentUser || '';
+  const productSel = document.getElementById('pc-product');
+  const productType = productSel ? productSel.options[productSel.selectedIndex].text : '';
+  const margin = parseFloat(productSel ? productSel.value : 0.4) || 0.4;
+  const g = id => { const el = document.getElementById(id); return el ? (parseFloat(el.value) || 0) : 0; };
+  const gs = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+
+  // Recalculate all values
+  let framesTotal = 0;
+  const frameRows = frameLines.map(f => {
+    const afterDiscount = (f.listPrice||0) * (1 - (f.discount||0)/100);
+    const surchargeRate = SUPPLIER_SURCHARGES_DATA[f.supplier] || 0;
+    const supplierSurcharge = (f.listPrice||0) * surchargeRate;
+    const framePrice = afterDiscount + (f.surcharge||0) + supplierSurcharge;
+    framesTotal += framePrice;
+    return [f.supplier||'', f.listPrice||0, (f.discount||0)+'%', f.surcharge||0, framePrice];
+  });
+
+  let glassTotal = 0;
+  const glassRows = glasLines.map(g2 => {
+    const linePrice = (g2.sqm||0)*(g2.pricePerSqm||0) + (g2.manualOversize||0) + (g2.extras||0);
+    glassTotal += linePrice;
+    return [g2.supplier||'', g2.sqm||0, g2.pricePerSqm||0, g2.manualOversize||0, g2.extras||0, linePrice];
+  });
+
+  const fitDays = g('pc-fitdays'), dayRate = g('pc-dayrate'), loadOut = g('pc-loadout');
+  const lifting = g('pc-lifting'), distanceFuel = parseFloat(gs('pc-distance'))||0;
+  const transport = g('pc-transport'), subcontract = g('pc-subcontract');
+  const fitCost = subcontract > 0 ? subcontract : (fitDays + loadOut) * dayRate;
+  const installTotal = fitCost + (lifting * 550) + distanceFuel + transport;
+
+  const cillM = g('pc-cill-m'), comp650 = g('pc-comp650'), comp652 = g('pc-comp652');
+  const scaffolding = g('pc-scaffolding'), building = g('pc-building');
+  const otherCost = g('pc-other-cost'), delivery = g('pc-delivery');
+  const ancillaries = (cillM*50) + (comp650*6) + (comp652*8.5) + scaffolding + building + otherCost;
+
+  const productTotal = framesTotal + glassTotal + delivery;
+  const totalCosts = productTotal + installTotal + ancillaries;
+  const recommended = margin < 1 ? totalCosts / (1 - margin) : 0;
+  const sold = g('pc-sold');
+  const marginVal = sold > 0 ? sold - totalCosts : 0;
+  const marginPct = sold > 0 ? (marginVal/sold)*100 : 0;
+
+  // Build worksheet data
+  const rows = [];
+  const h = (text) => ({ v: text, t: 's', s: { font: { bold: true }, fill: { fgColor: { rgb: '1E3A5F' } }, fontColor: { rgb: 'FFFFFF' } } });
+  const money = v => ({ v: v, t: 'n', z: '"£"#,##0.00' });
+  const pct = v => ({ v: v/100, t: 'n', z: '0.00%' });
+
+  rows.push(['BURGESS WINDOWS & DOORS — PROFIT CHECKER', '', '', '', '']);
+  rows.push(['', '', '', '', '']);
+  rows.push(['Customer / Deal:', dealName, '', 'Date:', dateStr]);
+  rows.push(['Salesperson:', salesperson, '', 'Product type:', productType]);
+  rows.push(['Expected margin:', Math.round(margin*100)+'%', '', '', '']);
+  rows.push(['', '', '', '', '']);
+
+  // Frame suppliers header
+  rows.push(['FRAME SUPPLIERS', '', '', '', '']);
+  rows.push(['Supplier / Product', 'List Price', 'Discount', 'Surcharge', 'Frame Price']);
+  frameRows.forEach(r => rows.push([r[0], r[1], r[2], r[3], r[4]]));
+  rows.push(['Supplier delivery fee', '', '', '', delivery]);
+  rows.push(['FRAMES TOTAL', '', '', '', framesTotal]);
+  rows.push(['', '', '', '', '']);
+
+  // Glass suppliers header
+  rows.push(['GLASS SUPPLIERS', '', '', '', '']);
+  rows.push(['Supplier / Product', 'Qty (m²)', 'Price/m²', 'Oversize Surcharge', 'Extras', 'Glass Price']);
+  glassRows.forEach(r => rows.push([r[0], r[1], r[2], r[3], r[4], r[5]]));
+  rows.push(['GLASS TOTAL', '', '', '', '', glassTotal]);
+  rows.push(['', '', '', '', '']);
+
+  // Installation
+  rows.push(['INSTALLATION COSTS', '', '', '', '']);
+  rows.push(['Fitting days', fitDays, 'Day rate', dayRate, fitCost]);
+  rows.push(['Load out days', loadOut, '', '', '']);
+  rows.push(['Lifting equipment days', lifting, '@ £550/day', '', lifting*550]);
+  rows.push(['Site distance fuel surcharge', gs('pc-distance')+'mi', '', '', distanceFuel]);
+  rows.push(['Transport / logistics', '', '', '', transport]);
+  if (subcontract > 0) rows.push(['Subcontract fit (manual override)', '', '', '', subcontract]);
+  rows.push(['INSTALLATION TOTAL', '', '', '', installTotal]);
+  rows.push(['', '', '', '', '']);
+
+  // Ancillaries
+  rows.push(['ANCILLARIES', '', '', '', '']);
+  rows.push(['Cill / Pressings', cillM+'m', '@ £50/m', '', cillM*50]);
+  rows.push(['Compriband TP650', comp650+'m', '@ £6/m', '', comp650*6]);
+  rows.push(['Compriband TP652', comp652+'m', '@ £8.50/m', '', comp652*8.5]);
+  rows.push(['Scaffolding', '', '', '', scaffolding]);
+  rows.push(['Building works', '', '', '', building]);
+  rows.push(['Other costs', '', '', '', otherCost]);
+  rows.push(['ANCILLARIES TOTAL', '', '', '', ancillaries]);
+  rows.push(['', '', '', '', '']);
+
+  // Summary
+  rows.push(['COST SUMMARY', '', '', '', '']);
+  rows.push(['Total product costs', '', '', '', productTotal]);
+  rows.push(['Total installation costs', '', '', '', installTotal]);
+  rows.push(['Ancillaries', '', '', '', ancillaries]);
+  rows.push(['TOTAL COSTS', '', '', '', totalCosts]);
+  rows.push(['', '', '', '', '']);
+  rows.push(['RECOMMENDED MINIMUM SALE VALUE', '', '', '', recommended]);
+  rows.push(['', '', '', '', '']);
+  if (sold > 0) {
+    rows.push(['SOLD / QUOTED VALUE', '', '', '', sold]);
+    rows.push(['Margin value', '', '', '', marginVal]);
+    rows.push(['Margin %', '', '', '', marginPct/100]);
+    rows.push(['Grade vs recommended', '', '', '', sold>=recommended?'Excellent (at/above)':sold>=(recommended*0.9)?'Good (90%+)':sold>=(recommended*0.75)?'Below target (75-90%)':'Significantly under (<75%)']);
+  }
+
+  // Create workbook
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // Column widths
+  ws['!cols'] = [{wch:40},{wch:15},{wch:15},{wch:20},{wch:15},{wch:15}];
+
+  // Style key rows
+  const bold_rows = [0, 6, 7, 12, 13, 20, 21, 29, 30, 37, 38, 45, 46, 53, 54];
+  const total_rows = [11, 19, 28, 36, 44, 52, 55, 57];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Profit Checker');
+
+  // Generate filename
+  const safeName = dealName.replace(/[^a-z0-9]/gi, '_');
+  const dateFile = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const filename = 'BWD_ProfitChecker_' + safeName + '_' + dateFile + '.xlsx';
+
+  XLSX.writeFile(wb, filename);
 }
 
 // ── Auto-login ────────────────────────────────────────────────
