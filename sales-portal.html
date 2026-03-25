@@ -743,7 +743,7 @@ const GLASS_SPECS=[
 ];
 const GLASS_MISC={'Active Blue 4mm':44.92,'Argon Fill':1.54,'Argon Fill Triple':3.08,'Float Clear 4mm':15.21,'Float Clear 6mm':19.12,'Float Obscure Satin 4mm':33.69,'Float Obscure Satin 6mm':37.60,'Float Soft Coat 4mm':22.36,'Float Soft Coat 6mm':28.02,'Laminate 6.8mm':31.72,'Spacer (28)':2.46,'Spacer (32)':13.44,'Spacer (36)':13.44,'TGU Surcharge':24.64,'Multiplier Oversize 3-4m2':1.25,'Multiplier Oversize 4-5m2':1.35,'Multiplier Oversize 5-6m2':1.50};
 
-let currentUser='',allDeals=[],allContacts=[],boardCols=[],contactCols=[];
+let currentUser='',mondayUserId=null,allDeals=[],allContacts=[],boardCols=[],contactCols=[];
 let dealsFilter='all',contactsFilter='all';
 let selectedDeal=null,selectedContact=null;
 let products=[],productCount=0,sitePhotos=[],projectFiles=[];
@@ -780,7 +780,25 @@ function initApp(){
   document.getElementById('header-user').style.display='block';
   document.getElementById('me-name').textContent=currentUser;
   document.getElementById('me-avatar').textContent=currentUser.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  // Fetch Monday user ID for People column assignments
+  fetchMondayUserId();
   loadAll();navTo('appts');
+}
+
+async function fetchMondayUserId(){
+  try{
+    const data = await mq('query{users{id name}}');
+    const users = data.data?.users || [];
+    // Try exact match first, then first-name match
+    const exact = users.find(u => u.name.toLowerCase() === currentUser.toLowerCase());
+    const partial = users.find(u =>
+      u.name.toLowerCase().includes(currentUser.toLowerCase().split(' ')[0]) ||
+      currentUser.toLowerCase().includes(u.name.toLowerCase().split(' ')[0])
+    );
+    const match = exact || partial;
+    if(match){ mondayUserId = match.id; console.log('Monday user ID:', mondayUserId); }
+    else{ console.warn('Could not match Monday user for:', currentUser); }
+  }catch(e){ console.warn('Could not fetch Monday users:', e); }
 }
 
 // ── Nav ───────────────────────────────────────────────────────
@@ -2460,7 +2478,14 @@ async function saveNewContact() {
     const newId = result.data?.create_item?.id;
     if (!newId) throw new Error('Could not create contact — no ID returned');
 
-    // Add salesperson as an update note (People column needs user ID which we don't have)
+    // Assign Sales Person column if we have the user ID
+    if(spId && mondayUserId){
+      try{
+        const peopleVal = JSON.stringify(JSON.stringify({personsAndTeams:[{id:mondayUserId,kind:'person'}]}));
+        await mq('mutation{change_column_value(board_id:' + CONTACTS_BOARD + ',item_id:' + newId + ',column_id:"' + spId + '",value:' + peopleVal + '){id}}');
+      }catch(e){ console.warn('Could not assign sales person:', e); }
+    }
+    // Also add an update note
     await mq('mutation{create_update(item_id:' + newId + ',body:"Contact added by ' + currentUser.replace(/"/g, '\"') + '."){id}}');
 
     // Upload any files
