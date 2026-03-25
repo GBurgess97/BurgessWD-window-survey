@@ -658,23 +658,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div id="qt-upload-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
     </div>
 
-    <!-- STAGE TAB -->
-    <div class="qtab-panel" id="qtp-stage">
-      <div class="section">
-        <div class="sec-title">🏷️ Update deal stage</div>
-        <div class="stage-btns">
-          <button class="stage-btn" onclick="updateStage('New')">New</button>
-          <button class="stage-btn" onclick="updateStage('Appointment')">Appointment</button>
-          <button class="stage-btn" onclick="updateStage('Pricing')">Pricing</button>
-          <button class="stage-btn" onclick="updateStage('Quote Sent')">Quote Sent</button>
-          <button class="stage-btn" onclick="updateStage('Prospect')">Prospect</button>
-          <button class="stage-btn" onclick="updateStage('Won')">Won</button>
-          <button class="stage-btn" onclick="updateStage('Lost')">Lost</button>
-          <button class="stage-btn" onclick="updateStage('Unsuccessful tender')">Unsuccessful tender</button>
-        </div>
-        <div class="stage-saved" id="stage-saved">✓ Stage updated in Monday</div>
-      </div>
-    </div>
+
 
     <!-- SUBMIT TAB -->
     <div class="qtab-panel" id="qtp-submit">
@@ -1106,6 +1090,31 @@ async function bookAppointment(){
     statusEl.textContent='Could not save: '+err.message; statusEl.style.color='#dc2626'; statusEl.style.display='block';
     btn.disabled=false; btn.textContent='📅 Save appointment & set stage to Appointment';
   }
+}
+
+// ── Appointment update ────────────────────────────────────────
+async function updateAppointment(){
+  if(!selectedDeal||!selectedDeal.apptId)return;
+  const date=document.getElementById('q-appt-date').value;
+  const time=document.getElementById('q-appt-time').value;
+  if(!date)return;
+  try{
+    const val=JSON.stringify(JSON.stringify({date:date,time:time||'00:00:00'}));
+    await mq(`mutation{change_column_value(board_id:${DEALS_BOARD},item_id:${selectedDeal.id},column_id:"${selectedDeal.apptId}",value:${val}){id}}`);
+    selectedDeal.apptDate=date;
+    selectedDeal.apptTime=time;
+    // Update info strip
+    let apptStr=fmtDate(date);
+    if(time)apptStr+=' at '+fmtTime(time);
+    if(selectedDeal.apptType)apptStr+=' ('+selectedDeal.apptType+')';
+    document.getElementById('di-appt').textContent=apptStr;
+    const saved=document.getElementById('appt-saved');
+    if(saved){saved.style.display='block';setTimeout(()=>saved.style.display='none',3000);}
+    // Update local deal
+    const d=allDeals.find(x=>x.id===selectedDeal.id);
+    if(d){d.apptDate=date;d.apptTime=time;}
+    renderAppointments();
+  }catch(e){alert('Could not update appointment: '+e.message);}
 }
 
 // ── Appointment Type update ───────────────────────────────────
@@ -2003,7 +2012,7 @@ async function submitQuote(){
     renderStats();renderDeals();
     setTimeout(()=>navTo('deals'),3000);
   }catch(err){
-    const fi=[0,1,2,3,4,5,6,7,8].find(i=>document.getElementById('ps'+i)?.classList.contains('active'));
+    const fi=[0,1,2,3,4,5,6,7,8,9].find(i=>document.getElementById('ps'+i)?.classList.contains('active'));
     if(fi!==undefined)setStep(fi,'error',err.message);
     document.getElementById('progress-title').textContent='Submission failed';
     document.getElementById('progress-title').style.color='#dc2626';
