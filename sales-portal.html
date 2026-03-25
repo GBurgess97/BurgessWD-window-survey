@@ -844,10 +844,12 @@ async function loadPrices(){
       if(p.marginUpvc !== undefined) PRICES.marginUpvc = p.marginUpvc;
       if(p.marginTimber !== undefined) PRICES.marginTimber = p.marginTimber;
       if(p.marginComp !== undefined) PRICES.marginComp = p.marginComp;
-      // Update day rate default in profit checker
+      // Update day rate input if still at default
       const drEl = document.getElementById('pc-dayrate');
-      if(drEl && drEl.value === '550') drEl.value = PRICES.dayrate;
-      console.log('Pricing loaded from admin settings');
+      if(drEl && (drEl.value === '550' || !drEl.value)) drEl.value = PRICES.dayrate;
+      // Recalculate if profit checker is open
+      if(selectedDeal) calcProfit();
+      console.log('Pricing loaded from admin settings:', PRICES);
     }
   }catch(e){ console.warn('Could not load pricing settings:', e); }
 }
@@ -1355,7 +1357,7 @@ function calcProfit() {
   const transport = parseFloat(document.getElementById('pc-transport')?.value)||0;
   const subcontract = parseFloat(document.getElementById('pc-subcontract')?.value)||0;
   const fitCost = subcontract > 0 ? subcontract : (fitDays + loadOut) * dayRate;
-  const installTotal = fitCost + (lifting * 550) + distanceFuel + transport;
+  const installTotal = fitCost + (lifting *PRICES.lifting) + distanceFuel + transport;
 
   // Ancillaries
   const cillM = parseFloat(document.getElementById('pc-cill-m')?.value)||0;
@@ -1364,7 +1366,7 @@ function calcProfit() {
   const scaffolding = parseFloat(document.getElementById('pc-scaffolding')?.value)||0;
   const building = parseFloat(document.getElementById('pc-building')?.value)||0;
   const otherCost = parseFloat(document.getElementById('pc-other-cost')?.value)||0;
-  const ancillaries = (cillM*50) + (comp650*6) + (comp652*8.5) + scaffolding + building + otherCost;
+  const ancillaries = (cillM*PRICES.cill) + (comp650*PRICES.comp650) + (comp652*PRICES.comp652) + scaffolding + building + otherCost;
 
   const totalCosts = productTotal + installTotal + ancillaries;
   const contingencyMargin = Math.min(margin + 0.02, 0.99);
@@ -1416,6 +1418,22 @@ function initProfitChecker() {
   frameLines = []; glasLines = []; frameLineCount = 0; glassLineCount = 0;
   document.getElementById('pc-frame-lines').innerHTML = '';
   document.getElementById('pc-glass-lines').innerHTML = '';
+  // Set input fields from current PRICES
+  const setV = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+  setV('pc-dayrate', PRICES.dayrate);
+  setV('pc-fitdays', 1);
+  setV('pc-loadout', 0);
+  setV('pc-lifting', 0);
+  setV('pc-transport', 0);
+  setV('pc-subcontract', 0);
+  setV('pc-cill-m', 0);
+  setV('pc-comp650', 0);
+  setV('pc-comp652', 0);
+  setV('pc-scaffolding', 0);
+  setV('pc-building', 0);
+  setV('pc-other-cost', 0);
+  setV('pc-delivery', 0);
+  setV('pc-sold', '');
   addFrameLine();
   addGlassLine();
 }
@@ -1484,10 +1502,7 @@ function addProduct(){
           <input type="text" placeholder="Any extra specification..." oninput="upd('${id}','notes',this.value)">
         </div>
       </div>
-      <div style="padding:10px 0 4px;display:flex;gap:8px">
-        <button onclick="saveAndSendProduct('${id}')" style="flex:1;padding:9px;background:#059669;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">💾 Save &amp; send product spec</button>
-      </div>
-      <div id="${id}-send-status" style="font-size:11px;color:#059669;display:none;margin-bottom:4px">✓ Product spec sent to Monday</div>
+      
       <div class="sub-section">
         <div class="sub-title">Design sketch</div>
         <div class="canvas-wrap">
@@ -3003,7 +3018,6 @@ async function generateSiteReport(){
 }
 
 </script>
-
 <!-- NEW CONTACT MODAL -->
 <div id="new-contact-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;overflow-y:auto;padding:20px">
   <div style="background:#fff;border-radius:14px;max-width:520px;margin:0 auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2)">
@@ -3082,5 +3096,13 @@ async function generateSiteReport(){
     </div>
   </div>
 </div>
+</body>
+</html>TYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Portal — Burgess Windows & Doors</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
 </body>
 </html>
