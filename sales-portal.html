@@ -2,698 +2,470 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Sales Portal — Burgess Windows & Doors</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
-
 :root {
-  --navy: #0f2340;
-  --navy-mid: #1a3556;
-  --navy-light: #234876;
-  --accent: #c9a84c;
-  --accent-light: #f5e9c8;
-  --surface: #ffffff;
-  --surface-2: #f7f8fa;
-  --surface-3: #eef0f4;
-  --border: #e4e7ed;
-  --border-light: #f0f2f5;
-  --text: #0f1923;
-  --text-2: #4a5568;
-  --text-3: #8896a8;
-  --green: #0f8a4e;
-  --green-bg: #e8f7ef;
-  --red: #c0392b;
-  --red-bg: #fdecea;
-  --amber: #b45309;
-  --amber-bg: #fef3c7;
-  --blue: #1d4ed8;
-  --blue-bg: #eff6ff;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.06);
+  --navy:#0f2340; --navy-mid:#1a3556; --navy-light:#234876;
+  --accent:#c9a84c; --accent-bg:#fdf6e3;
+  --surface:#ffffff; --surface-2:#f7f8fa; --surface-3:#eef0f4;
+  --border:#e4e7ed; --border-light:#f0f2f5;
+  --text:#0f1923; --text-2:#4a5568; --text-3:#8896a8;
+  --green:#0f8a4e; --green-bg:#e8f7ef;
+  --red:#c0392b; --red-bg:#fdecea;
+  --amber:#b45309; --amber-bg:#fef3c7;
+  --blue:#1d4ed8; --blue-bg:#eff6ff;
+  --r:12px; --r-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08),0 12px 32px rgba(0,0,0,.06);
+  --sidebar-w:220px;
 }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--text);background:var(--surface-2);-webkit-font-smoothing:antialiased}
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+/* ── Layout shell ─────────────────────────────── */
+.shell{display:flex;height:100vh;overflow:hidden}
 
-body {
-  font-family: 'DM Sans', -apple-system, sans-serif;
-  font-size: 14px;
-  color: var(--text);
-  background: var(--surface-2);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
+/* ── Sidebar ─────────────────────────────────── */
+.sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--navy);display:flex;flex-direction:column;height:100vh;z-index:50;transition:transform .25s ease}
+.sb-head{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.sb-sub{font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-top:2px}
+.sb-user{display:flex;align-items:center;gap:9px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-av{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--navy);flex-shrink:0}
+.sb-uname{font-size:12px;color:rgba(255,255,255,.9);font-weight:600}
+.sb-urole{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px}
+.sb-nav{padding:8px 0;flex:1;overflow-y:auto}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.5);font-weight:500;border-left:2px solid transparent;transition:all .12s;user-select:none}
+.sb-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.8)}
+.sb-item.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:var(--accent)}
+.sb-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.sb-foot{padding:12px 14px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:rgba(255,255,255,.3);cursor:pointer;transition:color .12s}
+.sb-foot:hover{color:rgba(255,255,255,.6)}
 
-/* ── Header ─────────────────────────────────────────────── */
-.app-header {
-  background: var(--navy);
-  padding: 0 20px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.app-title { font-size: 15px; font-weight: 600; color: #fff; letter-spacing: -0.01em; }
-.app-sub { font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; margin-top: 1px; }
-.header-user { font-size: 12px; color: rgba(255,255,255,0.5); display: none; }
+/* Mobile overlay */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:49}
 
-/* ── Bottom Nav ─────────────────────────────────────────── */
-.bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  display: none; z-index: 100;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-.nav-items { display: flex; }
-.nav-item {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 9px 4px 7px; cursor: pointer;
-  color: var(--text-3); border: none; background: transparent;
-  font-family: inherit; font-size: 10px; font-weight: 500; gap: 4px;
-  transition: color 0.15s;
-}
-.nav-item.active { color: var(--navy); }
-.nav-item.active .nav-icon { transform: translateY(-1px); }
-.nav-icon { font-size: 21px; line-height: 1; transition: transform 0.15s; }
+/* ── Main area ────────────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 
-/* ── Pages ──────────────────────────────────────────────── */
-.page { display: none; padding: 16px 16px 88px; max-width: 860px; margin: 0 auto; }
-.page.active { display: block; }
+/* Mobile top bar */
+.top-bar{display:none;align-items:center;gap:12px;padding:0 16px;height:52px;background:var(--navy);flex-shrink:0}
+.hamburger{background:none;border:none;cursor:pointer;padding:4px;display:flex;flex-direction:column;gap:4px}
+.hamburger span{display:block;width:20px;height:2px;background:#fff;border-radius:2px}
+.top-bar-title{font-size:14px;font-weight:700;color:#fff;flex:1}
+.top-bar-user{font-size:11px;color:rgba(255,255,255,.5)}
 
-/* ── Login ──────────────────────────────────────────────── */
-.login-wrap {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 100vh; padding: 24px;
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
-}
-.login-card {
-  background: var(--surface); border-radius: 20px;
-  padding: 36px 32px; max-width: 380px; width: 100%;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
-}
-.login-logo {
-  width: 52px; height: 52px; background: var(--navy);
-  border-radius: 14px; display: flex; align-items: center;
-  justify-content: center; margin: 0 auto 20px; font-size: 24px;
-}
-.login-card h2 { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; text-align: center; letter-spacing: -0.02em; }
-.login-card p { font-size: 13px; color: var(--text-3); text-align: center; margin-bottom: 24px; }
-.lfield { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
-.lfield label { font-size: 11px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em; }
-.lfield input {
-  padding: 11px 14px; border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm); font-size: 15px;
-  font-family: inherit; outline: none; color: var(--text);
-  transition: border-color 0.15s;
-}
-.lfield input:focus { border-color: var(--navy); }
-.login-btn {
-  width: 100%; padding: 13px; background: var(--navy);
-  color: #fff; border: none; border-radius: var(--radius-sm);
-  font-size: 14px; font-weight: 600; cursor: pointer;
-  font-family: inherit; margin-top: 4px;
-  transition: opacity 0.15s, transform 0.1s;
-}
-.login-btn:hover { opacity: 0.92; }
-.login-btn:active { transform: scale(0.99); }
-.login-btn:disabled { background: var(--text-3); cursor: not-allowed; }
-.login-err { color: var(--red); font-size: 12px; margin-bottom: 10px; display: none; }
+/* ── Content area: columns ───────────────────── */
+.content{flex:1;display:flex;overflow:hidden}
 
-/* ── Page header ────────────────────────────────────────── */
-.page-header { margin-bottom: 16px; }
-.page-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
-.page-header p { font-size: 13px; color: var(--text-3); margin-top: 2px; }
+/* ── Login ───────────────────────────────────── */
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);display:flex;align-items:center;justify-content:center;padding:24px;z-index:200}
+.login-card{background:#fff;border-radius:20px;padding:36px 32px;max-width:380px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+.login-logo{width:52px;height:52px;background:var(--navy);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:24px}
+.login-card h2{font-size:22px;font-weight:700;text-align:center;letter-spacing:-.02em;margin-bottom:4px}
+.login-card p{font-size:13px;color:var(--text-3);text-align:center;margin-bottom:24px}
+.lfield{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.lfield label{font-size:11px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em}
+.lfield input{padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:15px;font-family:inherit;outline:none;color:var(--text);transition:border-color .15s}
+.lfield input:focus{border-color:var(--navy)}
+.login-btn{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.login-btn:hover{opacity:.92}
+.login-btn:disabled{background:var(--text-3);cursor:not-allowed}
+.login-err{color:var(--red);font-size:12px;margin-bottom:10px;display:none}
 
-/* ── Cards ──────────────────────────────────────────────── */
-.card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); margin-bottom: 10px;
-  overflow: hidden; box-shadow: var(--shadow);
-}
-.card-header {
-  padding: 13px 16px; border-bottom: 1px solid var(--border-light);
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 8px;
-}
-.card-title { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+/* ── Column panel ────────────────────────────── */
+.col-panel{display:flex;flex-direction:column;background:var(--surface);border-right:1px solid var(--border);height:100%;overflow:hidden;transition:width .2s ease,min-width .2s ease}
+.col-panel.hidden{display:none}
+.col-head{padding:14px 16px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.col-head-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.col-title{font-size:16px;font-weight:700;letter-spacing:-.02em;color:var(--text)}
+.col-sub{font-size:11px;color:var(--text-3);margin-top:1px}
+.col-scroll{flex:1;overflow-y:auto}
 
-/* ── Stats ──────────────────────────────────────────────── */
-.stats-row { display: grid; gap: 8px; margin-bottom: 14px; }
-.stat-box {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 14px;
-  text-align: center; box-shadow: var(--shadow);
-}
-.stat-val { font-size: 26px; font-weight: 700; margin-bottom: 2px; letter-spacing: -0.03em; color: var(--navy); }
-.stat-lbl { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+/* Search & filters */
+.search-box{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:13px;font-family:inherit;outline:none;background:var(--surface);color:var(--text);margin-top:10px;transition:border-color .15s}
+.search-box:focus{border-color:var(--navy)}
+.filter-strip{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.chip{padding:4px 11px;border:1.5px solid var(--border);border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;color:var(--text-2);background:var(--surface);letter-spacing:.02em;transition:all .12s}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
 
-/* ── List rows ──────────────────────────────────────────── */
-.list-row {
-  padding: 13px 16px; border-bottom: 1px solid var(--border-light);
-  display: flex; align-items: center; gap: 12px; cursor: pointer;
-  transition: background 0.12s;
-}
-.list-row:last-child { border-bottom: none; }
-.list-row:hover, .list-row:active { background: var(--surface-2); }
-.row-avatar {
-  width: 38px; height: 38px; border-radius: 50%;
-  background: var(--blue-bg); color: var(--blue);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; flex-shrink: 0;
-}
-.row-main { flex: 1; min-width: 0; }
-.row-name { font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; }
-.row-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.row-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
-.row-arrow { color: var(--border); font-size: 14px; flex-shrink: 0; }
+/* List rows */
+.list-row{padding:11px 16px;border-bottom:1px solid var(--border-light);cursor:pointer;transition:background .1s;position:relative}
+.list-row:hover,.list-row.sel{background:var(--surface-2)}
+.list-row.sel{border-left:3px solid var(--navy)}
+.list-row.sel .row-name{color:var(--navy)}
+.row-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.row-name{font-weight:600;font-size:13px;letter-spacing:-.01em;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-meta{font-size:11px;color:var(--text-3);margin-top:3px;display:flex;align-items:center;gap:6px}
+.row-val{font-size:11px;color:var(--text-2);font-family:'DM Mono',monospace;font-weight:500}
 
-/* ── Badges ─────────────────────────────────────────────── */
-.badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; white-space: nowrap; letter-spacing: 0.02em; }
-.b-new { background: var(--blue-bg); color: var(--blue); }
-.b-appt { background: #e0f2fe; color: #0369a1; }
-.b-pricing { background: #ede9fe; color: #5b21b6; }
-.b-quotesent { background: var(--green-bg); color: var(--green); }
-.b-prospect { background: var(--amber-bg); color: var(--amber); }
-.b-won { background: var(--green-bg); color: var(--green); }
-.b-lost { background: var(--red-bg); color: var(--red); }
-.b-unsuccessful { background: var(--surface-3); color: var(--text-2); }
-.b-client { background: var(--blue-bg); color: var(--blue); }
-.b-virtual { background: #ede9fe; color: #5b21b6; }
-.b-site { background: var(--green-bg); color: var(--green); }
-.b-phone { background: var(--amber-bg); color: var(--amber); }
-.b-showroom { background: var(--blue-bg); color: var(--blue); }
+/* Badges */
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;letter-spacing:.02em;flex-shrink:0}
+.b-new{background:var(--blue-bg);color:var(--blue)}
+.b-appt{background:#e0f2fe;color:#0369a1}
+.b-pricing{background:#ede9fe;color:#5b21b6}
+.b-quotesent{background:var(--green-bg);color:var(--green)}
+.b-prospect{background:var(--amber-bg);color:var(--amber)}
+.b-won{background:var(--green-bg);color:var(--green)}
+.b-lost{background:var(--red-bg);color:var(--red)}
+.b-unsuccessful{background:var(--surface-3);color:var(--text-2)}
+.b-client{background:var(--blue-bg);color:var(--blue)}
+.b-virtual{background:#ede9fe;color:#5b21b6}
+.b-site{background:var(--green-bg);color:var(--green)}
 
-/* ── Search & Filter ────────────────────────────────────── */
-.search-box {
-  padding: 10px 14px; border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm); font-size: 14px;
-  font-family: inherit; outline: none; width: 100%;
-  margin-bottom: 10px; background: var(--surface); color: var(--text);
-  transition: border-color 0.15s;
-}
-.search-box:focus { border-color: var(--navy); }
-.filter-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
-.ftab {
-  padding: 5px 12px; border: 1.5px solid var(--border);
-  border-radius: 20px; background: var(--surface);
-  color: var(--text-2); font-size: 11px; cursor: pointer;
-  font-family: inherit; font-weight: 600; letter-spacing: 0.02em;
-  transition: all 0.12s;
-}
-.ftab.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+/* ── Deal detail panel ───────────────────────── */
+.deal-panel{display:flex;flex-direction:column;flex:1;min-width:0;height:100%;overflow:hidden}
+.deal-header{background:var(--navy);padding:14px 18px 13px;flex-shrink:0}
+.dh-back{font-size:11px;color:rgba(255,255,255,.45);cursor:pointer;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;padding:4px 0}
+.dh-back:hover{color:rgba(255,255,255,.7)}
+.dh-name{font-size:17px;font-weight:700;color:#fff;letter-spacing:-.02em;line-height:1.2}
+.dh-meta{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px}
+.dh-badges{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.dh-pill{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);letter-spacing:.02em}
+.dh-pill.accent{background:var(--accent);color:var(--navy)}
 
-/* ── Loading / Empty ────────────────────────────────────── */
-.loading { padding: 48px; text-align: center; color: var(--text-3); }
-.spinner {
-  width: 28px; height: 28px; border: 2.5px solid var(--border);
-  border-top-color: var(--navy); border-radius: 50%;
-  animation: spin 0.7s linear infinite; margin: 0 auto 12px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.empty { padding: 48px; text-align: center; color: var(--text-3); font-size: 13px; }
-.err-box {
-  background: var(--red-bg); border: 1px solid #fca5a5;
-  border-radius: var(--radius-sm); padding: 10px 14px;
-  font-size: 12px; color: var(--red); margin-bottom: 12px;
-}
+/* Info strip */
+.info-strip{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border);flex-shrink:0}
+.info-cell{padding:10px 14px;border-right:1px solid var(--border-light)}
+.info-cell:last-child{border-right:none}
+.info-lbl{font-size:9px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em}
+.info-val{font-size:12px;font-weight:500;color:var(--text);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* ── Deal detail header ─────────────────────────────────── */
-.detail-header {
-  background: var(--navy); border-radius: var(--radius) var(--radius) 0 0;
-  padding: 14px 16px; display: flex; align-items: center; gap: 10px;
-}
-.detail-back {
-  background: rgba(255,255,255,0.1); border: none; color: #fff;
-  padding: 7px 13px; border-radius: 7px; font-size: 12px;
-  cursor: pointer; font-family: inherit; font-weight: 500;
-  transition: background 0.12s;
-}
-.detail-back:hover { background: rgba(255,255,255,0.18); }
-.detail-title {
-  font-size: 15px; font-weight: 600; color: #fff; flex: 1;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  letter-spacing: -0.01em;
-}
+/* Tab bar */
+.tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{padding:11px 15px;border:none;background:transparent;color:var(--text-3);font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:.01em;transition:color .12s}
+.tab-btn.on{color:var(--navy);border-bottom-color:var(--navy)}
 
-/* ── Info grid ──────────────────────────────────────────── */
-.info-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border-light);
-}
-.info-item { display: flex; flex-direction: column; gap: 3px; }
-.info-label { font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; }
-.info-value { font-size: 13px; font-weight: 500; color: var(--text); }
+/* Tab content */
+.tab-body{flex:1;overflow-y:auto;padding:0}
+.tab-pane{display:none;padding:16px}
+.tab-pane.on{display:block}
 
-/* ── Appointment cards ──────────────────────────────────── */
-.appt-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 14px 16px;
-  margin-bottom: 10px; display: flex; gap: 14px; cursor: pointer;
-  box-shadow: var(--shadow); transition: box-shadow 0.15s, transform 0.1s;
-}
-.appt-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
-.appt-date-block {
-  flex-shrink: 0; width: 52px; text-align: center;
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: 10px; padding: 7px 4px;
-}
-.appt-day { font-size: 24px; font-weight: 700; color: var(--navy); line-height: 1; letter-spacing: -0.02em; }
-.appt-month { font-size: 10px; color: var(--text-3); font-weight: 600; text-transform: uppercase; margin-top: 2px; letter-spacing: 0.06em; }
-.appt-dow { font-size: 10px; color: var(--text-3); margin-top: 1px; }
-.appt-info { flex: 1; min-width: 0; }
-.appt-name { font-weight: 600; font-size: 14px; margin-bottom: 5px; letter-spacing: -0.01em; }
-.appt-time {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: var(--navy); color: #fff;
-  font-size: 11px; font-weight: 600; padding: 3px 9px;
-  border-radius: 20px; margin-bottom: 4px; font-family: 'DM Mono', monospace;
-}
-.appt-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
-.appt-card.today .appt-date-block { background: var(--navy); border-color: var(--navy); }
-.appt-card.today .appt-day, .appt-card.today .appt-month, .appt-card.today .appt-dow { color: #fff; }
-.appt-card.today .appt-month, .appt-card.today .appt-dow { color: rgba(255,255,255,0.6); }
+/* ── Form elements ────────────────────────────── */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.sec-title{font-size:10px;font-weight:700;color:var(--navy);margin-bottom:12px;text-transform:uppercase;letter-spacing:.07em}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.field:last-child{margin-bottom:0}
+.field label{font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select,.field textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:13px;font-family:inherit;outline:none;background:var(--surface);color:var(--text);transition:border-color .15s;-webkit-appearance:none}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238896a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy)}
+.field textarea{resize:vertical;min-height:72px;line-height:1.5}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 
-/* ── Sections / Fields ──────────────────────────────────── */
-.section {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px;
-  margin-bottom: 10px; box-shadow: var(--shadow);
-}
-.sec-title {
-  font-size: 11px; font-weight: 700; color: var(--navy);
-  margin-bottom: 12px; text-transform: uppercase;
-  letter-spacing: 0.07em; display: flex; align-items: center; gap: 6px;
-}
-.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
-.field:last-child { margin-bottom: 0; }
-.field label {
-  font-size: 11px; font-weight: 600; color: var(--text-3);
-  text-transform: uppercase; letter-spacing: 0.05em;
-}
-.field input, .field select, .field textarea {
-  padding: 10px 13px; border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm); font-size: 14px;
-  font-family: inherit; outline: none; background: var(--surface);
-  color: var(--text); transition: border-color 0.15s;
-  -webkit-appearance: none;
-}
-.field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238896a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
-.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--navy); background: var(--surface); }
-.field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+/* Buttons */
+.btn{width:100%;padding:11px;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s;margin-bottom:6px}
+.btn:hover{opacity:.9}
+.btn:active{transform:scale(.99)}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-amber{background:var(--accent);color:var(--navy)}
+.btn-outline{background:transparent;color:var(--navy);border:1.5px solid var(--border)}
+.btn-red{background:var(--red);color:#fff}
+.btn-sm{padding:8px 14px;font-size:12px;border-radius:7px;margin-bottom:0}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
 
-/* ── Tab bar ────────────────────────────────────────────── */
-.qtabs {
-  display: flex; overflow-x: auto; background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  scrollbar-width: none; -ms-overflow-style: none;
-}
-.qtabs::-webkit-scrollbar { display: none; }
-.qtab {
-  padding: 12px 16px; border: none; background: transparent;
-  color: var(--text-3); font-size: 12px; cursor: pointer;
-  font-family: inherit; font-weight: 600; white-space: nowrap;
-  border-bottom: 2px solid transparent; margin-bottom: -1px;
-  letter-spacing: 0.01em; transition: color 0.15s;
-}
-.qtab.active { color: var(--navy); border-bottom-color: var(--navy); }
-.qtab-panel { display: none; padding: 16px; }
-.qtab-panel.active { display: block; }
+/* Stage buttons */
+.stage-btns{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.stage-btn{padding:5px 11px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text-2);font-family:inherit;transition:all .12s}
+.stage-btn:hover{border-color:var(--navy);color:var(--navy)}
+.stage-btn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.stage-saved{font-size:11px;color:var(--green);margin-top:7px;display:none;font-weight:500}
 
-/* ── Product items ──────────────────────────────────────── */
-.prod-item {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden; margin-bottom: 12px;
-  box-shadow: var(--shadow);
-}
-.prod-header {
-  background: var(--navy); padding: 11px 14px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.prod-num { font-size: 12px; font-weight: 600; color: #fff; letter-spacing: 0.02em; }
-.prod-remove {
-  background: rgba(255,255,255,0.12); border: none; color: #fff;
-  padding: 5px 11px; border-radius: 6px; font-size: 11px;
-  cursor: pointer; font-family: inherit; font-weight: 500;
-  transition: background 0.12s;
-}
-.prod-remove:hover { background: rgba(255,255,255,0.22); }
-.prod-body { padding: 14px; }
-.sub-section {
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 12px; margin-top: 10px;
-}
-.sub-title {
-  font-size: 11px; font-weight: 700; color: var(--navy);
-  text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px;
-}
+/* Profit checker */
+.profit-matrix{background:var(--navy);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.pm-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px}
+.pm-row:last-child{border-bottom:none;font-weight:700;font-size:14px;padding-top:9px;margin-top:3px}
+.pm-label{color:rgba(255,255,255,.5)}
+.pm-val{color:#fff;font-family:'DM Mono',monospace;font-weight:500}
+.grade-box{border-radius:var(--r);padding:16px;text-align:center;margin-bottom:10px}
+.grade-pct{font-size:42px;font-weight:700;letter-spacing:-.03em;margin-bottom:3px}
+.grade-lbl{font-size:12px;font-weight:500;margin-bottom:3px}
+.grade-detail{font-size:11px;opacity:.75}
 
-/* ── Canvas ─────────────────────────────────────────────── */
-.canvas-wrap {
-  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-  overflow: hidden; background: #fff; touch-action: none; margin-top: 8px;
-}
-.sketch-canvas { display: block; width: 100%; cursor: crosshair; touch-action: none; }
-.canvas-toolbar {
-  display: flex; gap: 6px; flex-wrap: wrap; padding: 8px;
-  background: var(--surface-2); border-top: 1px solid var(--border);
-  align-items: center;
-}
-.tool-btn {
-  padding: 5px 12px; border: 1.5px solid var(--border);
-  border-radius: 6px; background: var(--surface); font-size: 11px;
-  cursor: pointer; font-family: inherit; font-weight: 500;
-  transition: all 0.12s;
-}
-.tool-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
-.color-swatch {
-  width: 22px; height: 22px; border-radius: 50%;
-  border: 2px solid transparent; cursor: pointer; flex-shrink: 0;
-  transition: transform 0.12s;
-}
-.color-swatch.active { border-color: var(--navy); transform: scale(1.2); }
+/* Collapsible profit panel */
+.expand-btn{width:100%;padding:11px 14px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--navy);display:flex;align-items:center;justify-content:space-between;transition:all .12s;margin-bottom:8px}
+.expand-btn:hover{background:var(--blue-bg);border-color:var(--navy)}
+.expand-btn .arrow{transition:transform .2s;font-size:10px}
+.expand-btn.open .arrow{transform:rotate(180deg)}
+.expand-panel{display:none}
+.expand-panel.open{display:block}
 
-/* ── Photo grid ─────────────────────────────────────────── */
-.photo-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 8px; margin-top: 10px;
-}
-.photo-thumb {
-  position: relative; aspect-ratio: 1; border-radius: var(--radius-sm);
-  overflow: hidden; border: 1px solid var(--border);
-}
-.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.photo-thumb button {
-  position: absolute; top: 3px; right: 3px;
-  background: rgba(0,0,0,0.55); color: #fff; border: none;
-  border-radius: 50%; width: 20px; height: 20px; font-size: 11px; cursor: pointer;
-}
-.upload-zone {
-  border: 1.5px dashed var(--border); border-radius: var(--radius-sm);
-  padding: 20px; text-align: center; cursor: pointer;
-  font-size: 13px; color: var(--text-3); transition: all 0.15s;
-}
-.upload-zone:hover { border-color: var(--navy); color: var(--navy); background: var(--blue-bg); }
-.add-prod-btn {
-  width: 100%; padding: 11px; border: 1.5px dashed var(--border);
-  background: var(--surface); color: var(--text-2);
-  border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;
-  font-family: inherit; font-weight: 600; margin-top: 6px;
-  transition: all 0.15s;
-}
-.add-prod-btn:hover { border-color: var(--navy); color: var(--navy); background: var(--blue-bg); }
+/* Products */
+.prod-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px;box-shadow:var(--shadow)}
+.prod-head{background:var(--navy);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.prod-num{font-size:11px;font-weight:700;color:#fff;letter-spacing:.02em}
+.prod-del{background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.7);padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;transition:background .12s}
+.prod-del:hover{background:rgba(255,255,255,.2)}
+.prod-body{padding:13px}
+.sub-section{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px;margin-top:9px}
+.sub-title{font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px}
+.add-prod{width:100%;padding:10px;border:1.5px dashed var(--border);background:var(--surface);color:var(--text-2);border-radius:var(--r-sm);font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .15s}
+.add-prod:hover{border-color:var(--navy);color:var(--navy);background:var(--blue-bg)}
 
-/* ── Profit matrix ──────────────────────────────────────── */
-.profit-matrix {
-  background: var(--navy); border-radius: var(--radius);
-  padding: 16px; margin-bottom: 12px;
-}
-.profit-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
-  font-size: 13px;
-}
-.profit-row:last-child { border-bottom: none; font-weight: 700; font-size: 15px; padding-top: 10px; margin-top: 4px; }
-.profit-label { color: rgba(255,255,255,0.55); font-size: 12px; }
-.profit-val { color: #fff; font-weight: 600; font-family: 'DM Mono', monospace; }
-.grade-box { border-radius: var(--radius); padding: 18px; text-align: center; margin-bottom: 12px; }
-.grade-pct { font-size: 44px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.03em; }
-.grade-lbl { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
-.grade-detail { font-size: 12px; opacity: 0.75; }
+/* Canvas */
+.canvas-wrap{border:1.5px solid var(--border);border-radius:var(--r-sm);overflow:hidden;background:#fff;touch-action:none;margin-top:7px}
+.sketch-canvas{display:block;width:100%;cursor:crosshair;touch-action:none}
+.canvas-toolbar{display:flex;gap:5px;flex-wrap:wrap;padding:7px;background:var(--surface-2);border-top:1px solid var(--border);align-items:center}
+.tool-btn{padding:4px 11px;border:1.5px solid var(--border);border-radius:5px;background:var(--surface);font-size:11px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .12s}
+.tool-btn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.color-swatch{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;flex-shrink:0;transition:transform .12s}
+.color-swatch.on{border-color:var(--navy);transform:scale(1.2)}
 
-/* ── Stage buttons ──────────────────────────────────────── */
-.stage-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-.stage-btn {
-  padding: 7px 13px; border-radius: 20px; font-size: 11px;
-  font-weight: 600; cursor: pointer; letter-spacing: 0.02em;
-  border: 1.5px solid var(--border); background: var(--surface);
-  color: var(--text-2); font-family: inherit; transition: all 0.12s;
-}
-.stage-btn:hover { border-color: var(--navy); color: var(--navy); }
-.stage-btn.active { border-color: var(--navy); background: var(--navy); color: #fff; }
-.stage-saved { font-size: 12px; color: var(--green); margin-top: 8px; display: none; font-weight: 500; }
+/* Photos */
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:7px;margin-top:9px}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-thumb button{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:19px;height:19px;font-size:11px;cursor:pointer;line-height:1}
+.upload-zone{border:1.5px dashed var(--border);border-radius:var(--r-sm);padding:18px;text-align:center;cursor:pointer;font-size:12px;color:var(--text-3);transition:all .15s}
+.upload-zone:hover{border-color:var(--navy);color:var(--navy);background:var(--blue-bg)}
 
-/* ── Submit ─────────────────────────────────────────────── */
-.submit-btn {
-  width: 100%; padding: 15px; background: var(--navy);
-  color: #fff; border: none; border-radius: var(--radius-sm);
-  font-size: 14px; font-weight: 600; cursor: pointer;
-  font-family: inherit; letter-spacing: -0.01em;
-  transition: opacity 0.15s, transform 0.1s;
-}
-.submit-btn:hover { opacity: 0.92; }
-.submit-btn:active { transform: scale(0.99); }
-.submit-btn:disabled { background: var(--text-3); cursor: not-allowed; }
-.progress-box {
-  background: var(--blue-bg); border: 1px solid #bfdbfe;
-  border-radius: var(--radius-sm); padding: 14px;
-  margin-top: 12px; display: none;
-}
-.progress-step {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 12px; color: var(--text-3); margin-bottom: 5px;
-}
-.progress-step.done { color: var(--green); }
-.progress-step.active { color: var(--blue); font-weight: 600; }
-.progress-step.error { color: var(--red); }
-.step-icon {
-  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; background: var(--surface-3); color: var(--text-3);
-}
-.step-icon.done { background: var(--green-bg); color: var(--green); }
-.step-icon.active { background: var(--blue-bg); color: var(--blue); }
-.step-icon.error { background: var(--red-bg); color: var(--red); }
+/* Submit */
+.submit-btn{width:100%;padding:14px;background:var(--navy);color:#fff;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.submit-btn:hover{opacity:.9}
+.submit-btn:disabled{background:var(--text-3);cursor:not-allowed}
+.progress-box{background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:var(--r-sm);padding:13px;margin-top:11px;display:none}
+.progress-step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-3);margin-bottom:4px}
+.progress-step.done{color:var(--green)}
+.progress-step.active{color:var(--blue);font-weight:600}
+.progress-step.error{color:var(--red)}
+.step-icon{width:17px;height:17px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;background:var(--surface-3);color:var(--text-3)}
+.step-icon.done{background:var(--green-bg);color:var(--green)}
+.step-icon.active{background:var(--blue-bg);color:var(--blue)}
+.step-icon.error{background:var(--red-bg);color:var(--red)}
 
-/* ── Me page ────────────────────────────────────────────── */
-.me-avatar {
-  width: 72px; height: 72px; border-radius: 50%;
-  background: var(--navy); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 26px; font-weight: 700; margin: 0 auto 12px;
-  letter-spacing: -0.02em;
-}
-.me-name { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 4px; letter-spacing: -0.02em; }
-.me-role { font-size: 12px; color: var(--text-3); text-align: center; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+/* Quote */
+.quote-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:8px;position:relative}
+.qt-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;border-bottom:1px solid var(--border-light)}
+.qt-row:last-child{border-bottom:none}
 
-/* ── Action buttons ─────────────────────────────────────── */
-.btn-primary {
-  width: 100%; padding: 13px; background: var(--navy);
-  color: #fff; border: none; border-radius: var(--radius-sm);
-  font-size: 14px; font-weight: 600; cursor: pointer;
-  font-family: inherit; transition: opacity 0.15s;
-}
-.btn-primary:hover { opacity: 0.9; }
-.btn-green {
-  width: 100%; padding: 13px; background: var(--green);
-  color: #fff; border: none; border-radius: var(--radius-sm);
-  font-size: 14px; font-weight: 600; cursor: pointer;
-  font-family: inherit; transition: opacity 0.15s;
-}
-.btn-green:hover { opacity: 0.9; }
+/* Appointments page */
+.appt-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;margin-bottom:9px;display:flex;gap:12px;cursor:pointer;box-shadow:var(--shadow);transition:box-shadow .15s,transform .1s}
+.appt-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.appt-date{flex-shrink:0;width:48px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;text-align:center;padding:6px 4px}
+.appt-day{font-size:22px;font-weight:700;color:var(--navy);line-height:1;letter-spacing:-.02em}
+.appt-mon{font-size:9px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.appt-dow{font-size:9px;color:var(--text-3)}
+.appt-info{flex:1;min-width:0}
+.appt-name{font-weight:600;font-size:13px;margin-bottom:4px;letter-spacing:-.01em}
+.appt-time{display:inline-flex;align-items:center;gap:4px;background:var(--navy);color:#fff;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;margin-bottom:3px;font-family:'DM Mono',monospace}
+.appt-meta{font-size:11px;color:var(--text-3)}
+.appt-card.today .appt-date{background:var(--navy);border-color:var(--navy)}
+.appt-card.today .appt-day,.appt-card.today .appt-mon,.appt-card.today .appt-dow{color:#fff}
+.appt-card.today .appt-mon,.appt-card.today .appt-dow{color:rgba(255,255,255,.5)}
 
-/* ── Profit checker inputs ──────────────────────────────── */
-.pc-row {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;
-}
-.pc-field { display: flex; flex-direction: column; gap: 4px; }
-.pc-field label { font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; }
-.pc-field input, .pc-field select {
-  padding: 8px 10px; border: 1.5px solid var(--border);
-  border-radius: 6px; font-size: 13px; font-family: inherit;
-  outline: none; background: var(--surface); color: var(--text);
-  -webkit-appearance: none;
-}
-.pc-field input:focus, .pc-field select:focus { border-color: var(--navy); }
+/* Me page */
+.me-wrap{max-width:400px;margin:0 auto;padding:24px 16px}
+.me-av{width:68px;height:68px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;margin:0 auto 12px;letter-spacing:-.02em}
+.me-name{font-size:19px;font-weight:700;text-align:center;letter-spacing:-.02em;margin-bottom:3px}
+.me-role{font-size:11px;color:var(--text-3);text-align:center;text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-bottom:20px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center;box-shadow:var(--shadow)}
+.stat-v{font-size:26px;font-weight:700;color:var(--navy);letter-spacing:-.03em}
+.stat-l{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
 
-/* ── Supplier lines ─────────────────────────────────────── */
-.supplier-line {
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px;
+/* Contacts */
+.contact-detail{padding:0}
+.cd-head{background:var(--navy);padding:16px;display:flex;align-items:center;gap:12px}
+.cd-av{width:44px;height:44px;border-radius:50%;background:var(--accent);color:var(--navy);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.cd-name{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.cd-type{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+
+/* Empty states */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center;color:var(--text-3)}
+.empty-icon{font-size:32px;margin-bottom:10px;opacity:.4}
+.empty-title{font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:4px}
+.empty-sub{font-size:12px}
+
+/* Loading */
+.loading{padding:40px;text-align:center;color:var(--text-3)}
+.spinner{width:26px;height:26px;border:2.5px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-box{background:var(--red-bg);border:1px solid #fca5a5;border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:10px}
+
+/* Supplier lines */
+.supplier-line{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px;margin-bottom:7px}
+.sl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.sl-title{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.05em}
+.sl-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;padding:2px 6px;font-family:inherit}
+
+/* Section divider */
+.divider{height:1px;background:var(--border-light);margin:12px 0}
+
+/* Status message */
+.status-msg{font-size:12px;margin-top:6px;display:none;text-align:center;font-weight:500}
+
+/* ── Responsive ───────────────────────────────── */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);z-index:50}
+  .sidebar.open{transform:translateX(0)}
+  .sb-overlay{display:block}
+  .top-bar{display:flex}
+  .info-strip{grid-template-columns:repeat(2,1fr)}
+  .info-cell:nth-child(2){border-right:none}
+  .info-cell:nth-child(n+3){border-top:1px solid var(--border-light)}
 }
-
-/* ── Quote items ────────────────────────────────────────── */
-.quote-item {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 13px;
-  margin-bottom: 8px; position: relative;
-}
-
-/* ── Utility ────────────────────────────────────────────── */
-.divider { height: 1px; background: var(--border-light); margin: 12px 0; }
-.text-sm { font-size: 12px; color: var(--text-3); }
-.text-mono { font-family: 'DM Mono', monospace; }
-.mt-8 { margin-top: 8px; }
-.mt-12 { margin-top: 12px; }
-.gap-8 { display: flex; gap: 8px; }
-
-@media (max-width: 600px) {
-  .row2, .row3 { grid-template-columns: 1fr 1fr; }
-  .stats-row { grid-template-columns: repeat(3, 1fr); }
-  .info-grid { grid-template-columns: 1fr 1fr; }
-  .page { padding: 12px 12px 88px; }
+@media(max-width:500px){
+  .info-strip{grid-template-columns:1fr 1fr}
+  .col-panel.list-col{width:100%!important;min-width:100%!important}
 }
 </style>
 </head>
 <body>
 
-<div class="app-header">
-  <div>
-    <div class="app-title">Burgess W&amp;D</div>
-    <div class="app-sub">Sales Portal</div>
-  </div>
-  <div class="header-user" id="header-user"></div>
-</div>
-
-<nav class="bottom-nav" id="bottom-nav">
-  <div class="nav-items">
-    <button class="nav-item active" id="nav-appts" onclick="navTo('appts')"><div class="nav-icon">📅</div>Appointments</button>
-    <button class="nav-item" id="nav-deals" onclick="navTo('deals')"><div class="nav-icon">💼</div>Deals</button>
-    <button class="nav-item" id="nav-contacts" onclick="navTo('contacts')"><div class="nav-icon">👥</div>Contacts</button>
-<button class="nav-item" id="nav-me" onclick="navTo('me')"><div class="nav-icon">👤</div>Me</button>
-  </div>
-</nav>
-
-<!-- LOGIN -->
-<div class="login-wrap" id="login-wrap">
+<!-- Login -->
+<div class="login-screen" id="login-screen">
   <div class="login-card">
-    <div class="login-logo">💼</div>
-    <div style="font-size:20px;font-weight:700;margin-bottom:6px">Sales Portal</div>
-    <div style="font-size:13px;color:#64748b;margin-bottom:24px">Sign in to manage your deals and quotes.</div>
-    <div class="lfield"><label>Your name</label><input type="text" id="ln" oninput="chkL()" onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <div class="lfield"><label>Password</label><input type="password" id="lp" oninput="chkL()" onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <div class="login-err" id="lerr"></div>
-    <button class="login-btn" id="lbtn" onclick="doLogin()" disabled>Sign in</button>
+    <div class="login-logo">🏠</div>
+    <h2>Sales Portal</h2>
+    <p>Burgess Windows &amp; Doors</p>
+    <div class="login-err" id="login-err"></div>
+    <div class="lfield">
+      <label>Username</label>
+      <input type="text" id="ln" placeholder="Your name" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="lfield">
+      <label>Password</label>
+      <input type="password" id="lp" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="login-spinner" style="display:none;text-align:center;margin-bottom:8px"><div class="spinner" style="margin:0 auto"></div></div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign in</button>
   </div>
 </div>
 
-<!-- APPOINTMENTS -->
-<div class="page" id="page-appts">
-  <div id="appts-error" class="err-box" style="display:none"></div>
-  <div id="appts-today"></div>
-  <div id="appts-upcoming"></div>
-  <div id="appts-loading" class="loading"><div class="spinner"></div>Loading appointments...</div>
-</div>
+<!-- App shell -->
+<div class="shell" id="app-shell" style="display:none">
 
-<!-- DEALS -->
-<div class="page" id="page-deals">
-  <div class="stats-row" id="deals-stats" style="grid-template-columns:repeat(5,1fr)"></div>
-  <div class="card">
-    <div class="card-header"><div class="card-title">My deals</div></div>
-    <div style="padding:10px 16px 0">
-      <input class="search-box" id="deals-search" placeholder="Search deals..." oninput="renderDeals()">
-      <div class="filter-row">
-        <button class="ftab active" onclick="setDF('all',this)">All</button>
-        <button class="ftab" onclick="setDF('New',this)">New</button>
-        <button class="ftab" onclick="setDF('Appointment',this)">Appt</button>
-        <button class="ftab" onclick="setDF('Pricing',this)">Pricing</button>
-        <button class="ftab" onclick="setDF('Quote Sent',this)">Quoted</button>
-        <button class="ftab" onclick="setDF('Won',this)">Won</button>
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()" style="display:none"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo">Burgess W&amp;D</div>
+      <div class="sb-sub">Sales Portal</div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-av" id="sb-av">?</div>
+      <div>
+        <div class="sb-uname" id="sb-uname">—</div>
+        <div class="sb-urole" id="sb-urole">Sales</div>
       </div>
     </div>
-    <div id="deals-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
-  </div>
-</div>
-
-<!-- CONTACTS -->
-<div class="page" id="page-contacts">
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Contacts</div>
-      <button onclick="openNewContactForm()" style="padding:7px 14px;background:#1e3a5f;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">+ New contact</button>
+    <div class="sb-nav">
+      <div class="sb-item" id="nav-appts" onclick="navTo('appts')"><span class="sb-icon">🗓</span><span>Appointments</span></div>
+      <div class="sb-item active" id="nav-deals" onclick="navTo('deals')"><span class="sb-icon">📋</span><span>Deals</span></div>
+      <div class="sb-item" id="nav-contacts" onclick="navTo('contacts')"><span class="sb-icon">👥</span><span>Contacts</span></div>
+      <div class="sb-item" id="nav-me" onclick="navTo('me')"><span class="sb-icon">👤</span><span>Me</span></div>
     </div>
-    <div style="padding:10px 16px 0">
-      <input class="search-box" id="contacts-search" placeholder="Search contacts..." oninput="renderContacts()">
-      <div class="filter-row">
-        <button class="ftab active" onclick="setCF('all',this)">All</button>
-        <button class="ftab" onclick="setCF('Client',this)">Clients</button>
-        <button class="ftab" onclick="setCF('Architect',this)">Architects</button>
-        <button class="ftab" onclick="setCF('Contractor',this)">Contractors</button>
+    <div class="sb-foot" onclick="signOut()">Sign out</div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Mobile top bar -->
+    <div class="top-bar" id="top-bar">
+      <button class="hamburger" onclick="openSidebar()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="top-bar-title" id="top-bar-title">Burgess W&amp;D</div>
+      <div class="top-bar-user" id="top-bar-user"></div>
+    </div>
+
+    <!-- Content -->
+    <div class="content" id="content">
+
+      <!-- APPOINTMENTS PAGE -->
+      <div class="col-panel" id="page-appts" style="display:none;flex:1;">
+        <div class="col-head">
+          <div class="col-title">Appointments</div>
+          <div class="col-sub" id="appts-sub">Your scheduled visits</div>
+        </div>
+        <div class="col-scroll" style="padding:14px">
+          <div id="appts-loading" class="loading"><div class="spinner"></div>Loading...</div>
+          <div id="appts-error" class="err-box" style="display:none"></div>
+          <div id="appts-today-label" style="display:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:8px">Today</div>
+          <div id="appts-today"></div>
+          <div id="appts-upcoming-label" style="display:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin:12px 0 8px">Upcoming</div>
+          <div id="appts-upcoming"></div>
+        </div>
       </div>
-    </div>
-    <div id="contacts-list"><div class="loading"><div class="spinner"></div>Loading...</div></div>
-  </div>
-</div>
 
-<!-- ME -->
-<div class="page" id="page-me">
-  <div class="card" style="padding:20px">
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
-      <div style="width:52px;height:52px;border-radius:50%;background:#dbeafe;color:#1e40af;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700" id="me-avatar"></div>
-      <div><div style="font-size:16px;font-weight:600" id="me-name"></div><div style="font-size:12px;color:#64748b">Sales</div></div>
-    </div>
-    <button onclick="signOut()" style="width:100%;padding:11px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Sign out</button>
-  </div>
-</div>
+      <!-- DEALS PAGE -->
+      <div id="page-deals" style="display:flex;flex:1;overflow:hidden;">
 
-<!-- CONTACT DETAIL -->
-<div class="page" id="page-contact-detail">
-  <div style="background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;margin-bottom:12px">
-    <div class="detail-header">
-      <button class="detail-back" onclick="navTo('contacts')">← Contacts</button>
-      <div class="detail-title" id="cd-title">Contact</div>
-    </div>
-    <div class="info-grid">
-      <div class="info-item"><div class="info-label">Phone</div><div class="info-value" id="cd-phone">—</div></div>
-      <div class="info-item"><div class="info-label">Email</div><div class="info-value" id="cd-email">—</div></div>
-      <div class="info-item" style="grid-column:span 2"><div class="info-label">Address</div><div class="info-value" id="cd-address">—</div></div>
-      <div class="info-item"><div class="info-label">Type</div><div class="info-value" id="cd-type">—</div></div>
-      <div class="info-item"><div class="info-label">Comments</div><div class="info-value" id="cd-comments">—</div></div>
-    </div>
-    <div style="padding:14px 16px;border-top:1px solid #f0f0f0;display:flex;flex-direction:column;gap:8px">
-      <button onclick="createDealFromContact()" id="create-deal-btn" style="width:100%;padding:11px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">💼 Create deal from this contact</button>
-      <button onclick="triggerCreateOpportunity()" id="create-opp-btn" style="width:100%;padding:11px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">🚀 Create opportunity in Monday</button>
-      <div id="create-deal-status" style="font-size:12px;margin-top:2px;display:none;text-align:center"></div>
-    </div>
-    <div style="padding:14px 16px;border-top:1px solid #f0f0f0">
-      <div style="font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:10px">LINKED DEALS</div>
-      <div id="cd-deals"></div>
-    </div>
-  </div>
-</div>
+        <!-- Deal list column -->
+        <div class="col-panel list-col" id="deals-list-col" style="width:280px;min-width:280px;">
+          <div class="col-head">
+            <div class="col-head-top">
+              <div>
+                <div class="col-title">Deals</div>
+                <div class="col-sub" id="deals-sub">Loading...</div>
+              </div>
+            </div>
+            <input class="search-box" id="deals-search" placeholder="Search deals…" oninput="renderDeals()">
+            <div class="filter-strip" id="deals-filters">
+              <span class="chip on" onclick="setDF('',this)">All</span>
+              <span class="chip" onclick="setDF('Appointment',this)">Appt</span>
+              <span class="chip" onclick="setDF('Pricing',this)">Pricing</span>
+              <span class="chip" onclick="setDF('Quote Sent',this)">Quoted</span>
+              <span class="chip" onclick="setDF('Won',this)">Won</span>
+            </div>
+          </div>
+          <div class="col-scroll" id="deals-list">
+            <div class="loading"><div class="spinner"></div>Loading deals…</div>
+          </div>
+        </div>
 
-<!-- DEAL DETAIL -->
-<div class="page" id="page-deal">
-  <div style="background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;margin-bottom:12px">
-    <div class="detail-header">
-      <button class="detail-back" id="deal-back-btn">← Back</button>
-      <div class="detail-title" id="deal-title">Deal</div>
-      <span class="badge" id="deal-stage-badge"></span>
-    </div>
-    <!-- Info strip -->
-    <div class="info-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="info-item"><div class="info-label">Customer</div><div class="info-value" id="di-name">—</div></div>
-      <div class="info-item"><div class="info-label">Phone</div><div class="info-value" id="di-phone">—</div></div>
-      <div class="info-item"><div class="info-label">Email</div><div class="info-value" id="di-email">—</div></div>
-      <div class="info-item" style="grid-column:span 2"><div class="info-label">Address</div><div class="info-value" id="di-address">—</div></div>
-      <div class="info-item"><div class="info-label">Appointment</div><div class="info-value" id="di-appt">—</div></div>
-    </div>
-    <!-- Tabs -->
-    <div class="qtabs">
-      <button class="qtab active" onclick="showQTab('overview',this)">📋 Overview</button>
-      <button class="qtab" onclick="showQTab('products',this)">🪟 Products</button>
-      <button class="qtab" onclick="showQTab('photos',this)">📸 Photos</button>
-      <button class="qtab" onclick="showQTab('files',this);loadMondayFiles()">📁 Files</button>
-      <button class="qtab" onclick="showQTab('quote',this)">📄 Quote</button>
-      <button class="qtab" onclick="showQTab('submit',this)">✅ Submit</button>
-    </div>
+        <!-- Deal detail column -->
+        <div class="col-panel" id="deal-detail-col" style="flex:1;display:none;">
+          <div class="deal-panel" id="deal-panel">
 
-    <!-- OVERVIEW TAB -->
-    <div class="qtab-panel active" id="qtp-overview">
-      <!-- Save bar -->
+            <!-- Deal header -->
+            <div class="deal-header" id="deal-header">
+              <div class="dh-back" onclick="closeDeal()">← Back to deals</div>
+              <div class="dh-name" id="di-name">—</div>
+              <div class="dh-meta" id="di-meta">—</div>
+              <div class="dh-badges">
+                <span class="dh-pill accent" id="di-stage">—</span>
+                <span class="dh-pill" id="di-appt">—</span>
+              </div>
+            </div>
+
+            <!-- Info strip -->
+            <div class="info-strip">
+              <div class="info-cell"><div class="info-lbl">Address</div><div class="info-val" id="di-address">—</div></div>
+              <div class="info-cell"><div class="info-lbl">Lead source</div><div class="info-val" id="di-leadsource">—</div></div>
+              <div class="info-cell"><div class="info-lbl">Phone</div><div class="info-val" id="di-phone">—</div></div>
+              <div class="info-cell"><div class="info-lbl">Email</div><div class="info-val" id="di-email">—</div></div>
+            </div>
+
+            <!-- Tab bar -->
+            <div class="tab-bar">
+              <button class="tab-btn on" onclick="showTab('overview',this)">Overview</button>
+              <button class="tab-btn" onclick="showTab('products',this)">Products</button>
+              <button class="tab-btn" onclick="showTab('photos',this)">Photos</button>
+              <button class="tab-btn" onclick="showTab('files',this);loadMondayFiles()">Files</button>
+              <button class="tab-btn" onclick="showTab('quote',this)">Quote</button>
+              <button class="tab-btn" onclick="showTab('submit',this)">Submit</button>
+            </div>
+
+            <!-- Tab body -->
+            <div class="tab-body">
+
+                            <!-- OVERVIEW TAB -->
+              <div class="tab-pane on" id="tab-overview">
+                <!-- Save bar -->
       <div style="background:#f0fdf4;border:1px solid #6ee7b7;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <div style="flex:1;min-width:160px">
           <div style="font-size:13px;font-weight:600;color:#065f46">Save all fields to Monday</div>
@@ -802,7 +574,15 @@ body {
       </div>
 
       <!-- Profit checker -->
-      <div class="section">
+      
+
+                <!-- PROFIT CHECKER EXPANDABLE -->
+                <button class="expand-btn" id="profit-expand-btn" onclick="toggleProfitChecker()">
+                  <span>💰 Profit checker</span>
+                  <span class="arrow">▼</span>
+                </button>
+                <div class="expand-panel" id="profit-expand-panel">
+                  <div class="section">
         <div class="sec-title">💰 Profit checker — Salesman estimate</div>
         <div class="row2">
           <div class="field"><label>Product type</label>
@@ -913,6 +693,9 @@ body {
         <div id="save-profit-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
         <div id="profit-report-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
       </div>
+                </div>
+
+                
       <!-- SAVE ALL TO MONDAY -->
       <div style="padding:4px 0 8px">
         <button onclick="saveDealToMonday()" id="save-monday-btn" style="width:100%;padding:14px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.01em">
@@ -922,10 +705,10 @@ body {
         <div id="save-monday-status" style="font-size:12px;margin-top:6px;display:none;text-align:center;font-weight:600"></div>
       </div>
     </div>
-
-    <!-- PRODUCTS TAB -->
-    <div class="qtab-panel" id="qtp-products">
-      <div style="font-size:12px;color:#64748b;margin-bottom:12px">Add each window, door or product. All sizes in mm. Use the canvas to sketch the design.</div>
+              </div>
+              <!-- PRODUCTS TAB -->
+              <div class="tab-pane" id="tab-products">
+                <div style="font-size:12px;color:#64748b;margin-bottom:12px">Add each window, door or product. All sizes in mm. Use the canvas to sketch the design.</div>
       <div id="products-list"></div>
       <button class="add-prod-btn" onclick="addProduct()">+ Add product / item</button>
 
@@ -935,22 +718,22 @@ body {
         </button>
         <div id="site-report-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
       </div>
-    </div>
-
-    <!-- PHOTOS TAB -->
-    <div class="qtab-panel" id="qtp-photos">
-      <div class="section">
+    
+              </div>
+              <!-- PHOTOS TAB -->
+              <div class="tab-pane" id="tab-photos">
+                <div class="section">
         <div class="sec-title">📸 Site photos</div>
         <div style="font-size:12px;color:#64748b;margin-bottom:10px">Upload photos of existing windows, doors, site access and any relevant details.</div>
         <div class="upload-zone" onclick="document.getElementById('photo-input').click()">📷 Tap to upload photos</div>
         <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
         <div class="photo-grid" id="photo-grid"></div>
       </div>
-    </div>
-
-    <!-- FILES TAB -->
-    <div class="qtab-panel" id="qtp-files">
-      <div class="section">
+    
+              </div>
+              <!-- FILES TAB -->
+              <div class="tab-pane" id="tab-files">
+                <div class="section">
         <div class="sec-title">📁 Project files</div>
         <div style="font-size:12px;color:#64748b;margin-bottom:10px">Upload spec sheets, brochures, drawings or any other files relating to this project.</div>
         <div class="upload-zone" onclick="document.getElementById('files-input').click()">📎 Tap to upload files</div>
@@ -963,11 +746,11 @@ body {
         <div id="monday-files-loading" style="font-size:12px;color:#888">Loading...</div>
         <div id="monday-files-list"></div>
       </div>
-    </div>
-
-    <!-- QUOTE TAB -->
-    <div class="qtab-panel" id="qtp-quote">
-      <div style="padding:14px 16px;background:#fffbeb;border-bottom:1px solid #fcd34d;font-size:12px;color:#92400e">
+    
+              </div>
+              <!-- QUOTE TAB -->
+              <div class="tab-pane" id="tab-quote">
+                <div style="padding:14px 16px;background:#fffbeb;border-bottom:1px solid #fcd34d;font-size:12px;color:#92400e">
         ✅ Client details are pre-filled from this deal. Add line items, adjust pricing and generate the PDF.
       </div>
       <div style="padding:16px">
@@ -1036,8 +819,7 @@ body {
       </div>
     </div>
 
-    <!-- QUOTE TAB -->
-    <div class="qtab-panel" id="qtp-quote">
+    
       <div class="section">
         <div class="sec-title">📄 Quote builder</div>
         <div style="font-size:12px;color:#64748b;margin-bottom:12px">Customer details are pre-filled from the deal. Add line items, adjust pricing and generate a branded PDF.</div>
@@ -1095,13 +877,11 @@ body {
         <button onclick="generateAndUploadDealQuote()" class="submit-btn" style="background:#059669">☁️ Save to Monday</button>
       </div>
       <div id="dq-upload-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
-    </div>
-
-
-
-    <!-- SUBMIT TAB -->
-    <div class="qtab-panel" id="qtp-submit">
-      <div class="section">
+    
+              </div>
+              <!-- SUBMIT TAB -->
+              <div class="tab-pane" id="tab-submit">
+                <div class="section">
         <div class="sec-title">✅ Submit</div>
         <div style="font-size:13px;color:#64748b;margin-bottom:12px">
           Generates a <strong>customer quote PDF</strong> and uploads it to Monday.<br>
@@ -1121,11 +901,164 @@ body {
           <div id="progress-steps"></div>
         </div>
       </div>
+    
+              </div>
+
+            </div><!-- end tab-body -->
+          </div><!-- end deal-panel -->
+        </div><!-- end deal-detail-col -->
+      </div><!-- end page-deals -->
+
+      <!-- CONTACTS PAGE -->
+      <div class="col-panel" id="page-contacts" style="display:none;flex:1;">
+        <!-- Contacts list -->
+        <div style="display:flex;height:100%;overflow:hidden;">
+          <div class="col-panel list-col" id="contacts-list-col" style="width:280px;min-width:280px;">
+            <div class="col-head">
+              <div class="col-head-top">
+                <div>
+                  <div class="col-title">Contacts</div>
+                  <div class="col-sub" id="contacts-sub">Loading...</div>
+                </div>
+                <button onclick="openNewContactForm()" style="padding:6px 12px;background:var(--navy);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">+ New</button>
+              </div>
+              <input class="search-box" id="contacts-search" placeholder="Search contacts…" oninput="renderContacts()">
+            </div>
+            <div class="col-scroll" id="contacts-list">
+              <div class="loading"><div class="spinner"></div>Loading contacts…</div>
+            </div>
+          </div>
+          <!-- Contact detail -->
+          <div class="col-panel" id="contact-detail-col" style="flex:1;display:none;">
+            <div class="col-scroll" id="contact-detail-inner">
+              <div class="cd-head" id="contact-detail-head">
+                <div class="cd-av" id="cd-av">?</div>
+                <div>
+                  <div class="cd-name" id="cd-title">—</div>
+                  <div class="cd-type" id="cd-type">—</div>
+                </div>
+              </div>
+              <div style="padding:14px">
+                <div class="section">
+                  <div class="sec-title">Contact details</div>
+                  <div class="row2">
+                    <div class="field"><label>Phone</label><div id="cd-phone" style="padding:8px 0;font-size:13px;font-weight:500">—</div></div>
+                    <div class="field"><label>Email</label><div id="cd-email" style="padding:8px 0;font-size:13px;font-weight:500">—</div></div>
+                  </div>
+                  <div class="field"><label>Address</label><div id="cd-address" style="padding:8px 0;font-size:13px;font-weight:500">—</div></div>
+                  <div class="field"><label>Comments</label><div id="cd-comments" style="padding:8px 0;font-size:13px;color:var(--text-2)">—</div></div>
+                </div>
+                <button onclick="createDealFromContact()" class="btn btn-navy">💼 Create deal</button>
+                <button onclick="triggerCreateOpportunity()" class="btn btn-green" style="margin-top:0">🚀 Create opportunity</button>
+                <div id="create-deal-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ME PAGE -->
+      <div class="col-panel" id="page-me" style="display:none;flex:1;">
+        <div class="col-scroll">
+          <div class="me-wrap">
+            <div class="me-av" id="me-avatar">?</div>
+            <div class="me-name" id="me-name">—</div>
+            <div class="me-role">Sales</div>
+            <div class="stats-grid">
+              <div class="stat-card"><div class="stat-v" id="me-stat-deals">—</div><div class="stat-l">Deals</div></div>
+              <div class="stat-card"><div class="stat-v" id="me-stat-won" style="color:var(--green)">—</div><div class="stat-l">Won</div></div>
+              <div class="stat-card"><div class="stat-v" id="me-stat-appts">—</div><div class="stat-l">Appts</div></div>
+            </div>
+            <button class="btn btn-navy" onclick="signOut()">Sign out</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end content -->
+  </div><!-- end main -->
+</div><!-- end shell -->
+
+<!-- NEW CONTACT MODAL -->
+<div id="new-contact-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;overflow-y:auto;padding:20px">
+  <div style="background:#fff;border-radius:14px;max-width:520px;margin:0 auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2)">
+    <div style="background:#1e3a5f;padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:15px;font-weight:600;color:#fff">Add new contact</div>
+      <button onclick="closeNewContactForm()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:6px;font-size:16px;cursor:pointer;font-family:inherit">&#x2715;</button>
+    </div>
+    <div style="padding:20px">
+
+      <div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px">Contact details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Full name *</label>
+            <input type="text" id="nc-name" placeholder="e.g. Sally Evans" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Phone</label>
+            <input type="tel" id="nc-phone" placeholder="07700 000000" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px">
+          <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Email</label>
+          <input type="email" id="nc-email" placeholder="email@example.com" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px">
+          <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Location / address</label>
+          <input type="text" id="nc-location" placeholder="Town, County or full address" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Client type</label>
+            <select id="nc-type" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:#fff">
+              <option value="">Select...</option>
+              <option>Client</option>
+              <option>Architect</option>
+              <option>Contractor</option>
+              <option>Developer</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Lead source</label>
+            <input type="text" id="nc-leadsource" placeholder="e.g. Website, Referral..." style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px">Notes</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Comments</label>
+          <textarea id="nc-comments" placeholder="Any relevant notes about this contact..." style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;resize:vertical;min-height:80px"></textarea>
+        </div>
+      </div>
+
+      <div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px">Files</div>
+        <div onclick="document.getElementById('nc-files-input').click()" style="border:1.5px dashed #cbd5e1;border-radius:8px;padding:14px;text-align:center;cursor:pointer;font-size:13px;color:#94a3b8">
+          📎 Tap to attach files
+        </div>
+        <input type="file" id="nc-files-input" multiple style="display:none" onchange="handleNewContactFiles(event)">
+        <div id="nc-files-list" style="margin-top:8px"></div>
+      </div>
+
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#1e40af">
+        <strong>Sales person:</strong> <span id="nc-assigned-display"></span> — will be assigned automatically
+      </div>
+
+      <div id="nc-error" style="display:none;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;font-size:12px;color:#dc2626;margin-bottom:10px"></div>
+
+      <div style="display:flex;gap:10px">
+        <button onclick="closeNewContactForm()" style="flex:1;padding:12px;background:#f3f4f6;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:#374151">Cancel</button>
+        <button onclick="saveNewContact()" id="nc-save-btn" style="flex:2;padding:12px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Save contact to Monday</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+
 const DEALS_BOARD='9998586607';
 const CONTACTS_BOARD='9998586586';
 const PROXY='/monday-proxy';
@@ -3845,84 +3778,274 @@ async function generateSiteReport(){
   }
 }
 
+
+
+// ── New layout functions ──────────────────────────────────────
+
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sb-overlay').style.display='block';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sb-overlay').style.display='none';
+}
+
+// Override navTo to work with new layout
+const _origNavTo = navTo;
+window.navTo = function(section){
+  closeSidebar();
+  // Hide all pages
+  ['appts','deals','contacts','me'].forEach(function(s){
+    var el = document.getElementById('page-'+s);
+    if(el) el.style.display = 'none';
+  });
+  // Show target
+  var target = document.getElementById('page-'+section);
+  if(target) target.style.display = (section === 'deals') ? 'flex' : (section === 'appts' || section === 'me') ? 'flex' : 'flex';
+  // Update nav
+  document.querySelectorAll('.sb-item').forEach(function(el){ el.classList.remove('active'); });
+  var navEl = document.getElementById('nav-'+section);
+  if(navEl) navEl.classList.add('active');
+  // Update mobile title
+  var titles = {appts:'Appointments',deals:'Deals',contacts:'Contacts',me:'Me'};
+  var tb = document.getElementById('top-bar-title');
+  if(tb) tb.textContent = titles[section] || 'Burgess W&D';
+  // Load data if needed
+  if(section==='appts') renderAppointments();
+  if(section==='contacts' && allContacts.length===0) loadContacts();
+  if(section==='me') updateMeStats();
+};
+
+function updateMeStats(){
+  var myDeals = allDeals.filter(function(d){ return d.salesperson && d.salesperson.toLowerCase().includes(currentUser.toLowerCase().split(' ')[0]); });
+  var won = myDeals.filter(function(d){ return d.stage==='Won'; });
+  var appts = allDeals.filter(function(d){ return d.apptDate; });
+  var sd = document.getElementById('me-stat-deals'); if(sd) sd.textContent = myDeals.length;
+  var sw = document.getElementById('me-stat-won'); if(sw) sw.textContent = won.length;
+  var sa = document.getElementById('me-stat-appts'); if(sa) sa.textContent = appts.length;
+}
+
+// Override showQTab with showTab for new layout
+window.showTab = function(tabName, btn){
+  // Update tab buttons
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('on'); });
+  if(btn) btn.classList.add('on');
+  // Hide all panes
+  document.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('on'); });
+  // Show target
+  var pane = document.getElementById('tab-'+tabName);
+  if(pane) pane.classList.add('on');
+  // Update submit summary if needed
+  if(tabName==='submit') updateSubmitSummary();
+};
+
+// Override showQTab to use new showTab
+window.showQTab = window.showTab;
+
+function openDealNew(id){
+  // Show detail column
+  var listCol = document.getElementById('deals-list-col');
+  var detailCol = document.getElementById('deal-detail-col');
+  // On narrow screens hide list, show detail
+  if(window.innerWidth < 768){
+    if(listCol) listCol.style.display = 'none';
+  }
+  if(detailCol) detailCol.style.display = 'flex';
+  // Mark selected in list
+  document.querySelectorAll('#deals-list .list-row').forEach(function(r){ r.classList.remove('sel'); });
+  var row = document.querySelector('#deals-list .list-row[data-id="'+id+'"]');
+  if(row) row.classList.add('sel');
+  // Reset profit checker expand state
+  var ep = document.getElementById('profit-expand-panel');
+  var eb = document.getElementById('profit-expand-btn');
+  if(ep) ep.classList.remove('open');
+  if(eb) eb.classList.remove('open');
+  // Show first tab
+  var firstTab = document.querySelector('.tab-btn');
+  showTab('overview', firstTab);
+  // Call original openDeal
+  openDeal(id);
+}
+
+function closeDeal(){
+  var listCol = document.getElementById('deals-list-col');
+  var detailCol = document.getElementById('deal-detail-col');
+  if(listCol) listCol.style.display = 'flex';
+  if(detailCol) detailCol.style.display = 'none';
+  document.querySelectorAll('#deals-list .list-row').forEach(function(r){ r.classList.remove('sel'); });
+}
+
+function toggleProfitChecker(){
+  var panel = document.getElementById('profit-expand-panel');
+  var btn = document.getElementById('profit-expand-btn');
+  var isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open');
+  btn.classList.toggle('open');
+  if(!isOpen){
+    // Init profit checker when opening
+    calcProfit();
+  }
+}
+
+// Override openContact for new layout
+var _origOpenContact = openContact;
+window.openContact = function(contact){
+  var detailCol = document.getElementById('contact-detail-col');
+  if(detailCol) detailCol.style.display = 'flex';
+  if(window.innerWidth < 768){
+    var listCol = document.getElementById('contacts-list-col');
+    if(listCol) listCol.style.display = 'none';
+  }
+  _origOpenContact(contact);
+};
+
+// Override initApp to use new layout
+var _origInitApp = initApp;
+window.initApp = function(){
+  // Hide login
+  var ls = document.getElementById('login-screen');
+  if(ls) ls.style.display = 'none';
+  // Show app
+  var shell = document.getElementById('app-shell');
+  if(shell) shell.style.display = 'flex';
+  // Set user info
+  document.getElementById('sb-av').textContent = currentUser.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+  document.getElementById('sb-uname').textContent = currentUser;
+  var tu = document.getElementById('top-bar-user');
+  if(tu) tu.textContent = currentUser.split(' ')[0];
+  var mu = document.getElementById('me-avatar');
+  if(mu) mu.textContent = currentUser.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+  var mn = document.getElementById('me-name');
+  if(mn) mn.textContent = currentUser;
+  // Load data
+  loadPrices();
+  fetchMondayUserId();
+  loadAll();
+  navTo('deals');
+};
+
+// Override signOut
+window.signOut = function(){
+  localStorage.removeItem('bwd_sales_token');
+  localStorage.removeItem('bwd_sales_user');
+  location.reload();
+};
+
+// Override renderDeals for new row format
+var _origRenderDeals = renderDeals;
+window.renderDeals = function(){
+  var search = (document.getElementById('deals-search')?.value||'').toLowerCase();
+  var filter = currentDealFilter||'';
+  var filtered = allDeals.filter(function(d){
+    var matchSearch = !search || (d.name||'').toLowerCase().includes(search) || (d.address||'').toLowerCase().includes(search);
+    var matchFilter = !filter || (d.stage||'')=== filter;
+    return matchSearch && matchFilter;
+  });
+  var sub = document.getElementById('deals-sub');
+  if(sub) sub.textContent = filtered.length + ' deal' + (filtered.length!==1?'s':'');
+  var list = document.getElementById('deals-list');
+  if(!list) return;
+  if(filtered.length===0){
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No deals found</div><div class="empty-sub">Try a different filter</div></div>';
+    return;
+  }
+  list.innerHTML = filtered.map(function(d){
+    var badge = getBadgeClass(d.stage);
+    var apptStr = d.apptDate ? fmtDate(d.apptDate)+(d.apptTime?' · '+fmtTime(d.apptTime):'') : '';
+    var valStr = d.soldValue ? '£'+parseFloat(d.soldValue).toLocaleString('en-GB') : '';
+    return '<div class="list-row" data-id="'+d.id+'" onclick="openDealNew(this.dataset.id)">' +
+      '<div class="row-top"><span class="row-name">'+escHtml(d.name||'Unnamed')+'</span>' +
+      '<span class="badge '+badge+'">'+escHtml(d.stage||'New')+'</span></div>' +
+      '<div class="row-meta">'+(apptStr?'<span>'+apptStr+'</span>':'')+(valStr?'<span class="row-val">'+valStr+'</span>':'<span>'+escHtml(d.leadSource||'')+'</span>')+'</div>' +
+      '</div>';
+  }).join('');
+};
+
+// Override renderContacts
+window.renderContacts = function(){
+  var search = (document.getElementById('contacts-search')?.value||'').toLowerCase();
+  var filtered = allContacts.filter(function(c){
+    return !search || (c.name||'').toLowerCase().includes(search) || (c.email||'').toLowerCase().includes(search);
+  });
+  var sub = document.getElementById('contacts-sub');
+  if(sub) sub.textContent = filtered.length + ' contact' + (filtered.length!==1?'s':'');
+  var list = document.getElementById('contacts-list');
+  if(!list) return;
+  if(filtered.length===0){
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">No contacts found</div></div>';
+    return;
+  }
+  list.innerHTML = filtered.map(function(c){
+    var initials = (c.name||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+    return '<div class="list-row" data-idx="'+allContacts.indexOf(c)+'" onclick="openContact(allContacts[this.dataset.idx])">' +
+      '<div class="row-top" style="gap:10px"><div style="width:34px;height:34px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+initials+'</div>' +
+      '<div style="flex:1;min-width:0"><div class="row-name">'+escHtml(c.name||'—')+'</div>' +
+      '<div class="row-meta">'+escHtml(c.phone||c.email||'—')+'</div></div>' +
+      '<span class="badge b-client">'+escHtml(c.clientType||'Client')+'</span></div></div>';
+  }).join('');
+};
+
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Override renderAppointments for new layout
+window.renderAppointments = function(){
+  var todayEl = document.getElementById('appts-today');
+  var upcomingEl = document.getElementById('appts-upcoming');
+  var loadEl = document.getElementById('appts-loading');
+  var tlabel = document.getElementById('appts-today-label');
+  var ulabel = document.getElementById('appts-upcoming-label');
+  var sub = document.getElementById('appts-sub');
+  if(loadEl) loadEl.style.display='none';
+  if(!todayEl||!upcomingEl) return;
+  var today = new Date().toISOString().slice(0,10);
+  var withAppt = allDeals.filter(function(d){return d.apptDate;}).sort(function(a,b){return(a.apptDate+a.apptTime||'')>(b.apptDate+b.apptTime||'')?1:-1;});
+  var todayDeals = withAppt.filter(function(d){return d.apptDate===today;});
+  var upcomingDeals = withAppt.filter(function(d){return d.apptDate>today;}).slice(0,10);
+  if(sub) sub.textContent = todayDeals.length+' today · '+upcomingDeals.length+' upcoming';
+  if(tlabel) tlabel.style.display = todayDeals.length?'block':'none';
+  if(ulabel) ulabel.style.display = upcomingDeals.length?'block':'none';
+  var renderCard = function(d, isToday){
+    var dt = new Date(d.apptDate+'T12:00:00');
+    var day = dt.getDate();
+    var mon = dt.toLocaleString('en-GB',{month:'short'}).toUpperCase();
+    var dow = dt.toLocaleString('en-GB',{weekday:'short'});
+    var badge = getBadgeClass(d.stage);
+    return '<div class="appt-card'+(isToday?' today':'')+'" data-id="'+d.id+'" onclick="openDealNew(this.dataset.id)">' +
+      '<div class="appt-date"><div class="appt-day">'+day+'</div><div class="appt-mon">'+mon+'</div><div class="appt-dow">'+dow+'</div></div>' +
+      '<div class="appt-info"><div class="appt-name">'+escHtml(d.name||'—')+'</div>' +
+      (d.apptTime?'<div class="appt-time">⏰ '+fmtTime(d.apptTime)+'</div>':'')+
+      '<div class="appt-meta">'+escHtml(d.apptType||d.stage||'')+'</div></div>' +
+      '<span class="badge '+badge+'" style="align-self:center">'+escHtml(d.stage||'—')+'</span>' +
+      '</div>';
+  };
+  todayEl.innerHTML = todayDeals.map(function(d){return renderCard(d,true);}).join('') || '<div class="empty-state" style="padding:20px 0"><div class="empty-sub">No appointments today</div></div>';
+  upcomingEl.innerHTML = upcomingDeals.map(function(d){return renderCard(d,false);}).join('');
+};
+
+function getBadgeClass(stage){
+  var map = {'New':'b-new','Appointment':'b-appt','Pricing':'b-pricing','Quote Sent':'b-quotesent','Prospect':'b-prospect','Won':'b-won','Lost':'b-lost','Unsuccessful tender':'b-unsuccessful'};
+  return map[stage]||'b-new';
+}
+
+// Auto-login check
+(function(){
+  var saved = localStorage.getItem('bwd_sales_token');
+  var user = localStorage.getItem('bwd_sales_user');
+  if(saved && user){
+    fetch(AUTH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'validate',token:saved})})
+      .then(function(r){return r.json();})
+      .then(function(data){
+        if(data.valid){
+          currentUser=user;
+          sessionToken=saved;
+          initApp();
+        }
+      }).catch(function(){});
+  }
+})();
 </script>
-<!-- NEW CONTACT MODAL -->
-<div id="new-contact-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;overflow-y:auto;padding:20px">
-  <div style="background:#fff;border-radius:14px;max-width:520px;margin:0 auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2)">
-    <div style="background:#1e3a5f;padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:15px;font-weight:600;color:#fff">Add new contact</div>
-      <button onclick="closeNewContactForm()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:6px;font-size:16px;cursor:pointer;font-family:inherit">&#x2715;</button>
-    </div>
-    <div style="padding:20px">
-
-      <div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:14px;margin-bottom:14px">
-        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px">Contact details</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div style="display:flex;flex-direction:column;gap:4px">
-            <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Full name *</label>
-            <input type="text" id="nc-name" placeholder="e.g. Sally Evans" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
-          </div>
-          <div style="display:flex;flex-direction:column;gap:4px">
-            <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Phone</label>
-            <input type="tel" id="nc-phone" placeholder="07700 000000" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px">
-          <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Email</label>
-          <input type="email" id="nc-email" placeholder="email@example.com" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px">
-          <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Location / address</label>
-          <input type="text" id="nc-location" placeholder="Town, County or full address" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div style="display:flex;flex-direction:column;gap:4px">
-            <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Client type</label>
-            <select id="nc-type" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:#fff">
-              <option value="">Select...</option>
-              <option>Client</option>
-              <option>Architect</option>
-              <option>Contractor</option>
-              <option>Developer</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:4px">
-            <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Lead source</label>
-            <input type="text" id="nc-leadsource" placeholder="e.g. Website, Referral..." style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none">
-          </div>
-        </div>
-      </div>
-
-      <div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:14px;margin-bottom:14px">
-        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:12px">Notes</div>
-        <div style="display:flex;flex-direction:column;gap:4px">
-          <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em">Comments</label>
-          <textarea id="nc-comments" placeholder="Any relevant notes about this contact..." style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;resize:vertical;min-height:80px"></textarea>
-        </div>
-      </div>
-
-      <div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:14px;margin-bottom:14px">
-        <div style="font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px">Files</div>
-        <div onclick="document.getElementById('nc-files-input').click()" style="border:1.5px dashed #cbd5e1;border-radius:8px;padding:14px;text-align:center;cursor:pointer;font-size:13px;color:#94a3b8">
-          📎 Tap to attach files
-        </div>
-        <input type="file" id="nc-files-input" multiple style="display:none" onchange="handleNewContactFiles(event)">
-        <div id="nc-files-list" style="margin-top:8px"></div>
-      </div>
-
-      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#1e40af">
-        <strong>Sales person:</strong> <span id="nc-assigned-display"></span> — will be assigned automatically
-      </div>
-
-      <div id="nc-error" style="display:none;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;font-size:12px;color:#dc2626;margin-bottom:10px"></div>
-
-      <div style="display:flex;gap:10px">
-        <button onclick="closeNewContactForm()" style="flex:1;padding:12px;background:#f3f4f6;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:#374151">Cancel</button>
-        <button onclick="saveNewContact()" id="nc-save-btn" style="flex:2;padding:12px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Save contact to Monday</button>
-      </div>
-    </div>
-  </div>
-</div>
 </body>
 </html>
