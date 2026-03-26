@@ -2,27 +2,34 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Portal — Burgess Windows & Doors</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Burgess W&D — Sales Portal</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f0f4f8;min-height:100vh}
-.app-header{background:#1e3a5f;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+
+/* ── Header ── */
+.app-header{background:#1e3a5f;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .app-title{font-size:15px;font-weight:600;color:#fff}
 .app-sub{font-size:11px;color:#93c5fd;margin-top:1px}
 .header-user{font-size:12px;color:#93c5fd;display:none}
+
+/* ── Bottom nav ── */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e5e5;display:none;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
 .nav-items{display:flex}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;cursor:pointer;color:#94a3b8;border:none;background:transparent;font-family:inherit;font-size:10px;font-weight:500;gap:3px}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;cursor:pointer;color:#94a3b8;border:none;background:transparent;font-family:inherit;font-size:10px;font-weight:500;gap:3px;transition:color 0.15s}
 .nav-item.active{color:#1e3a5f}
 .nav-icon{font-size:20px;line-height:1}
-.page{display:none;padding:16px 16px 80px;max-width:860px;margin:0 auto}
+
+/* ── Pages ── */
+.page{display:none;padding:14px 14px 80px;max-width:900px;margin:0 auto}
 .page.active{display:block}
-/* Login */
+
+/* ── Login ── */
 .login-wrap{display:flex;align-items:center;justify-content:center;min-height:80vh;padding:20px}
-.login-card{background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:32px;max-width:400px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
+.login-card{background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:32px;max-width:400px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.06)}
 .login-logo{width:56px;height:56px;background:#1e3a5f;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px}
 .lfield{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;text-align:left}
 .lfield label{font-size:12px;font-weight:600;color:#374151}
@@ -31,17 +38,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .login-btn{width:100%;padding:12px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 .login-btn:disabled{background:#93c5fd;cursor:not-allowed}
 .login-err{color:#dc2626;font-size:12px;margin-bottom:10px;display:none}
-/* Cards */
+
+/* ── Cards ── */
 .card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;margin-bottom:12px}
 .card-header{padding:13px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .card-title{font-size:14px;font-weight:600}
-/* Stats */
-.stats-row{display:grid;gap:8px;margin-bottom:14px}
-.stat-box{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:12px 14px;text-align:center}
+.stats-row{display:grid;gap:8px;margin-bottom:14px;grid-template-columns:repeat(5,1fr)}
+.stat-box{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:12px;text-align:center}
 .stat-val{font-size:22px;font-weight:700;margin-bottom:2px}
-.stat-lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.04em}
-/* List rows */
-.list-row{padding:12px 16px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.1s}
+.stat-lbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.04em}
+
+/* ── List rows ── */
+.list-row{padding:12px 16px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .1s}
 .list-row:last-child{border-bottom:none}
 .list-row:hover{background:#f8faff}
 .row-avatar{width:36px;height:36px;border-radius:50%;background:#dbeafe;color:#1e40af;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
@@ -50,7 +58,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .row-meta{font-size:11px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
 .row-arrow{color:#cbd5e1;font-size:16px;flex-shrink:0}
-/* Badges */
+
+/* ── Badges ── */
 .badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;white-space:nowrap}
 .b-new{background:#e0e7ff;color:#3730a3}
 .b-appt{background:#e0f2fe;color:#0369a1}
@@ -65,29 +74,50 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .b-site{background:#d1fae5;color:#065f46}
 .b-phone{background:#fef3c7;color:#92400e}
 .b-showroom{background:#dbeafe;color:#1e40af}
-/* Search & filter */
+
+/* ── Search & filter ── */
 .search-box{padding:7px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;outline:none;width:100%;margin-bottom:10px}
 .search-box:focus{border-color:#1e3a5f}
 .filter-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
 .ftab{padding:4px 10px;border:1px solid #e0e0e0;border-radius:6px;background:transparent;color:#888;font-size:11px;cursor:pointer;font-family:inherit;font-weight:500}
 .ftab.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
-/* Loading */
+
+/* ── Loading / empty ── */
 .loading{padding:40px;text-align:center;color:#94a3b8}
-.spinner{width:26px;height:26px;border:3px solid #e5e5e5;border-top-color:#1e3a5f;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 10px}
+.spinner{width:26px;height:26px;border:3px solid #e5e5e5;border-top-color:#1e3a5f;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{padding:40px;text-align:center;color:#94a3b8}
 .err-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:12px;color:#991b1b;margin-bottom:12px}
-/* Detail header */
-.detail-header{background:#1e3a5f;border-radius:12px 12px 0 0;padding:13px 16px;display:flex;align-items:center;gap:10px}
-.detail-back{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit}
-.detail-title{font-size:14px;font-weight:600;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* Info grid */
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px;border-bottom:1px solid #f0f0f0}
-.info-item{display:flex;flex-direction:column;gap:3px}
-.info-label{font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.04em}
-.info-value{font-size:13px;font-weight:500}
-/* Appt card */
-.appt-card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;gap:14px;cursor:pointer;transition:background 0.1s}
+
+/* ── Deal detail header ── */
+.deal-header{background:#1e3a5f;border-radius:12px 12px 0 0;padding:14px 16px}
+.deal-back{background:rgba(255,255,255,.15);border:none;color:#fff;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;margin-bottom:10px;display:inline-block}
+.deal-name{font-size:17px;font-weight:700;color:#fff;margin-bottom:4px}
+.deal-meta{font-size:12px;color:#93c5fd;margin-bottom:10px}
+.deal-stage-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.stage-pill{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;cursor:pointer;border:1.5px solid transparent;font-family:inherit;transition:all .15s}
+.stage-pill.active{background:#fff;color:#1e3a5f}
+.stage-pill.inactive{background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border-color:transparent}
+.stage-pill:hover{background:rgba(255,255,255,.2);color:#fff}
+.stage-saved{font-size:11px;color:#6ee7b7;margin-left:8px;display:none}
+
+/* ── Info strip ── */
+.info-strip{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #f0f0f0}
+.info-cell{padding:10px 14px;border-right:1px solid #f0f0f0}
+.info-cell:last-child{border-right:none}
+.info-lbl{font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.info-val{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Tab nav ── */
+.qtabs{display:flex;border-bottom:1px solid #e5e5e5;overflow-x:auto;background:#fff;scrollbar-width:none}
+.qtabs::-webkit-scrollbar{display:none}
+.qtab{padding:11px 16px;border:none;background:transparent;color:#888;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s}
+.qtab.active{color:#1e3a5f;border-bottom-color:#1e3a5f;font-weight:600}
+.qtab-panel{display:none;padding:16px}
+.qtab-panel.active{display:block}
+
+/* ── Appt card ── */
+.appt-card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;gap:14px;cursor:pointer;transition:background .1s}
 .appt-card:hover{background:#f8faff}
 .appt-date-block{flex-shrink:0;width:52px;text-align:center;background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:6px 4px}
 .appt-day{font-size:22px;font-weight:700;color:#1e3a5f;line-height:1}
@@ -96,37 +126,56 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .appt-info{flex:1;min-width:0}
 .appt-name{font-weight:600;font-size:14px;margin-bottom:4px}
 .appt-time{display:inline-flex;align-items:center;gap:4px;background:#eff6ff;color:#1e3a5f;font-size:12px;font-weight:600;padding:3px 8px;border-radius:5px;margin-bottom:4px}
-.appt-meta{font-size:12px;color:#64748b;margin-top:2px}
+.appt-meta{font-size:12px;color:#64748b}
 .appt-card.today .appt-date-block{background:#1e3a5f;border-color:#1e3a5f}
-.appt-card.today .appt-day{color:#fff}
-.appt-card.today .appt-month{color:#93c5fd}
+.appt-card.today .appt-day,.appt-card.today .appt-month{color:#fff}
 .appt-card.today .appt-dow{color:#bfdbfe}
-/* Section */
+
+/* ── Sections / fields ── */
 .section{background:#f8fafc;border:1px solid #e5e5e5;border-radius:10px;padding:14px 16px;margin-bottom:12px}
-.sec-title{font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em}
+.sec-title{font-size:11px;font-weight:700;color:#1e3a5f;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px}
 .field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
 .field:last-child{margin-bottom:0}
-.field label{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.04em}
-.field input,.field select,.field textarea{padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:#fff}
+.field label{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em}
+.field input,.field select,.field textarea{padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:#fff;-webkit-appearance:none}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:#1e3a5f}
-.field textarea{resize:vertical;min-height:80px}
+.field textarea{resize:vertical;min-height:80px;line-height:1.5}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2394a3b8' d='M5 7L1 3h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-/* Quote tabs */
-.qtabs{display:flex;border-bottom:1px solid #e5e5e5;overflow-x:auto;background:#fff}
-.qtab{padding:11px 14px;border:none;background:transparent;color:#888;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
-.qtab.active{color:#1e3a5f;border-bottom-color:#1e3a5f;font-weight:600}
-.qtab-panel{display:none;padding:16px}
-.qtab-panel.active{display:block}
-/* Product item */
+
+/* ── Buttons ── */
+.btn-primary{width:100%;padding:13px;background:#1e3a5f;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s;margin-bottom:8px}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{background:#93c5fd;cursor:not-allowed}
+.btn-green{background:#059669}
+.btn-amber{background:#d97706}
+.btn-red{background:#dc2626}
+.btn-outline{background:transparent;color:#1e3a5f;border:1.5px solid #1e3a5f}
+.btn-sm{padding:8px 14px;font-size:12px;border-radius:7px;display:inline-block;width:auto}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+
+/* ── Profit checker ── */
+.profit-matrix{background:#1e3a5f;border-radius:10px;padding:16px;margin-bottom:12px}
+.profit-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:13px}
+.profit-row:last-child{border-bottom:none}
+.profit-label{color:#93c5fd}
+.profit-val{color:#fff;font-weight:500}
+.grade-box{border-radius:10px;padding:16px;text-align:center;margin-bottom:12px}
+.grade-pct{font-size:42px;font-weight:700;margin-bottom:4px}
+.grade-lbl{font-size:13px;font-weight:500;margin-bottom:4px}
+.grade-detail{font-size:12px;opacity:.8}
+
+/* ── Product item ── */
 .prod-item{background:#fff;border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:12px}
 .prod-header{background:#1e3a5f;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
 .prod-num{font-size:12px;font-weight:600;color:#fff}
-.prod-remove{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;font-family:inherit}
+.prod-remove{background:rgba(255,255,255,.15);border:none;color:#fff;padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;font-family:inherit}
 .prod-body{padding:14px}
 .sub-section{background:#f8fafc;border:1px solid #e5e5e5;border-radius:8px;padding:12px;margin-top:10px}
-.sub-title{font-size:11px;font-weight:600;color:#1e3a5f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px}
-/* Canvas */
+.sub-title{font-size:10px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+
+/* ── Canvas ── */
 .canvas-wrap{border:1.5px solid #e5e5e5;border-radius:8px;overflow:hidden;background:#fff;touch-action:none;margin-top:8px}
 .sketch-canvas{display:block;width:100%;cursor:crosshair;touch-action:none}
 .canvas-toolbar{display:flex;gap:6px;flex-wrap:wrap;padding:8px;background:#f8fafc;border-top:1px solid #e5e5e5;align-items:center}
@@ -134,32 +183,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .tool-btn.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
 .color-swatch{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;flex-shrink:0}
 .color-swatch.active{border-color:#1e3a5f;transform:scale(1.2)}
-/* Photo grid */
+
+/* ── Photos ── */
 .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:10px}
 .photo-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid #e5e5e5}
 .photo-thumb img{width:100%;height:100%;object-fit:cover}
-.photo-thumb button{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer}
-.upload-zone{border:1.5px dashed #cbd5e1;border-radius:8px;padding:18px;text-align:center;cursor:pointer;font-size:13px;color:#94a3b8}
+.photo-thumb button{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer}
+.upload-zone{border:1.5px dashed #cbd5e1;border-radius:8px;padding:18px;text-align:center;cursor:pointer;font-size:13px;color:#94a3b8;transition:all .15s}
 .upload-zone:hover{border-color:#1e3a5f;color:#1e3a5f;background:#f8faff}
-.add-prod-btn{width:100%;padding:10px;border:1.5px dashed #93c5fd;background:#f8faff;color:#1e3a5f;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;margin-top:6px}
-/* Profit checker */
-.profit-matrix{background:#1e3a5f;border-radius:10px;padding:16px;margin-bottom:12px}
-.profit-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.1);font-size:13px}
-.profit-row:last-child{border-bottom:none;font-weight:700;font-size:15px;padding-top:8px;margin-top:4px}
-.profit-label{color:#93c5fd}
-.profit-val{color:#fff;font-weight:500}
-.grade-box{border-radius:10px;padding:16px;text-align:center;margin-bottom:12px}
-.grade-pct{font-size:42px;font-weight:700;margin-bottom:4px}
-.grade-lbl{font-size:13px;font-weight:500;margin-bottom:4px}
-.grade-detail{font-size:12px;opacity:0.8}
-/* Stage buttons */
-.stage-btns{display:flex;gap:6px;flex-wrap:wrap}
-.stage-btn{padding:6px 13px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid #e0e0e0;background:#fff;color:#374151;font-family:inherit}
-.stage-btn.active{border-color:#1e3a5f;background:#1e3a5f;color:#fff}
-.stage-saved{font-size:12px;color:#059669;margin-top:6px;display:none}
-/* Submit */
-.submit-btn{width:100%;padding:14px;background:#1e3a5f;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
-.submit-btn:disabled{background:#93c5fd;cursor:not-allowed}
+.add-prod-btn{width:100%;padding:10px;border:1.5px dashed #93c5fd;background:#f8faff;color:#1e3a5f;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;margin-top:8px}
+
+/* ── Progress box ── */
 .progress-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-top:10px;display:none}
 .progress-step{display:flex;align-items:center;gap:8px;font-size:12px;color:#64748b;margin-bottom:4px}
 .progress-step.done{color:#059669}
@@ -169,10 +203,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .step-icon.done{background:#d1fae5;color:#059669}
 .step-icon.active{background:#dbeafe;color:#1e40af}
 .step-icon.error{background:#fee2e2;color:#dc2626}
+
+/* ── Contact detail ── */
+.contact-detail{background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;margin-bottom:12px}
+.contact-head{background:#1e3a5f;padding:13px 16px;display:flex;align-items:center;gap:10px}
+.contact-back{background:rgba(255,255,255,.15);border:none;color:#fff;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
+.contact-title{font-size:14px;font-weight:600;color:#fff;flex:1}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid #f0f0f0}
+.info-item{padding:12px 16px;border-right:1px solid #f5f5f5;border-bottom:1px solid #f5f5f5}
+.info-item:nth-child(even){border-right:none}
+.info-label{font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.info-value{font-size:13px;font-weight:500}
+
 @media(max-width:600px){
   .row2,.row3{grid-template-columns:1fr 1fr}
   .stats-row{grid-template-columns:repeat(3,1fr)}
-  .info-grid{grid-template-columns:1fr 1fr}
+  .info-strip{grid-template-columns:1fr 1fr}
+  .info-cell:nth-child(3){grid-column:span 2;border-right:none}
 }
 </style>
 </head>
@@ -197,7 +244,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   <div class="login-card">
     <div class="login-logo">💼</div>
     <div style="font-size:20px;font-weight:700;margin-bottom:6px">Sales Portal</div>
-    <div style="font-size:13px;color:#64748b;margin-bottom:24px">Sign in to manage your deals and quotes.</div>
+    <div style="font-size:13px;color:#64748b;margin-bottom:24px">Sign in to manage your deals.</div>
     <div class="lfield"><label>Your name</label><input type="text" id="ln" oninput="chkL()" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="lfield"><label>Password</label><input type="password" id="lp" oninput="chkL()" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="login-err" id="lerr"></div>
@@ -215,7 +262,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
 <!-- DEALS -->
 <div class="page" id="page-deals">
-  <div class="stats-row" id="deals-stats" style="grid-template-columns:repeat(5,1fr)"></div>
+  <div class="stats-row" id="deals-stats"></div>
   <div class="card">
     <div class="card-header"><div class="card-title">My deals</div></div>
     <div style="padding:10px 16px 0">
@@ -257,31 +304,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div style="width:52px;height:52px;border-radius:50%;background:#dbeafe;color:#1e40af;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700" id="me-avatar"></div>
       <div><div style="font-size:16px;font-weight:600" id="me-name"></div><div style="font-size:12px;color:#64748b">Sales</div></div>
     </div>
-    <button onclick="signOut()" style="width:100%;padding:11px;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Sign out</button>
+    <button onclick="signOut()" class="btn-primary btn-red">Sign out</button>
   </div>
 </div>
 
 <!-- CONTACT DETAIL -->
 <div class="page" id="page-contact-detail">
-  <div style="background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;margin-bottom:12px">
-    <div class="detail-header">
-      <button class="detail-back" onclick="navTo('contacts')">← Contacts</button>
-      <div class="detail-title" id="cd-title">Contact</div>
+  <div class="contact-detail">
+    <div class="contact-head">
+      <button class="contact-back" onclick="navTo('contacts')">← Contacts</button>
+      <div class="contact-title" id="cd-title">Contact</div>
     </div>
     <div class="info-grid">
       <div class="info-item"><div class="info-label">Phone</div><div class="info-value" id="cd-phone">—</div></div>
       <div class="info-item"><div class="info-label">Email</div><div class="info-value" id="cd-email">—</div></div>
-      <div class="info-item" style="grid-column:span 2"><div class="info-label">Address</div><div class="info-value" id="cd-address">—</div></div>
       <div class="info-item"><div class="info-label">Type</div><div class="info-value" id="cd-type">—</div></div>
-      <div class="info-item"><div class="info-label">Comments</div><div class="info-value" id="cd-comments">—</div></div>
+      <div class="info-item"><div class="info-label">Address</div><div class="info-value" id="cd-address">—</div></div>
     </div>
-    <div style="padding:14px 16px;border-top:1px solid #f0f0f0">
-      <button onclick="createDealFromContact()" id="create-deal-btn" style="width:100%;padding:11px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">+ Create deal from this contact</button>
-      <div id="create-deal-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
+    <div style="padding:14px 16px;border-bottom:1px solid #f0f0f0">
+      <div style="font-size:12px;color:#64748b;margin-bottom:6px" id="cd-comments"></div>
     </div>
-    <div style="padding:14px 16px;border-top:1px solid #f0f0f0">
-      <div style="font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:10px">LINKED DEALS</div>
-      <div id="cd-deals"></div>
+    <div style="padding:14px 16px">
+      <button onclick="createDealFromContact()" id="create-deal-btn" class="btn-primary" style="margin-bottom:6px">+ Create deal from this contact</button>
+      <div id="create-deal-status" style="font-size:12px;margin-top:4px;display:none;text-align:center"></div>
+      <div style="font-size:11px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 8px">Linked deals</div>
+      <div id="cd-deals"><div style="font-size:12px;color:#94a3b8">No deals found.</div></div>
     </div>
   </div>
 </div>
@@ -289,41 +336,48 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <!-- DEAL DETAIL -->
 <div class="page" id="page-deal">
   <div style="background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;margin-bottom:12px">
-    <div class="detail-header">
-      <button class="detail-back" id="deal-back-btn">← Back</button>
-      <div class="detail-title" id="deal-title">Deal</div>
-      <span class="badge" id="deal-stage-badge"></span>
+
+    <!-- Header with stage pills -->
+    <div class="deal-header">
+      <button class="deal-back" onclick="navTo('deals')">← Back to deals</button>
+      <div class="deal-name" id="deal-title">Deal</div>
+      <div class="deal-meta" id="deal-meta"></div>
+      <div class="deal-stage-bar" id="deal-stage-bar">
+        <button class="stage-pill inactive" onclick="updateStage('New')">New</button>
+        <button class="stage-pill inactive" onclick="updateStage('Appointment')">Appointment</button>
+        <button class="stage-pill inactive" onclick="updateStage('Pricing')">Pricing</button>
+        <button class="stage-pill inactive" onclick="updateStage('Quote Sent')">Quote Sent</button>
+        <button class="stage-pill inactive" onclick="updateStage('Prospect')">Prospect</button>
+        <button class="stage-pill inactive" onclick="updateStage('Won')">Won</button>
+        <button class="stage-pill inactive" onclick="updateStage('Lost')">Lost</button>
+        <span class="stage-saved" id="stage-saved">✓ Saved</span>
+      </div>
     </div>
-    <!-- Info strip -->
-    <div class="info-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="info-item"><div class="info-label">Customer</div><div class="info-value" id="di-name">—</div></div>
-      <div class="info-item"><div class="info-label">Phone</div><div class="info-value" id="di-phone">—</div></div>
-      <div class="info-item"><div class="info-label">Email</div><div class="info-value" id="di-email">—</div></div>
-      <div class="info-item" style="grid-column:span 2"><div class="info-label">Address</div><div class="info-value" id="di-address">—</div></div>
-      <div class="info-item"><div class="info-label">Appointment</div><div class="info-value" id="di-appt">—</div></div>
+
+    <!-- Info strip: address / phone / email -->
+    <div class="info-strip">
+      <div class="info-cell"><div class="info-lbl">Address</div><div class="info-val" id="di-address">—</div></div>
+      <div class="info-cell"><div class="info-lbl">Phone</div><div class="info-val" id="di-phone">—</div></div>
+      <div class="info-cell"><div class="info-lbl">Appointment</div><div class="info-val" id="di-appt">—</div></div>
     </div>
-    <!-- Tabs -->
+
+    <!-- Tab nav -->
     <div class="qtabs">
       <button class="qtab active" onclick="showQTab('overview',this)">📋 Overview</button>
       <button class="qtab" onclick="showQTab('products',this)">🪟 Products</button>
-      <button class="qtab" onclick="showQTab('photos',this)">📸 Photos</button>
+      <button class="qtab" onclick="showQTab('survey',this)">📐 Site survey</button>
       <button class="qtab" onclick="showQTab('files',this)">📁 Files</button>
-      <button class="qtab" onclick="showQTab('stage',this)">🏷️ Stage</button>
       <button class="qtab" onclick="showQTab('submit',this)">✅ Submit</button>
     </div>
 
-    <!-- OVERVIEW TAB -->
+    <!-- ═══ OVERVIEW TAB ═══ -->
     <div class="qtab-panel active" id="qtp-overview">
+
+      <!-- Job details -->
       <div class="section">
-        <div class="sec-title">📍 Site details</div>
+        <div class="sec-title">📍 Job details</div>
         <div class="field"><label>Site address</label><input type="text" id="q-siteaddress" placeholder="Full site address"></div>
         <div class="row2">
-          <div class="field"><label>Appointment type</label>
-            <select id="q-appttype" onchange="updateApptType()">
-              <option value="">Select...</option>
-              <option>Virtual</option><option>Site</option><option>Phone</option><option>Showroom</option>
-            </select>
-          </div>
           <div class="field"><label>Lead source</label>
             <select id="q-leadsource">
               <option value="">Select...</option>
@@ -331,6 +385,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
               <option>Internorm</option><option>VELFAC</option><option>Evolution</option>
               <option>Manufacturer referral</option><option>Customer referral</option>
               <option>Social media</option><option>Other</option>
+            </select>
+          </div>
+          <div class="field"><label>Appointment type</label>
+            <select id="q-appttype" onchange="updateApptType()">
+              <option value="">Select...</option>
+              <option>Virtual</option><option>Site</option><option>Phone</option><option>Showroom</option>
             </select>
           </div>
         </div>
@@ -360,21 +420,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         </div>
         <div class="row2">
           <div class="field"><label>Fit days</label><input type="number" id="q-fitdays" min="0" value="1" step="0.5"></div>
-          <div class="field"><label>Access / logistics</label><input type="text" id="q-access" placeholder="Scaffolding, lifting etc."></div>
+          <div class="field"><label>Access / logistics</label><input type="text" id="q-access" placeholder="Scaffolding, parking, lifting..."></div>
         </div>
+        <div class="field"><label>Builder / architect (if applicable)</label><input type="text" id="q-builder" placeholder="Name and contact number"></div>
       </div>
+
+      <!-- Notes -->
       <div class="section">
         <div class="sec-title">📝 Notes</div>
-        <div class="field"><label>Description of works (for customer quote)</label>
-          <textarea id="q-worksdesc" placeholder="Supply and installation of..." style="min-height:100px"></textarea>
+        <div class="field"><label>Description of works (shown on customer quote)</label>
+          <textarea id="q-worksdesc" placeholder="Supply and installation of..." style="min-height:90px"></textarea>
         </div>
         <div class="field"><label>Internal notes</label>
-          <textarea id="q-internalnotes" placeholder="Internal observations, access issues..."></textarea>
+          <textarea id="q-internalnotes" placeholder="Observations, concerns, anything not for the customer..."></textarea>
         </div>
         <div class="field"><label>Customer requirements & preferences</label>
           <textarea id="q-requirements" placeholder="Colours, finishes, hardware, budget range..."></textarea>
         </div>
       </div>
+
       <!-- Profit checker -->
       <div class="section">
         <div class="sec-title">💰 Profit checker</div>
@@ -392,7 +456,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         </div>
         <div class="row2">
           <div class="field"><label>Delivery / fuel (£)</label><input type="number" id="pc-delivery" value="0" oninput="calcProfit()"></div>
-          <div class="field"><label>Product type (for margin)</label>
+          <div class="field"><label>Product type</label>
             <select id="pc-product" onchange="calcProfit()">
               <option value="0.4">Aluminium (40%)</option>
               <option value="0.4">Al-Clad (40%)</option>
@@ -404,21 +468,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
             </select>
           </div>
         </div>
-        <!-- Matrix -->
-        <div class="profit-matrix" id="profit-matrix">
+        <div class="profit-matrix">
           <div class="profit-row"><span class="profit-label">Frame cost</span><span class="profit-val" id="pm-frame">£0</span></div>
           <div class="profit-row"><span class="profit-label">Glass cost</span><span class="profit-val" id="pm-glass">£0</span></div>
           <div class="profit-row"><span class="profit-label">Fit cost</span><span class="profit-val" id="pm-fit">£0</span></div>
           <div class="profit-row"><span class="profit-label">Delivery / fuel</span><span class="profit-val" id="pm-delivery">£0</span></div>
-          <div class="profit-row"><span class="profit-label">Total cost</span><span class="profit-val" id="pm-total">£0</span></div>
-          <div class="profit-row" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.3)">
-            <span style="color:#6ee7b7;font-size:14px">Recommended sale price</span>
+          <div class="profit-row" style="border-top:1px solid rgba(255,255,255,.2);padding-top:8px;margin-top:4px"><span class="profit-label" style="font-size:14px">Total cost</span><span class="profit-val" style="font-size:14px" id="pm-total">£0</span></div>
+          <div class="profit-row" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.3)">
+            <span style="color:#6ee7b7;font-size:14px">Recommended min. sale price</span>
             <span style="color:#6ee7b7;font-size:18px;font-weight:700" id="pm-recommended">£0</span>
           </div>
         </div>
-        <!-- Sold value & grade -->
-        <div class="field" style="margin-top:12px">
-          <label>Quoted / sold price (£)</label>
+        <div class="field"><label>Quoted / sold price (£)</label>
           <input type="number" id="pc-sold" placeholder="Price given to customer" oninput="calcProfit()" style="font-size:18px;font-weight:600">
         </div>
         <div id="grade-box" style="display:none;border-radius:10px;padding:16px;text-align:center;margin-top:10px">
@@ -429,84 +490,87 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       </div>
     </div>
 
-    <!-- PRODUCTS TAB -->
+    <!-- ═══ PRODUCTS TAB ═══ -->
     <div class="qtab-panel" id="qtp-products">
-      <div style="font-size:12px;color:#64748b;margin-bottom:12px">Add each window, door or product. All sizes in mm. Use the canvas to sketch the design.</div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:12px">Add each window, door or unit. All sizes in mm. Specify full product details for the order pack.</div>
       <div id="products-list"></div>
       <button class="add-prod-btn" onclick="addProduct()">+ Add product / item</button>
-    </div>
-
-    <!-- PHOTOS TAB -->
-    <div class="qtab-panel" id="qtp-photos">
-      <div class="section">
-        <div class="sec-title">📸 Site photos</div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:10px">Upload photos of existing windows, doors, site access and any relevant details.</div>
-        <div class="upload-zone" onclick="document.getElementById('photo-input').click()">📷 Tap to upload photos</div>
-        <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
-        <div class="photo-grid" id="photo-grid"></div>
+      <div style="margin-top:14px">
+        <div class="field"><label>Total quoted price (£ ex VAT)</label>
+          <input type="number" id="q-price" placeholder="0.00" style="font-size:18px;font-weight:600">
+        </div>
+        <div class="field"><label>Quote valid (days)</label>
+          <input type="number" id="q-validity" value="30" min="1">
+        </div>
       </div>
     </div>
 
-    <!-- FILES TAB -->
-    <div class="qtab-panel" id="qtp-files">
+    <!-- ═══ SITE SURVEY TAB ═══ -->
+    <div class="qtab-panel" id="qtp-survey">
+      <div style="font-size:12px;color:#64748b;margin-bottom:14px">Capture site measurements, opening details, sketches and photos for each location. This becomes the surveyor's reference.</div>
+
+      <!-- Site overview photos -->
       <div class="section">
-        <div class="sec-title">📁 Project files</div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:10px">Upload spec sheets, brochures, drawings or any other files relating to this project.</div>
+        <div class="sec-title">📸 Site overview photos</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:10px">Overall site photos — access, elevation, existing windows/doors.</div>
+        <div class="upload-zone" onclick="document.getElementById('photo-input').click()">📷 Tap to upload site photos</div>
+        <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
+        <div class="photo-grid" id="photo-grid"></div>
+      </div>
+
+      <!-- Per-opening survey entries -->
+      <div id="survey-list"></div>
+      <button class="add-prod-btn" onclick="addSurveyEntry()">+ Add opening / location</button>
+    </div>
+
+    <!-- ═══ FILES TAB ═══ -->
+    <div class="qtab-panel" id="qtp-files">
+      <!-- Upload new files -->
+      <div class="section">
+        <div class="sec-title">📎 Upload files</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:10px">Spec sheets, drawings, brochures — uploaded to this deal in Monday.</div>
         <div class="upload-zone" onclick="document.getElementById('files-input').click()">📎 Tap to upload files</div>
         <input type="file" id="files-input" multiple style="display:none" onchange="handleFiles(event)">
         <div id="files-list" style="margin-top:10px"></div>
       </div>
-      <!-- Existing Monday files -->
+      <!-- Files from Monday -->
       <div class="section">
-        <div class="sec-title">Files on Monday</div>
+        <div class="sec-title">📁 Files on Monday</div>
         <div id="monday-files-loading" style="font-size:12px;color:#888">Loading...</div>
         <div id="monday-files-list"></div>
       </div>
     </div>
 
-    <!-- STAGE TAB -->
-    <div class="qtab-panel" id="qtp-stage">
-      <div class="section">
-        <div class="sec-title">🏷️ Update deal stage</div>
-        <div class="stage-btns">
-          <button class="stage-btn" onclick="updateStage('New')">New</button>
-          <button class="stage-btn" onclick="updateStage('Appointment')">Appointment</button>
-          <button class="stage-btn" onclick="updateStage('Pricing')">Pricing</button>
-          <button class="stage-btn" onclick="updateStage('Quote Sent')">Quote Sent</button>
-          <button class="stage-btn" onclick="updateStage('Prospect')">Prospect</button>
-          <button class="stage-btn" onclick="updateStage('Won')">Won</button>
-          <button class="stage-btn" onclick="updateStage('Lost')">Lost</button>
-          <button class="stage-btn" onclick="updateStage('Unsuccessful tender')">Unsuccessful tender</button>
-        </div>
-        <div class="stage-saved" id="stage-saved">✓ Stage updated in Monday</div>
-      </div>
-    </div>
-
-    <!-- SUBMIT TAB -->
+    <!-- ═══ SUBMIT TAB ═══ -->
     <div class="qtab-panel" id="qtp-submit">
       <div class="section">
-        <div class="sec-title">✅ Submit</div>
-        <div style="font-size:13px;color:#64748b;margin-bottom:12px">
-          Generates a <strong>customer quote PDF</strong> and uploads it to Monday.<br>
-          If stage is <strong>Won</strong>, also generates a <strong>Surveyor Order Pack</strong> with full product specs for the survey team.
+        <div class="sec-title">✅ Win / lose the deal</div>
+        <div style="font-size:13px;color:#64748b;margin-bottom:14px">
+          Mark the deal as <strong>Won</strong> to generate a customer quote PDF + surveyor order pack and upload both to Monday.<br>
+          Mark as <strong>Lost</strong> to record the outcome.
         </div>
-        <div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:8px;padding:12px;margin-bottom:12px;font-size:13px">
+        <!-- Summary -->
+        <div style="background:#f8fafc;border:1px solid #e5e5e5;border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div><div style="color:#94a3b8;font-size:11px">Customer</div><div style="font-weight:600" id="s-name">—</div></div>
-            <div><div style="color:#94a3b8;font-size:11px">Stage</div><div style="font-weight:600" id="s-stage">—</div></div>
+            <div><div style="color:#94a3b8;font-size:11px">Current stage</div><div style="font-weight:600" id="s-stage">—</div></div>
             <div><div style="color:#94a3b8;font-size:11px">Products</div><div style="font-weight:600" id="s-prods">—</div></div>
             <div><div style="color:#94a3b8;font-size:11px">Quoted price</div><div style="font-weight:600;color:#059669" id="s-price">—</div></div>
           </div>
         </div>
-        <button class="submit-btn" id="submit-btn" onclick="submitQuote()">Generate &amp; submit to Monday →</button>
+        <div class="btn-row">
+          <button class="btn-primary btn-green" id="submit-btn" onclick="submitQuote()" style="margin-bottom:0">🏆 Mark as Won &amp; generate PDFs</button>
+          <button class="btn-primary btn-red" onclick="updateStage('Lost')" style="margin-bottom:0">✗ Mark as Lost</button>
+        </div>
         <div class="progress-box" id="progress-box">
           <div style="font-size:13px;font-weight:500;color:#1e40af;margin-bottom:8px" id="progress-title">Generating...</div>
           <div id="progress-steps"></div>
         </div>
       </div>
     </div>
-  </div>
-</div>
+
+  </div><!-- end deal card -->
+</div><!-- end page-deal -->
 
 <script>
 const DEALS_BOARD='9998586607';
@@ -521,10 +585,11 @@ let currentUser='',allDeals=[],allContacts=[],boardCols=[],contactCols=[];
 let dealsFilter='all',contactsFilter='all';
 let selectedDeal=null,selectedContact=null;
 let products=[],productCount=0,sitePhotos=[],projectFiles=[];
+let surveyEntries=[],surveyCount=0;
 let canvases={},drawingState={},activeTools={},activeColors={};
 const SWATCHES=['#1a1a1a','#2563eb','#dc2626','#16a34a','#d97706','#9333ea','#64748b','#ffffff'];
 
-// \u2500\u2500 Auth \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Auth ──────────────────────────────────────────────────────────────────
 function chkL(){const n=document.getElementById('ln').value.trim(),p=document.getElementById('lp').value;document.getElementById('lbtn').disabled=n.length<2||p.length<1;}
 async function doLogin(){
   const name=document.getElementById('ln').value.trim(),pass=document.getElementById('lp').value;
@@ -557,7 +622,7 @@ function initApp(){
   loadAll();navTo('appts');
 }
 
-// \u2500\u2500 Nav \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Navigation ────────────────────────────────────────────────────────────
 function navTo(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -568,7 +633,18 @@ function navTo(page){
   window.scrollTo(0,0);
 }
 
-// \u2500\u2500 Monday \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Tab switching ─────────────────────────────────────────────────────────
+function showQTab(tab,btn){
+  document.querySelectorAll('.qtab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.qtab').forEach(b=>b.classList.remove('active'));
+  const panel=document.getElementById('qtp-'+tab);
+  if(panel)panel.classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(tab==='submit')updateSubmitSummary();
+  if(tab==='files')loadMondayFiles();
+}
+
+// ── Monday ────────────────────────────────────────────────────────────────
 async function mq(query){
   const res=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query})});
   if(!res.ok)throw new Error('Server error '+res.status);
@@ -578,13 +654,13 @@ async function mq(query){
 }
 async function loadAll(){await Promise.all([loadDeals(),loadContacts()]);}
 
-// \u2500\u2500 Deals \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Deals ─────────────────────────────────────────────────────────────────
 async function loadDeals(){
   try{
     const cd=await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
     boardCols=cd.data?.boards?.[0]?.columns||[];
     const gc=t=>boardCols.find(c=>c.title===t)?.id||'';
-    const spId=gc('Sales Person'),stageId=gc('Stage'),addrId=gc('Address')||gc('Location');
+    const spId=gc('Sales Person'),stageId=gc('Stage'),addrId=gc('Site Address')||gc('Address')||gc('Location');
     const phoneId=gc('Phone'),emailId=gc('Email'),apptId=gc('Appointment'),apptTypeId=gc('Appointment Type');
     const data=await mq(`query{boards(ids:${DEALS_BOARD}){items_page(limit:300){items{id name column_values{id text ...on StatusValue{label} ...on DateValue{date time}}}}}}`);
     const items=data.data?.boards?.[0]?.items_page?.items||[];
@@ -614,10 +690,7 @@ function sBadge(stage){
   const m={'New':'b-new','Appointment':'b-appt','Pricing':'b-pricing','Quote Sent':'b-quotesent','Prospect':'b-prospect','Won':'b-won','Lost':'b-lost','Unsuccessful tender':'b-unsuccessful'};
   return m[stage]||'b-new';
 }
-function apptTypeBadge(type){
-  const m={'Virtual':'b-virtual','Site':'b-site','Phone':'b-phone','Showroom':'b-showroom'};
-  return m[type]||'b-appt';
-}
+function apptTypeBadge(type){const m={'Virtual':'b-virtual','Site':'b-site','Phone':'b-phone','Showroom':'b-showroom'};return m[type]||'b-appt';}
 function fmtDate(d){if(!d)return'';try{return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}catch(e){return d;}}
 function fmtTime(t){if(!t)return'';try{return t.slice(0,5);}catch(e){return t;}}
 
@@ -638,10 +711,10 @@ function renderDeals(){
         <div class="row-meta">${apptStr||d.address||d.phone||'No details'}</div>
       </div>
       <div class="row-right">
-        <span class="badge ${sBadge(d.stage)}">${d.stage||'\u2014'}</span>
+        <span class="badge ${sBadge(d.stage)}">${d.stage||'—'}</span>
         ${d.apptType?`<span class="badge ${apptTypeBadge(d.apptType)}">${d.apptType}</span>`:''}
       </div>
-      <div class="row-arrow">\u203a</div>
+      <div class="row-arrow">›</div>
     </div>`;
   }).join('');
 }
@@ -654,11 +727,10 @@ function renderStats(){
 }
 function setDF(f,btn){dealsFilter=f;document.querySelectorAll('#page-deals .ftab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderDeals();}
 
-// \u2500\u2500 Appointments \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Appointments ──────────────────────────────────────────────────────────
 function renderAppointments(){
   const loadEl=document.getElementById('appts-loading');if(loadEl)loadEl.style.display='none';
-  const today=new Date();today.setHours(0,0,0,0);
-  const todayStr=today.toISOString().slice(0,10);
+  const todayStr=new Date().toISOString().slice(0,10);
   const appts=allDeals.filter(d=>d.apptDate).map(d=>({...d,dateObj:new Date(d.apptDate)})).sort((a,b)=>a.dateObj-b.dateObj);
   const todayA=appts.filter(d=>d.apptDate===todayStr);
   const upcomingA=appts.filter(d=>d.apptDate>todayStr);
@@ -682,12 +754,12 @@ function renderAppointments(){
     </div>`;
   }
   const te=document.getElementById('appts-today'),ue=document.getElementById('appts-upcoming');
-  te.innerHTML=todayA.length>0?`<div style="font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">Today</div>`+todayA.map(d=>html(d,true)).join(''):`<div style="background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:16px;text-align:center;color:#94a3b8;font-size:13px;margin-bottom:10px">No appointments today</div>`;
-  ue.innerHTML=upcomingA.length>0?`<div style="font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:8px;margin-top:14px;text-transform:uppercase;letter-spacing:0.06em">Upcoming</div>`+upcomingA.map(d=>html(d,false)).join(''):'';
+  te.innerHTML=todayA.length>0?`<div style="font-size:11px;font-weight:700;color:#1e3a5f;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Today</div>`+todayA.map(d=>html(d,true)).join(''):`<div style="background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:16px;text-align:center;color:#94a3b8;font-size:13px;margin-bottom:10px">No appointments today</div>`;
+  ue.innerHTML=upcomingA.length>0?`<div style="font-size:11px;font-weight:700;color:#1e3a5f;margin-bottom:8px;margin-top:14px;text-transform:uppercase;letter-spacing:.06em">Upcoming</div>`+upcomingA.map(d=>html(d,false)).join(''):'';
   if(!todayA.length&&!upcomingA.length)ue.innerHTML='<div class="empty"><div style="font-size:32px;margin-bottom:8px">📅</div>No upcoming appointments</div>';
 }
 
-// \u2500\u2500 Contacts \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Contacts ──────────────────────────────────────────────────────────────
 async function loadContacts(){
   try{
     const cd=await mq(`query{boards(ids:${CONTACTS_BOARD}){columns{id title type}}}`);
@@ -718,7 +790,7 @@ function renderContacts(){
       <div class="row-avatar">${init}</div>
       <div class="row-main"><div class="row-name">${c.name}</div><div class="row-meta">${c.address||c.phone||'No details'}</div></div>
       <div class="row-right">${c.clientType?`<span class="badge ${typeCls[c.clientType]||'b-client'}">${c.clientType}</span>`:''}</div>
-      <div class="row-arrow">\u203a</div>
+      <div class="row-arrow">›</div>
     </div>`;
   }).join('');
 }
@@ -727,20 +799,18 @@ function setCF(f,btn){contactsFilter=f;document.querySelectorAll('#page-contacts
 function openContact(id){
   selectedContact=allContacts.find(c=>c.id===id);if(!selectedContact)return;
   document.getElementById('cd-title').textContent=selectedContact.name;
-  document.getElementById('cd-phone').textContent=selectedContact.phone||'\u2014';
-  document.getElementById('cd-email').textContent=selectedContact.email||'\u2014';
-  document.getElementById('cd-address').textContent=selectedContact.address||'\u2014';
-  document.getElementById('cd-type').textContent=selectedContact.clientType||'\u2014';
-  document.getElementById('cd-comments').textContent=selectedContact.comments||'\u2014';
-  document.getElementById('create-deal-btn').disabled=false;
-  document.getElementById('create-deal-btn').textContent='+ Create deal from this contact';
-  document.getElementById('create-deal-btn').style.background='#1e3a5f';
+  document.getElementById('cd-phone').textContent=selectedContact.phone||'—';
+  document.getElementById('cd-email').textContent=selectedContact.email||'—';
+  document.getElementById('cd-address').textContent=selectedContact.address||'—';
+  document.getElementById('cd-type').textContent=selectedContact.clientType||'—';
+  document.getElementById('cd-comments').textContent=selectedContact.comments||'';
+  const btn=document.getElementById('create-deal-btn');
+  btn.disabled=false;btn.textContent='+ Create deal from this contact';btn.style.background='';
   document.getElementById('create-deal-status').style.display='none';
   const linked=allDeals.filter(d=>d.name.toLowerCase().includes(selectedContact.name.split(' ')[0].toLowerCase()));
-  const dealsEl=document.getElementById('cd-deals');
-  dealsEl.innerHTML=linked.length>0?linked.map(d=>`<div class="list-row" style="padding:10px 0" onclick="openDeal('${d.id}')">
+  document.getElementById('cd-deals').innerHTML=linked.length>0?linked.map(d=>`<div class="list-row" style="padding:10px 0" onclick="openDeal('${d.id}')">
     <div class="row-main"><div class="row-name">${d.name}</div><div class="row-meta">${d.apptDate?fmtDate(d.apptDate):'No appointment'}</div></div>
-    <span class="badge ${sBadge(d.stage)}">${d.stage||'\u2014'}</span><div class="row-arrow">\u203a</div>
+    <span class="badge ${sBadge(d.stage)}">${d.stage||'—'}</span><div class="row-arrow">›</div>
   </div>`).join(''):'<div style="font-size:12px;color:#94a3b8">No linked deals found.</div>';
   navTo('contact-detail');
 }
@@ -748,7 +818,7 @@ function openContact(id){
 async function createDealFromContact(){
   if(!selectedContact)return;
   const btn=document.getElementById('create-deal-btn'),statusEl=document.getElementById('create-deal-status');
-  btn.disabled=true;btn.textContent='Creating deal...';statusEl.style.display='none';
+  btn.disabled=true;btn.textContent='Creating...';statusEl.style.display='none';
   try{
     const cd=await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
     const cols=cd.data?.boards?.[0]?.columns||[];
@@ -762,62 +832,48 @@ async function createDealFromContact(){
     const result=await mq(`mutation{create_item(board_id:${DEALS_BOARD},item_name:"${selectedContact.name.replace(/"/g,'\\"')}",column_values:${cvStr}){id}}`);
     const newId=result.data?.create_item?.id;
     if(!newId)throw new Error('Could not create deal');
-    await mq(`mutation{create_update(item_id:${newId},body:"Deal created from Contacts board. Type: ${selectedContact.clientType||'Client'}."){id}}`);
-    statusEl.textContent='\u2713 Deal created!';statusEl.style.color='#059669';statusEl.style.display='block';
-    btn.textContent='\u2713 Created';btn.style.background='#10b981';
+    statusEl.textContent='✓ Deal created!';statusEl.style.color='#059669';statusEl.style.display='block';
+    btn.textContent='✓ Created';btn.style.background='#10b981';
     await loadDeals();
-  }catch(err){statusEl.textContent='\u2717 '+err.message;statusEl.style.color='#dc2626';statusEl.style.display='block';btn.disabled=false;btn.textContent='+ Create deal from this contact';}
+  }catch(err){statusEl.textContent='✗ '+err.message;statusEl.style.color='#dc2626';statusEl.style.display='block';btn.disabled=false;btn.textContent='+ Create deal from this contact';}
 }
 
-// \u2500\u2500 Deal detail \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Deal detail ───────────────────────────────────────────────────────────
 function openDeal(id){
   selectedDeal=allDeals.find(d=>d.id===id);if(!selectedDeal)return;
+  // Header
   document.getElementById('deal-title').textContent=selectedDeal.name;
-  const badge=document.getElementById('deal-stage-badge');badge.textContent=selectedDeal.stage||'\u2014';badge.className='badge '+sBadge(selectedDeal.stage);
-  document.getElementById('di-name').textContent=selectedDeal.name||'\u2014';
-  document.getElementById('di-phone').textContent=selectedDeal.phone||'\u2014';
-  document.getElementById('di-email').textContent=selectedDeal.email||'\u2014';
-  document.getElementById('di-address').textContent=selectedDeal.address||'\u2014';
-  document.getElementById('q-siteaddress').value=selectedDeal.address||'';
-  const apptStr=selectedDeal.apptDate?(fmtDate(selectedDeal.apptDate)+(selectedDeal.apptTime?' at '+fmtTime(selectedDeal.apptTime):'')+(selectedDeal.apptType?' ('+selectedDeal.apptType+')':'')):'-';
+  document.getElementById('deal-meta').textContent=(selectedDeal.phone||'')+(selectedDeal.phone&&selectedDeal.email?' · ':'')+( selectedDeal.email||'');
+  // Info strip
+  document.getElementById('di-address').textContent=selectedDeal.address||'—';
+  document.getElementById('di-phone').textContent=selectedDeal.phone||'—';
+  let apptStr=selectedDeal.apptDate?fmtDate(selectedDeal.apptDate):'\u2014';if(selectedDeal.apptDate&&selectedDeal.apptTime)apptStr+=' at '+fmtTime(selectedDeal.apptTime);if(selectedDeal.apptDate&&selectedDeal.apptType)apptStr+=' ('+selectedDeal.apptType+')';
   document.getElementById('di-appt').textContent=apptStr;
-  // Set current appt type in dropdown
-  if(selectedDeal.apptType){const sel=document.getElementById('q-appttype');for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===selectedDeal.apptType){sel.selectedIndex=i;break;}}}
-  document.querySelectorAll('.stage-btn').forEach(b=>b.classList.toggle('active',b.textContent===selectedDeal.stage));
-  products=[];productCount=0;sitePhotos=[];projectFiles=[];canvases={};drawingState={};activeTools={};activeColors={};
+  // Stage pills
+  document.querySelectorAll('.stage-pill').forEach(b=>{
+    const isActive=b.textContent===selectedDeal.stage;
+    b.className='stage-pill '+(isActive?'active':'inactive');
+  });
+  document.getElementById('stage-saved').style.display='none';
+  // Pre-fill overview fields
+  document.getElementById('q-siteaddress').value=selectedDeal.address||'';
+  if(selectedDeal.apptType){
+    const sel=document.getElementById('q-appttype');
+    for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===selectedDeal.apptType){sel.selectedIndex=i;break;}}
+  }
+  // Reset tabs and data
+  products=[];productCount=0;sitePhotos=[];projectFiles=[];surveyEntries=[];surveyCount=0;
+  canvases={};drawingState={};activeTools={};activeColors={};
   document.getElementById('products-list').innerHTML='';
   document.getElementById('photo-grid').innerHTML='';
   document.getElementById('files-list').innerHTML='';
+  document.getElementById('survey-list').innerHTML='';
   document.getElementById('progress-box').style.display='none';
-  document.getElementById('stage-saved').style.display='none';
-  document.getElementById('deal-back-btn').onclick=()=>navTo('deals');
+  // Show first tab
   showQTab('overview',document.querySelector('.qtab'));
-  loadMondayFiles();
   navTo('deal');
 }
 
-function showQTab(tab,btn){
-  document.querySelectorAll('.qtab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.qtab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('qtp-'+tab).classList.add('active');
-  if(btn)btn.classList.add('active');
-  if(tab==='submit')updateSubmitSummary();
-}
-
-// \u2500\u2500 Appointment Type update \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-async function updateApptType(){
-  if(!selectedDeal||!selectedDeal.apptTypeId)return;
-  const newType=document.getElementById('q-appttype').value;
-  if(!newType)return;
-  try{
-    const val=JSON.stringify(JSON.stringify({label:newType}));
-    await mq(`mutation{change_column_value(board_id:${DEALS_BOARD},item_id:${selectedDeal.id},column_id:"${selectedDeal.apptTypeId}",value:${val}){id}}`);
-    selectedDeal.apptType=newType;
-    const d=allDeals.find(x=>x.id===selectedDeal.id);if(d)d.apptType=newType;
-  }catch(e){console.warn('Could not update appt type:',e);}
-}
-
-// \u2500\u2500 Stage update \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 async function updateStage(newStage){
   if(!selectedDeal)return;
   try{
@@ -826,17 +882,28 @@ async function updateStage(newStage){
     const val=JSON.stringify(JSON.stringify({label:newStage}));
     await mq(`mutation{change_column_value(board_id:${DEALS_BOARD},item_id:${selectedDeal.id},column_id:"${stageColId}",value:${val}){id}}`);
     selectedDeal.stage=newStage;
-    document.getElementById('deal-stage-badge').textContent=newStage;
-    document.getElementById('deal-stage-badge').className='badge '+sBadge(newStage);
-    document.querySelectorAll('.stage-btn').forEach(b=>b.classList.toggle('active',b.textContent===newStage));
-    document.getElementById('stage-saved').style.display='block';
+    document.querySelectorAll('.stage-pill').forEach(b=>{
+      b.className='stage-pill '+(b.textContent===newStage?'active':'inactive');
+    });
+    document.getElementById('stage-saved').style.display='inline';
     setTimeout(()=>document.getElementById('stage-saved').style.display='none',3000);
     const d=allDeals.find(x=>x.id===selectedDeal.id);if(d)d.stage=newStage;
     renderStats();
   }catch(err){alert('Could not update stage: '+err.message);}
 }
 
-// \u2500\u2500 Profit checker \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+async function updateApptType(){
+  if(!selectedDeal||!selectedDeal.apptTypeId)return;
+  const newType=document.getElementById('q-appttype').value;
+  if(!newType)return;
+  try{
+    const val=JSON.stringify(JSON.stringify({label:newType}));
+    await mq(`mutation{change_column_value(board_id:${DEALS_BOARD},item_id:${selectedDeal.id},column_id:"${selectedDeal.apptTypeId}",value:${val}){id}}`);
+    selectedDeal.apptType=newType;
+  }catch(e){console.warn('Could not update appt type:',e);}
+}
+
+// ── Profit checker ────────────────────────────────────────────────────────
 function calcProfit(){
   const frame=parseFloat(document.getElementById('pc-frame').value)||0;
   const discount=parseFloat(document.getElementById('pc-discount').value)||0;
@@ -846,32 +913,31 @@ function calcProfit(){
   const dayRate=parseFloat(document.getElementById('pc-dayrate').value)||550;
   const delivery=parseFloat(document.getElementById('pc-delivery').value)||0;
   const sold=parseFloat(document.getElementById('pc-sold').value)||0;
-  const productSel=document.getElementById('pc-product');
-  const margin=parseFloat(productSel.value)||0.4;
+  const margin=parseFloat(document.getElementById('pc-product').value)||0.4;
   const frameCost=frame*(1-(discount/100))+surcharge;
   const fitCost=fitDays*dayRate;
   const totalCost=frameCost+glass+fitCost+delivery;
   const recommended=totalCost>0?totalCost/(1-margin):0;
-  document.getElementById('pm-frame').textContent='\u00a3'+frameCost.toFixed(0);
-  document.getElementById('pm-glass').textContent='\u00a3'+glass.toFixed(0);
-  document.getElementById('pm-fit').textContent='\u00a3'+fitCost.toFixed(0);
-  document.getElementById('pm-delivery').textContent='\u00a3'+delivery.toFixed(0);
-  document.getElementById('pm-total').textContent='\u00a3'+totalCost.toFixed(0);
-  document.getElementById('pm-recommended').textContent='\u00a3'+recommended.toFixed(0);
+  document.getElementById('pm-frame').textContent='£'+frameCost.toFixed(0);
+  document.getElementById('pm-glass').textContent='£'+glass.toFixed(0);
+  document.getElementById('pm-fit').textContent='£'+fitCost.toFixed(0);
+  document.getElementById('pm-delivery').textContent='£'+delivery.toFixed(0);
+  document.getElementById('pm-total').textContent='£'+totalCost.toFixed(0);
+  document.getElementById('pm-recommended').textContent='£'+recommended.toFixed(0);
   const gradeBox=document.getElementById('grade-box');
   if(sold>0&&recommended>0){
     const pct=(sold/recommended)*100;
     gradeBox.style.display='block';
     document.getElementById('grade-pct').textContent=pct.toFixed(1)+'%';
-    document.getElementById('grade-detail').textContent='Quoted \u00a3'+sold.toLocaleString()+' vs recommended \u00a3'+recommended.toFixed(0);
-    if(pct>=100){gradeBox.style.cssText='display:block;background:#d1fae5;border:1px solid #6ee7b7;border-radius:10px;padding:16px;text-align:center;margin-top:10px';document.getElementById('grade-pct').style.color='#059669';document.getElementById('grade-lbl').textContent='of recommended \u2014 excellent';}
-    else if(pct>=90){gradeBox.style.cssText='display:block;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:16px;text-align:center;margin-top:10px';document.getElementById('grade-pct').style.color='#d97706';document.getElementById('grade-lbl').textContent='of recommended \u2014 good';}
-    else if(pct>=75){gradeBox.style.cssText='display:block;background:#fff7ed;border:1px solid #fdba74;border-radius:10px;padding:16px;text-align:center;margin-top:10px';document.getElementById('grade-pct').style.color='#ea580c';document.getElementById('grade-lbl').textContent='of recommended \u2014 below target';}
-    else{gradeBox.style.cssText='display:block;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:16px;text-align:center;margin-top:10px';document.getElementById('grade-pct').style.color='#dc2626';document.getElementById('grade-lbl').textContent='of recommended \u2014 significantly under';}
+    document.getElementById('grade-detail').textContent='Quoted £'+sold.toLocaleString()+' vs recommended £'+recommended.toFixed(0);
+    const colors=pct>=100?['#d1fae5','#6ee7b7','#059669','of recommended — excellent']:pct>=90?['#fffbeb','#fcd34d','#d97706','of recommended — good']:pct>=75?['#fff7ed','#fdba74','#ea580c','of recommended — below target']:['#fef2f2','#fca5a5','#dc2626','of recommended — significantly under'];
+    gradeBox.style.cssText=`display:block;background:${colors[0]};border:1px solid ${colors[1]};border-radius:10px;padding:16px;text-align:center;margin-top:10px`;
+    document.getElementById('grade-pct').style.color=colors[2];
+    document.getElementById('grade-lbl').textContent=colors[3];
   }else{gradeBox.style.display='none';}
 }
 
-// \u2500\u2500 Products \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Products ──────────────────────────────────────────────────────────────
 const PROD_TYPES=['Casement window','Flush casement window','Tilt & turn window','Sash window','Fixed window','Bifold door','Sliding door','French door','Front door','Rooflight','Curtain walling','Internal door'];
 const SYSTEMS=['Liniar UPVC','Deceuninck UPVC','Emplas UPVC','Rehau UPVC','Origin Aluminium','Schuco Aluminium','Reynaers Aluminium','Smart Aluminium','AluK Aluminium','Internorm Al-Clad','Rationel Dovista Al-Clad','Velfac Dovista Al-Clad','Bereco Timber','Accoya Timber','Accoya Timber-Alt','Evolution Timber-Alt','Masterframe Timber-Alt','Residence Collection R7','Residence Collection R9','Solarlux Bifold','Glideline Bifold','Kommerling UPVC','Other'];
 const GLASS_TYPES=['Annealed (float)','Toughened','Laminated'];
@@ -880,7 +946,6 @@ const OBSCURE_TYPES=['Satin','Acid etch','Cotswold','Everglade','Florenze','Nash
 const HINGE_TYPES=['N/A','Standard','Fire escape (egress)','Easy clean egress','Tilt and turn'];
 const COLOURS=['White','Anthracite grey','Black','Cream','Chartwell green','Grey/white','RAL custom','Other'];
 const CILL_TYPES=['No cill','UPVC cill','Aluminium cill','Internorm transport packer','Dovista attachment profile','Dovista timber packer cill','Slim pressing'];
-
 function selOpts(arr){return arr.map(a=>`<option>${a}</option>`).join('');}
 
 function addProduct(){
@@ -895,7 +960,7 @@ function addProduct(){
     </div>
     <div class="prod-body">
       <div class="row3">
-        <div class="field" style="margin:0"><label>Product type</label><select onchange="upd('${id}','type',this.value);toggleObscure('${id}')"><option value="">Select...</option>${selOpts(PROD_TYPES)}</select></div>
+        <div class="field" style="margin:0"><label>Product type</label><select onchange="upd('${id}','type',this.value)"><option value="">Select...</option>${selOpts(PROD_TYPES)}</select></div>
         <div class="field" style="margin:0"><label>System / supplier</label><select onchange="upd('${id}','system',this.value)"><option value="">Select...</option>${selOpts(SYSTEMS)}</select></div>
         <div class="field" style="margin:0"><label>Qty</label><input type="number" value="1" min="1" oninput="upd('${id}','qty',this.value)"></div>
       </div>
@@ -932,41 +997,90 @@ function addProduct(){
           <div class="field" style="margin:0"><label>Location / ref</label><input type="text" placeholder="e.g. Kitchen" oninput="upd('${id}','location',this.value)"></div>
         </div>
         <div class="field" style="margin-top:8px;margin-bottom:0"><label>Additional notes / spec</label>
-          <input type="text" placeholder="Any extra specification..." oninput="upd('${id}','notes',this.value)">
+          <input type="text" placeholder="Any extra specification, hardware notes..." oninput="upd('${id}','notes',this.value)">
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('products-list').appendChild(div);
+}
+function toggleObscure(id){const f=document.getElementById(id+'-finish')?.value,w=document.getElementById(id+'-obscure-wrap');if(w)w.style.display=f==='Obscure'?'block':'none';}
+function removeProduct(id){products=products.filter(p=>p.id!==id);document.getElementById(id)?.remove();}
+function upd(id,field,value){const p=products.find(p=>p.id===id);if(p)p[field]=value;}
+
+// ── Site survey entries ───────────────────────────────────────────────────
+function addSurveyEntry(){
+  surveyCount++;
+  const id='sv'+surveyCount;
+  surveyEntries.push({id,location:'',width:'',height:'',notes:'',photos:[]});
+  const div=document.createElement('div');div.className='prod-item';div.id=id;
+  div.innerHTML=`
+    <div class="prod-header">
+      <div class="prod-num">Opening ${surveyCount}</div>
+      <button class="prod-remove" onclick="removeSurveyEntry('${id}')">Remove</button>
+    </div>
+    <div class="prod-body">
+      <div class="row2">
+        <div class="field" style="margin:0"><label>Location / reference</label><input type="text" placeholder="e.g. Kitchen window" oninput="updSv('${id}','location',this.value)"></div>
+        <div class="field" style="margin:0"><label>Product type</label><select onchange="updSv('${id}','type',this.value)"><option value="">Select...</option>${selOpts(PROD_TYPES)}</select></div>
+      </div>
+      <div class="sub-section" style="margin-top:10px">
+        <div class="sub-title">Measured opening sizes</div>
+        <div class="row3">
+          <div class="field" style="margin:0"><label>Width (mm)</label><input type="number" placeholder="Overall width" oninput="updSv('${id}','width',this.value)"></div>
+          <div class="field" style="margin:0"><label>Height (mm)</label><input type="number" placeholder="Overall height" oninput="updSv('${id}','height',this.value)"></div>
+          <div class="field" style="margin:0"><label>Reveal depth (mm)</label><input type="number" placeholder="Depth" oninput="updSv('${id}','depth',this.value)"></div>
+        </div>
+        <div class="row2" style="margin-top:8px">
+          <div class="field" style="margin:0"><label>Cill condition</label><select onchange="updSv('${id}','cillCondition',this.value)"><option>Good</option><option>Replace required</option><option>No cill</option><option>New cill required</option></select></div>
+          <div class="field" style="margin:0"><label>Lintel type</label><select onchange="updSv('${id}','lintel',this.value)"><option>N/A</option><option>Timber</option><option>Steel</option><option>Concrete</option><option>Unknown</option></select></div>
         </div>
       </div>
       <div class="sub-section">
-        <div class="sub-title">Design sketch</div>
+        <div class="sub-title">Observations & notes</div>
+        <div class="field" style="margin:0"><label>Site notes for this opening</label>
+          <textarea placeholder="Condition of existing frame, access issues, special requirements, hazards..." style="min-height:70px" oninput="updSv('${id}','notes',this.value)"></textarea>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">Sketch</div>
         <div class="canvas-wrap">
           <canvas class="sketch-canvas" id="${id}-canvas" height="200"></canvas>
           <div class="canvas-toolbar">
-            <button class="tool-btn active" id="${id}-tool-pen" onclick="setTool('${id}','pen')">\u270f\ufe0f Pen</button>
-            <button class="tool-btn" id="${id}-tool-erase" onclick="setTool('${id}','erase')">\u2b1c Eraser</button>
-            <button class="tool-btn" onclick="clearCanvas('${id}')">🗑\ufe0f Clear</button>
+            <button class="tool-btn active" id="${id}-tool-pen" onclick="setTool('${id}','pen')">✏️ Pen</button>
+            <button class="tool-btn" id="${id}-tool-erase" onclick="setTool('${id}','erase')">⬜ Eraser</button>
+            <button class="tool-btn" onclick="clearCanvas('${id}')">🗑️ Clear</button>
             ${SWATCHES.map(c=>`<div class="color-swatch${c==='#1a1a1a'?' active':''}" style="background:${c}" onclick="setColor('${id}','${c}',this)"></div>`).join('')}
           </div>
         </div>
       </div>
       <div class="sub-section">
-        <div class="sub-title">Item photos</div>
-        <div class="upload-zone" onclick="document.getElementById('${id}-photos').click()">📷 Add photos for this item</div>
-        <input type="file" id="${id}-photos" accept="image/*" multiple style="display:none" onchange="handleItemPhotos('${id}',event)">
+        <div class="sub-title">Photos of this opening</div>
+        <div class="upload-zone" onclick="document.getElementById('${id}-photos').click()">📷 Add photos for this opening</div>
+        <input type="file" id="${id}-photos" accept="image/*" multiple style="display:none" onchange="handleSurveyPhotos('${id}',event)">
         <div class="photo-grid" id="${id}-photo-grid"></div>
       </div>
     </div>`;
-  document.getElementById('products-list').appendChild(div);
+  document.getElementById('survey-list').appendChild(div);
   initCanvas(id);
 }
-
-function toggleObscure(id){
-  const finish=document.getElementById(id+'-finish')?.value;
-  const wrap=document.getElementById(id+'-obscure-wrap');
-  if(wrap)wrap.style.display=finish==='Obscure'?'block':'none';
+function removeSurveyEntry(id){surveyEntries=surveyEntries.filter(s=>s.id!==id);delete canvases[id];document.getElementById(id)?.remove();}
+function updSv(id,field,value){const s=surveyEntries.find(s=>s.id===id);if(s)s[field]=value;}
+function handleSurveyPhotos(id,e){
+  const s=surveyEntries.find(s=>s.id===id);if(!s){return;}
+  if(!s.photos)s.photos=[];
+  Array.from(e.target.files).forEach(file=>{
+    const r=new FileReader();
+    r.onload=ev=>{s.photos.push({name:file.name,dataUrl:ev.target.result});renderSurveyPhotos(id,s.photos);};
+    r.readAsDataURL(file);
+  });e.target.value='';
 }
-function removeProduct(id){products=products.filter(p=>p.id!==id);delete canvases[id];document.getElementById(id)?.remove();}
-function upd(id,field,value){const p=products.find(p=>p.id===id);if(p)p[field]=value;}
+function renderSurveyPhotos(id,photos){
+  const grid=document.getElementById(id+'-photo-grid');if(!grid)return;
+  grid.innerHTML=(photos||[]).map((p,i)=>`<div class="photo-thumb"><img src="${p.dataUrl}"><button onclick="removeSurveyPhoto('${id}',${i})">×</button></div>`).join('');
+}
+function removeSurveyPhoto(id,i){const s=surveyEntries.find(s=>s.id===id);if(s&&s.photos){s.photos.splice(i,1);renderSurveyPhotos(id,s.photos);}}
 
-// \u2500\u2500 Canvas \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Canvas ────────────────────────────────────────────────────────────────
 function initCanvas(id){
   const canvas=document.getElementById(id+'-canvas');if(!canvas)return;
   canvas.width=canvas.offsetWidth||600;
@@ -986,42 +1100,25 @@ function setTool(id,tool){activeTools[id]=tool;document.getElementById(id+'-tool
 function setColor(id,color,el){activeColors[id]=color;el.closest('.canvas-toolbar').querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));el.classList.add('active');}
 function clearCanvas(id){const c=canvases[id];if(c)c.ctx.clearRect(0,0,c.canvas.width,c.canvas.height);}
 
-function handleItemPhotos(id,e){
-  const p=products.find(p=>p.id===id);if(!p){return;}
-  if(!p.photos)p.photos=[];
-  Array.from(e.target.files).forEach(file=>{
-    const r=new FileReader();
-    r.onload=ev=>{p.photos.push({name:file.name,dataUrl:ev.target.result});renderItemPhotos(id,p.photos);};
-    r.readAsDataURL(file);
-  });
-  e.target.value='';
-}
-function renderItemPhotos(id,photos){
-  const grid=document.getElementById(id+'-photo-grid');if(!grid)return;
-  grid.innerHTML=(photos||[]).map((p,i)=>`<div class="photo-thumb"><img src="${p.dataUrl}"><button onclick="removeItemPhoto('${id}',${i})">\u00d7</button></div>`).join('');
-}
-function removeItemPhoto(id,i){const p=products.find(p=>p.id===id);if(p&&p.photos){p.photos.splice(i,1);renderItemPhotos(id,p.photos);}}
-
-// \u2500\u2500 Site photos \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Site photos ───────────────────────────────────────────────────────────
 function handlePhotos(e){Array.from(e.target.files).forEach(file=>{const r=new FileReader();r.onload=ev=>{sitePhotos.push({name:file.name,dataUrl:ev.target.result});renderPhotos();};r.readAsDataURL(file);});e.target.value='';}
-function renderPhotos(){document.getElementById('photo-grid').innerHTML=sitePhotos.map((p,i)=>`<div class="photo-thumb"><img src="${p.dataUrl}"><button onclick="removePhoto(${i})">\u00d7</button></div>`).join('');}
+function renderPhotos(){document.getElementById('photo-grid').innerHTML=sitePhotos.map((p,i)=>`<div class="photo-thumb"><img src="${p.dataUrl}"><button onclick="removePhoto(${i})">×</button></div>`).join('');}
 function removePhoto(i){sitePhotos.splice(i,1);renderPhotos();}
 
-// \u2500\u2500 Project files \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Project files ─────────────────────────────────────────────────────────
 function handleFiles(e){
   Array.from(e.target.files).forEach(file=>{
     const r=new FileReader();
     r.onload=ev=>{projectFiles.push({name:file.name,dataUrl:ev.target.result,type:file.type});renderFilesList();};
     r.readAsDataURL(file);
-  });
-  e.target.value='';
+  });e.target.value='';
 }
 function renderFilesList(){
   document.getElementById('files-list').innerHTML=projectFiles.map((f,i)=>`
     <div style="display:flex;align-items:center;gap:10px;padding:8px;background:#f8fafc;border:1px solid #e5e5e5;border-radius:7px;margin-bottom:6px">
       <span style="font-size:20px">${f.type?.includes('pdf')?'📄':'📎'}</span>
       <span style="flex:1;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</span>
-      <button onclick="projectFiles.splice(${i},1);renderFilesList()" style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;border:none;border-radius:5px;padding:3px 8px;font-size:12px;cursor:pointer">Remove</button>
+      <button onclick="projectFiles.splice(${i},1);renderFilesList()" style="background:#fef2f2;border:none;color:#dc2626;border-radius:5px;padding:3px 8px;font-size:12px;cursor:pointer">Remove</button>
     </div>`).join('');
 }
 async function loadMondayFiles(){
@@ -1044,28 +1141,28 @@ async function loadMondayFiles(){
   }catch(e){if(loadEl)loadEl.textContent='Could not load files.';}
 }
 
-// \u2500\u2500 Submit summary \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Submit summary ────────────────────────────────────────────────────────
 function updateSubmitSummary(){
-  document.getElementById('s-name').textContent=selectedDeal?.name||'\u2014';
-  document.getElementById('s-stage').textContent=selectedDeal?.stage||'\u2014';
+  document.getElementById('s-name').textContent=selectedDeal?.name||'—';
+  document.getElementById('s-stage').textContent=selectedDeal?.stage||'—';
   document.getElementById('s-prods').textContent=products.length+' item(s)';
-  const pv=document.getElementById('pc-sold').value;
-  document.getElementById('s-price').textContent=pv?'\u00a3'+parseFloat(pv).toLocaleString('en-GB',{minimumFractionDigits:2}):'\u2014';
+  const pv=document.getElementById('q-price')?.value;
+  document.getElementById('s-price').textContent=pv?'£'+parseFloat(pv).toLocaleString('en-GB',{minimumFractionDigits:2}):'\u2014';
 }
 
-// \u2500\u2500 PDF: Customer quote \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── PDFs ──────────────────────────────────────────────────────────────────
 function generateCustomerQuotePDF(){
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const name=selectedDeal?.name||'\u2014';
+  const name=selectedDeal?.name||'—';
   const address=document.getElementById('q-siteaddress').value||selectedDeal?.address||'';
   const phone=selectedDeal?.phone||'';
   const email=selectedDeal?.email||'';
   const dateStr=new Date().toLocaleDateString('en-GB');
-  const validity=30;
+  const validity=parseInt(document.getElementById('q-validity')?.value)||30;
   const validUntil=new Date();validUntil.setDate(validUntil.getDate()+validity);
   const vatRate=parseFloat(document.getElementById('q-vat').value)||0;
-  const soldValue=parseFloat(document.getElementById('pc-sold').value)||0;
+  const soldValue=parseFloat(document.getElementById('q-price')?.value)||0;
   const vatAmt=soldValue*vatRate;
   const totalIncVat=soldValue+vatAmt;
   const refNum='BWD-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
@@ -1076,7 +1173,7 @@ function generateCustomerQuotePDF(){
   doc.text('Burgess Windows & Doors',14,16);
   doc.setFontSize(9);doc.setFont('helvetica','normal');
   doc.text('Premium Window & Door Specialists',14,23);
-  doc.text('Tel: 01234 567890  |  info@burgesswd.co.uk  |  www.burgesswd.co.uk',14,29);
+  doc.text('Tel: 01280 815493  |  info@burgesswd.co.uk  |  www.burgesswd.co.uk',14,29);
   doc.setFillColor(245,158,11);doc.rect(150,0,60,36,'F');
   doc.setTextColor(255,255,255);doc.setFontSize(14);doc.setFont('helvetica','bold');
   doc.text('QUOTATION',152,14);doc.setFontSize(8);doc.setFont('helvetica','normal');
@@ -1088,8 +1185,8 @@ function generateCustomerQuotePDF(){
   doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(30,30,30);doc.text(name,14,y);
   doc.setFont('helvetica','normal');doc.setFontSize(9);
   if(address){const al=doc.splitTextToSize(address,84);doc.text(al,14,y+5);}
-  if(phone&&phone!=='\u2014')doc.text('T: '+phone,14,y+15);
-  if(email&&email!=='\u2014')doc.text('E: '+email,14,y+20);
+  if(phone&&phone!=='—')doc.text('T: '+phone,14,y+15);
+  if(email&&email!=='—')doc.text('E: '+email,14,y+20);
   let ry=y;
   doc.text('Salesperson: '+currentUser,116,ry);ry+=5;
   doc.text('Payment: '+payTerms,116,ry);ry+=5;
@@ -1104,7 +1201,10 @@ function generateCustomerQuotePDF(){
   }
   if(products.length>0){
     doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);doc.text('Schedule of Works',14,y);y+=4;
-    doc.autoTable({startY:y,head:[['#','Product','System','Size','Qty','Colour','Glass','Notes']],body:products.map((p,i)=>[i+1,p.type||'\u2014',p.system||'\u2014',p.width&&p.height?p.width+' \u00d7 '+p.height+'mm':'TBC',p.qty||1,p.colour||'\u2014',p.glazing+(p.glassFinish==='Obscure'?(' Obscure'+(p.obscureType?(' ('+p.obscureType+')'):'')):''),p.notes||'']),styles:{fontSize:7.5,cellPadding:2},headStyles:{fillColor:[30,58,95],textColor:255},alternateRowStyles:{fillColor:[248,250,252]},columnStyles:{0:{cellWidth:8},1:{cellWidth:30},2:{cellWidth:28},3:{cellWidth:22},4:{cellWidth:8},5:{cellWidth:20},6:{cellWidth:28},7:{cellWidth:34}}});
+    doc.autoTable({startY:y,head:[['#','Product','System','Size','Qty','Colour','Glass','Notes']],
+      body:products.map((p,i)=>[i+1,p.type||'—',p.system||'—',p.width&&p.height?p.width+' x '+p.height+'mm':'TBC',p.qty||1,p.colour||'—',p.glazing+(p.glassFinish==='Obscure'?' Obscure':''),p.notes||'']),
+      styles:{fontSize:7.5,cellPadding:2},headStyles:{fillColor:[30,58,95],textColor:255},alternateRowStyles:{fillColor:[248,250,252]},
+      columnStyles:{0:{cellWidth:8},1:{cellWidth:30},2:{cellWidth:28},3:{cellWidth:22},4:{cellWidth:8},5:{cellWidth:20},6:{cellWidth:28},7:{cellWidth:34}}});
     y=doc.lastAutoTable.finalY+8;
   }
   if(soldValue>0){
@@ -1113,52 +1213,49 @@ function generateCustomerQuotePDF(){
     const bx=110,bw=90;
     doc.setFillColor(248,250,252);doc.rect(bx,y-4,bw,vatRate>0?32:22,'F');
     doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);doc.text('Net price (ex VAT)',bx+4,y+2);
-    doc.setTextColor(30,30,30);doc.setFont('helvetica','bold');doc.text('\u00a3'+soldValue.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw-4,y+2,{align:'right'});
+    doc.setTextColor(30,30,30);doc.setFont('helvetica','bold');doc.text('£'+soldValue.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw-4,y+2,{align:'right'});
     if(vatRate>0){
       doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);doc.text('VAT ('+Math.round(vatRate*100)+'%)',bx+4,y+9);
-      doc.setTextColor(30,30,30);doc.text('\u00a3'+vatAmt.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw-4,y+9,{align:'right'});
+      doc.setTextColor(30,30,30);doc.text('£'+vatAmt.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw-4,y+9,{align:'right'});
       doc.setFillColor(30,58,95);doc.rect(bx,y+13,bw,11,'F');doc.setTextColor(255,255,255);doc.setFontSize(10);doc.setFont('helvetica','bold');
-      doc.text('TOTAL INC VAT',bx+4,y+21);doc.text('\u00a3'+totalIncVat.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw-4,y+21,{align:'right'});y+=32;
+      doc.text('TOTAL INC VAT',bx+4,y+21);doc.text('£'+totalIncVat.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw-4,y+21,{align:'right'});
     }else{
       doc.setFillColor(30,58,95);doc.rect(bx,y+6,bw,11,'F');doc.setTextColor(255,255,255);doc.setFontSize(10);doc.setFont('helvetica','bold');
-      doc.text('TOTAL',bx+4,y+14);doc.text('\u00a3'+soldValue.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw-4,y+14,{align:'right'});y+=22;
+      doc.text('TOTAL',bx+4,y+14);doc.text('£'+soldValue.toLocaleString('en-GB',{minimumFractionDigits:2}),bx+bw-4,y+14,{align:'right'});
     }
+    y+=28;
   }
   if(y<255){
     doc.setDrawColor(226,232,240);doc.line(10,y,200,y);y+=6;
     doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(30,30,30);doc.text('Terms & Conditions',14,y);y+=4;
     doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);
-    ['\u2022 This quotation is valid for 30 days from the date of issue.',
-     '\u2022 All prices are subject to a formal survey. Final pricing may vary following survey.',
-     '\u2022 A deposit is required to confirm your order. Payment terms: '+payTerms+'.',
-     '\u2022 Lead times are indicative and subject to supplier availability.',
-     '\u2022 All work carried out in accordance with current Building Regulations.'].forEach(t=>{if(y<280){doc.text(t,14,y);y+=4.5;}});
+    ['• This quotation is valid for 30 days from the date of issue.',
+     '• All prices are subject to a formal survey. Final pricing may vary following survey.',
+     '• A deposit is required to confirm your order. Payment terms: '+payTerms+'.',
+     '• Lead times are indicative and subject to supplier availability.',
+     '• All work carried out in accordance with current Building Regulations.'].forEach(t=>{if(y<280){doc.text(t,14,y);y+=4.5;}});
   }
   const pc=doc.getNumberOfPages();for(let i=1;i<=pc;i++){doc.setPage(i);doc.setFillColor(30,58,95);doc.rect(0,285,210,12,'F');doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(147,197,253);doc.text('Burgess Windows & Doors  |  Ref: '+refNum+'  |  '+dateStr+'  |  Page '+i+' of '+pc,105,292,{align:'center'});}
   return doc.output('blob');
 }
 
-// \u2500\u2500 PDF: Surveyor Order Pack \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function generateSurveyorOrderPack(){
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const name=selectedDeal?.name||'\u2014';
+  const name=selectedDeal?.name||'—';
   const address=document.getElementById('q-siteaddress').value||selectedDeal?.address||'';
   const dateStr=new Date().toLocaleDateString('en-GB');
-  // Header
   doc.setFillColor(30,58,95);doc.rect(0,0,210,32,'F');
   doc.setTextColor(255,255,255);doc.setFontSize(20);doc.setFont('helvetica','bold');doc.text('Burgess Windows & Doors',14,14);
-  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.text('SURVEYOR ORDER PACK \u2014 CONFIDENTIAL',14,22);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.text('SURVEYOR ORDER PACK — CONFIDENTIAL',14,22);
   doc.setFillColor(245,158,11);doc.rect(150,0,60,32,'F');
   doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);doc.text('ORDER PACK',153,14);doc.setFont('helvetica','normal');doc.text(dateStr,153,21);
-  // Customer info
   doc.setTextColor(30,30,30);let y=42;
   doc.setFillColor(240,244,248);doc.rect(10,y-4,190,22,'F');
   doc.setFontSize(9);doc.setFont('helvetica','bold');
   doc.text('Customer: '+name,14,y+2);doc.text('Salesperson: '+currentUser,14,y+8);
   if(address)doc.text('Site address: '+address,14,y+14);
   y+=26;
-  // Project info
   const projectInfo=[
     ['Build type',document.getElementById('q-buildtype').value],
     ['Property type',document.getElementById('q-proptype').value],
@@ -1169,8 +1266,7 @@ function generateSurveyorOrderPack(){
   ];
   doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);doc.text('Project Information',14,y);y+=5;
   doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(30,30,30);
-  projectInfo.forEach(([l,v])=>{doc.text(l+':',14,y);doc.text(v||'\u2014',80,y);y+=5;});
-  // Site notes
+  projectInfo.forEach(([l,v])=>{doc.text(l+':',14,y);doc.text(v||'—',80,y);y+=5;});
   const notes=document.getElementById('q-internalnotes').value||document.getElementById('q-requirements').value;
   if(notes&&y<240){
     y+=4;doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);doc.text('Site Notes',14,y);y+=5;
@@ -1180,125 +1276,103 @@ function generateSurveyorOrderPack(){
   y+=4;doc.setDrawColor(226,232,240);doc.line(10,y,200,y);y+=6;
   // Products
   if(products.length>0){
-    doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);doc.text('Product Schedule \u2014 '+products.length+' item(s)',14,y);y+=6;
+    doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);doc.text('Product Schedule — '+products.length+' item(s)',14,y);y+=6;
     products.forEach((p,idx)=>{
       if(y>240){doc.addPage();y=20;}
       doc.setFillColor(30,58,95);doc.rect(10,y-3,190,10,'F');
       doc.setTextColor(255,255,255);doc.setFontSize(10);doc.setFont('helvetica','bold');
-      doc.text(`Item ${idx+1}: ${p.type||'\u2014'}${p.location?' \u2014 '+p.location:''}`,14,y+4);y+=12;
+      doc.text(`Item ${idx+1}: ${p.type||'—'}${p.location?' — '+p.location:''}`,14,y+4);y+=12;
       doc.setTextColor(30,30,30);doc.setFontSize(9);doc.setFont('helvetica','normal');
-      const details=[
-        ['System / supplier',p.system||'\u2014'],
-        ['Quantity',String(p.qty||1)],
-        ['Width',p.width?p.width+'mm':'TBC'],
-        ['Height',p.height?p.height+'mm':'TBC'],
-        ['Cill type',p.cill||'No cill'],
-        ['Glazing',p.glazing||'\u2014'],
-        ['Glass type',p.glassType||'\u2014'],
-        ['Glass finish',p.glassFinish+(p.glassFinish==='Obscure'&&p.obscureType?' ('+p.obscureType+')':'')],
-        ['Colour',p.colour||'\u2014'],
-        ['Hinge type',p.hinge||'\u2014'],
-      ];
+      const details=[['System',p.system||'—'],['Qty',String(p.qty||1)],['Width',p.width?p.width+'mm':'TBC'],['Height',p.height?p.height+'mm':'TBC'],['Cill',p.cill||'No cill'],['Glazing',p.glazing||'—'],['Glass type',p.glassType||'—'],['Glass finish',p.glassFinish],['Colour',p.colour||'—'],['Hinge',p.hinge||'—']];
       details.forEach(([l,v])=>{doc.text(l+':',14,y);doc.text(v,80,y);y+=5;});
       if(p.notes){doc.setFont('helvetica','bold');doc.text('Notes:',14,y);doc.setFont('helvetica','normal');const nl=doc.splitTextToSize(p.notes,110);doc.text(nl,40,y);y+=nl.length*4+2;}
-      // Sketch canvas
-      try{
-        const c=canvases[p.id];
-        if(c){
-          const isEmpty=!c.ctx.getImageData(0,0,c.canvas.width,c.canvas.height).data.some(v=>v!==0);
-          if(!isEmpty){
-            if(y>220){doc.addPage();y=20;}
-            doc.text('Design sketch:',14,y);y+=4;
-            doc.addImage(c.canvas.toDataURL(),'PNG',14,y,80,30);y+=34;
-          }
-        }
-      }catch(e){}
-      // Item photos
-      if(p.photos&&p.photos.length>0){
+      // Survey entries for this product
+      const surveyMatch=surveyEntries.filter(s=>s.location&&s.location.toLowerCase().includes((p.location||'').toLowerCase()));
+      surveyMatch.forEach(sv=>{
         if(y>220){doc.addPage();y=20;}
-        doc.setFont('helvetica','bold');doc.text('Item photos:',14,y);y+=4;doc.setFont('helvetica','normal');
-        let px=14;
-        p.photos.slice(0,4).forEach(photo=>{
-          try{if(px+50>200){px=14;y+=42;}if(y>220){doc.addPage();y=20;px=14;}doc.addImage(photo.dataUrl,'JPEG',px,y,44,36);px+=50;}catch(e){}
-        });
-        y+=40;
-      }
+        doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);doc.text('Survey data — '+sv.location,14,y);y+=5;
+        doc.setFont('helvetica','normal');doc.setTextColor(30,30,30);
+        if(sv.width)doc.text('Measured width: '+sv.width+'mm',14,y++*5);
+        if(sv.height)doc.text('Measured height: '+sv.height+'mm',80,y-1);
+        y+=2;
+        // Sketch
+        try{const c=canvases[sv.id];if(c){const isEmpty=!c.ctx.getImageData(0,0,c.canvas.width,c.canvas.height).data.some(v=>v!==0);if(!isEmpty){if(y>220){doc.addPage();y=20;}doc.addImage(c.canvas.toDataURL(),'PNG',14,y,80,30);y+=34;}}}catch(e){}
+        // Photos
+        if(sv.photos&&sv.photos.length>0){let px=14;sv.photos.slice(0,4).forEach(photo=>{try{if(px+50>200){px=14;y+=42;}if(y>220){doc.addPage();y=20;px=14;}doc.addImage(photo.dataUrl,'JPEG',px,y,44,36);px+=50;}catch(e){}});y+=40;}
+      });
       doc.setDrawColor(226,232,240);doc.line(10,y,200,y);y+=6;
     });
   }
   // Site photos
   if(sitePhotos.length>0){
     if(y>200){doc.addPage();y=20;}
-    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);doc.text('Site Photos',14,y);y+=6;
+    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(30,58,95);doc.text('Site Overview Photos',14,y);y+=6;
     let px=14;
-    sitePhotos.slice(0,9).forEach(photo=>{
-      try{if(px+62>200){px=14;y+=52;}if(y>220){doc.addPage();y=20;px=14;}doc.addImage(photo.dataUrl,'JPEG',px,y,56,42);px+=62;}catch(e){}
-    });
+    sitePhotos.slice(0,9).forEach(photo=>{try{if(px+62>200){px=14;y+=52;}if(y>220){doc.addPage();y=20;px=14;}doc.addImage(photo.dataUrl,'JPEG',px,y,56,42);px+=62;}catch(e){}});
   }
-  const pc=doc.getNumberOfPages();for(let i=1;i<=pc;i++){doc.setPage(i);doc.setFontSize(8);doc.setTextColor(150,150,150);doc.text('Burgess W&D \u2014 SURVEYOR ORDER PACK \u2014 '+name+' \u2014 '+dateStr+' \u2014 Page '+i+' of '+pc,14,290);}
+  const pc=doc.getNumberOfPages();for(let i=1;i<=pc;i++){doc.setPage(i);doc.setFontSize(8);doc.setTextColor(150,150,150);doc.text('Burgess W&D — SURVEYOR ORDER PACK — '+name+' — '+dateStr+' — Page '+i+' of '+pc,14,290);}
   return doc.output('blob');
 }
 
-// \u2500\u2500 Submit \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Submit ────────────────────────────────────────────────────────────────
 async function uploadFile(itemId,colId,fileName,blob){
   const base64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Read failed'));r.readAsDataURL(blob);});
   const resp=await fetch(UPLOAD,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:String(itemId),columnId:colId,fileName,fileBase64:base64})});
   if(!resp.ok)throw new Error('Upload error '+resp.status);
   const data=await resp.json();if(data.error)throw new Error(data.error);return data;
 }
-function showProgress(steps){document.getElementById('progress-box').style.display='block';document.getElementById('progress-steps').innerHTML=steps.map((s,i)=>`<div class="progress-step" id="ps${i}"><div class="step-icon" id="pi${i}">\u25cb</div><span id="pt${i}">${s}</span></div>`).join('');}
-function setStep(i,status,text){const s=document.getElementById('ps'+i),ic=document.getElementById('pi'+i),t=document.getElementById('pt'+i);if(!s)return;s.className='progress-step '+status;ic.className='step-icon '+status;ic.textContent=status==='done'?'\u2713':status==='error'?'\u2717':'\u2026';if(text&&t)t.textContent=text;}
+function showProgress(steps){
+  document.getElementById('progress-box').style.display='block';
+  document.getElementById('progress-steps').innerHTML=steps.map((s,i)=>`<div class="progress-step" id="ps${i}"><div class="step-icon" id="pi${i}">○</div><span id="pt${i}">${s}</span></div>`).join('');
+}
+function setStep(i,status,text){
+  const s=document.getElementById('ps'+i),ic=document.getElementById('pi'+i),t=document.getElementById('pt'+i);
+  if(!s)return;
+  s.className='progress-step '+status;ic.className='step-icon '+status;
+  ic.textContent=status==='done'?'✓':status==='error'?'✗':'…';
+  if(text&&t)t.textContent=text;
+}
 
 async function submitQuote(){
   if(!selectedDeal){alert('No deal selected.');return;}
   const btn=document.getElementById('submit-btn');btn.disabled=true;btn.textContent='Generating...';
-  const isWon=selectedDeal.stage==='Won';
-  const steps=['Generating customer quote PDF',isWon?'Generating surveyor order pack':'Skipping order pack (not Won)','Finding Files column','Uploading customer quote',isWon?'Uploading surveyor order pack':'\u2014','Uploading project files','Updating stage & adding note'];
+  const steps=['Generating customer quote PDF','Generating surveyor order pack','Finding Files column','Uploading customer quote','Uploading order pack','Uploading project files','Marking as Won'];
   showProgress(steps);
   const dateStr=new Date().toISOString().slice(0,10).replace(/-/g,'');
   const safeName=(selectedDeal.name||'deal').replace(/[^a-z0-9]/gi,'_');
   try{
     setStep(0,'active');const quotePDF=generateCustomerQuotePDF();setStep(0,'done');
-    setStep(1,'active');
-    const orderPDF=isWon?generateSurveyorOrderPack():null;
-    setStep(1,'done',isWon?'Order pack generated':'Stage is not Won \u2014 skipped');
+    setStep(1,'active');const orderPDF=generateSurveyorOrderPack();setStep(1,'done');
     setStep(2,'active');
     const colData=await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
     const cols=colData.data?.boards?.[0]?.columns||[];
     const filesCol=cols.find(c=>c.title==='Files')||cols.find(c=>c.type==='file');
     if(!filesCol)throw new Error('No Files column found on deals board');
-    setStep(2,'done',`"${filesCol.title}"`);
-    setStep(3,'active');await uploadFile(selectedDeal.id,filesCol.id,`${safeName}_Quote_${dateStr}.pdf`,quotePDF);setStep(3,'done');
-    setStep(4,'active');
-    if(orderPDF){await uploadFile(selectedDeal.id,filesCol.id,`${safeName}_SurveyorOrderPack_${dateStr}.pdf`,orderPDF);setStep(4,'done');}
-    else{setStep(4,'done','Skipped');}
+    setStep(2,'done','"'+filesCol.title+'"');
+    setStep(3,'active');await uploadFile(selectedDeal.id,filesCol.id,safeName+'_Quote_'+dateStr+'.pdf',quotePDF);setStep(3,'done');
+    setStep(4,'active');await uploadFile(selectedDeal.id,filesCol.id,safeName+'_SurveyorOrderPack_'+dateStr+'.pdf',orderPDF);setStep(4,'done');
     setStep(5,'active');
-    for(const f of projectFiles){
-      try{const base64=f.dataUrl.split(',')[1];await fetch(UPLOAD,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:String(selectedDeal.id),columnId:filesCol.id,fileName:f.name,fileBase64:base64})});}catch(e){console.warn('File upload failed:',e);}
-    }
+    for(const f of projectFiles){try{const base64=f.dataUrl.split(',')[1];await fetch(UPLOAD,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({itemId:String(selectedDeal.id),columnId:filesCol.id,fileName:f.name,fileBase64:base64})});}catch(e){console.warn('File upload failed:',e);}}
     setStep(5,'done');
-    setStep(6,'active');
-    if(!isWon){await updateStage('Quote Sent');}
-    const pv=document.getElementById('pc-sold').value;
-    const note=`💼 Sales visit by ${currentUser} on ${new Date().toLocaleDateString('en-GB')}.\\n\\nProducts: ${products.length} item(s)\\n${pv?'Quoted: \u00a3'+parseFloat(pv).toLocaleString():''}\\n${isWon?'\\n\u2705 WON \u2014 Surveyor Order Pack generated and uploaded.':''}\\n\\nCustomer quote PDF uploaded.`;
-    await mq(`mutation{create_update(item_id:${selectedDeal.id},body:"${note.replace(/"/g,'\\"')}"){id}}`);
-    setStep(6,'done');
-    document.getElementById('progress-title').textContent=isWon?'\u2713 Won! Quote + Surveyor Order Pack submitted!':'\u2713 Quote submitted!';
+    setStep(6,'active');await updateStage('Won');setStep(6,'done');
+    const pv=document.getElementById('q-price')?.value;
+    const note=`🏆 WON by ${currentUser} on ${new Date().toLocaleDateString('en-GB')}.\n\nProducts: ${products.length} item(s)\n${pv?'Quoted: £'+parseFloat(pv).toLocaleString():''}\n\nCustomer quote + Surveyor Order Pack uploaded.`;
+    await mq(`mutation{create_update(item_id:${selectedDeal.id},body:"${note.replace(/"/g,'\\"').replace(/\n/g,'\\n')}"){id}}`);
+    document.getElementById('progress-title').textContent='✓ Won! All documents submitted to Monday';
     document.getElementById('progress-title').style.color='#059669';
-    btn.textContent='Submitted \u2713';btn.style.background='#10b981';
-    const d=allDeals.find(x=>x.id===selectedDeal.id);if(d&&!isWon)d.stage='Quote Sent';
+    btn.textContent='✓ Submitted';btn.style.background='#10b981';
+    const d=allDeals.find(x=>x.id===selectedDeal.id);if(d)d.stage='Won';
     renderStats();renderDeals();
-    setTimeout(()=>navTo('deals'),3000);
   }catch(err){
     const fi=[0,1,2,3,4,5,6].find(i=>document.getElementById('ps'+i)?.classList.contains('active'));
     if(fi!==undefined)setStep(fi,'error',err.message);
     document.getElementById('progress-title').textContent='Submission failed';
     document.getElementById('progress-title').style.color='#dc2626';
-    btn.disabled=false;btn.textContent='Generate & submit to Monday \u2192';
+    btn.disabled=false;btn.textContent='🏆 Mark as Won & generate PDFs';
   }
 }
 
-// \u2500\u2500 Auto-login \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Auto-login ────────────────────────────────────────────────────────────
 window.addEventListener('load',async()=>{
   const savedToken=localStorage.getItem('bwd_sales_token');
   const savedUser=localStorage.getItem('bwd_sales_user');
