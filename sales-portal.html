@@ -81,7 +81,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
 .login-err{color:var(--red);font-size:12px;margin-bottom:10px;display:none}
 
 /* ── Column panel ────────────────────────────── */
-.col-panel{display:flex;flex-direction:column;background:var(--surface);border-right:1px solid var(--border);height:100%;overflow:hidden;transition:width .2s ease,min-width .2s ease}
+.col-panel{display:flex;flex-direction:column;background:var(--surface);border-right:1px solid var(--border);height:100%;overflow:hidden;transition:width .2s ease,min-width .2s ease;min-height:0}
 .col-panel.hidden{display:none}
 .col-head{padding:14px 16px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
 .col-head-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
@@ -428,7 +428,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
         </div>
 
         <!-- Deal detail column -->
-        <div class="col-panel" id="deal-detail-col" style="flex:1;display:none;">
+        <div class="col-panel" id="deal-detail-col" style="flex:1;display:none;min-height:0;">
           <div class="deal-panel" id="deal-panel">
 
             <!-- Deal header -->
