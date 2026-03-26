@@ -380,6 +380,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           <textarea id="q-requirements" placeholder="Colours, finishes, hardware, budget range..."></textarea>
         </div>
       </div>
+      <!-- SAVE TO MONDAY -->
+      <div style="margin-bottom:16px">
+        <button onclick="saveDealToMonday()" id="save-monday-btn" style="width:100%;padding:13px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">
+          💾 Save all changes to Monday
+        </button>
+        <div id="save-monday-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
+      </div>
+
       <!-- APPOINTMENT & STAGE -->
       <div class="section">
         <div class="sec-title">📅 Book appointment</div>
@@ -1128,6 +1136,276 @@ function showQTab(tab,btn){
   if(tab==='submit')updateSubmitSummary();
 }
 
+
+// ── Column ID cache ──────────────────────────────────────────
+let dealColMap = {}; // title -> id map, populated on first load
+
+async function getDealColumns(){
+  if(Object.keys(dealColMap).length > 0) return dealColMap;
+  try{
+    const data = await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
+    const cols = data.data?.boards?.[0]?.columns||[];
+    cols.forEach(c => { dealColMap[c.title] = {id:c.id, type:c.type}; });
+  }catch(e){ console.warn('Could not load deal columns:', e); }
+  return dealColMap;
+}
+
+function colId(map, title){ return map[title]?.id || null; }
+function colType(map, title){ return map[title]?.type || 'text'; }
+
+// Build column value in correct format for Monday API
+function colVal(type, value){
+  if(!value && value !== 0) return null;
+  if(type === 'color' || type === 'status') return JSON.stringify({label: String(value)});
+  if(type === 'numeric' || type === 'numbers') return String(value);
+  if(type === 'long_text') return JSON.stringify({text: String(value)});
+  return String(value); // text columns
+}
+
+// ── Load deal fields from Monday ──────────────────────────────
+async function loadDealFromMonday(){
+  if(!selectedDeal) return;
+  try{
+    const map = await getDealColumns();
+    // Build list of column IDs we want to fetch
+    const wantCols = [
+      'Site Address','Lead Source','Property Type','Build Type','Survey Type',
+      'Survey Timeframe','VAT Rate','Payment Terms','Fit Days','Access Notes',
+      'Description of Works','Internal Notes','Customer Requirements','Builder Contact',
+      'Product Type','Frame Supplier 1','Frame List Price 1','Frame Discount 1','Frame Surcharge 1',
+      'Glass Supplier 1','Glass M2 1','Glass Price Per M2 1','Fit Days PC','Load Out Days',
+      'Lifting Days','Site Distance','Transport Cost','Cill Metres','Comp TP650 Metres',
+      'Comp TP652 Metres','Scaffolding Cost','Building Works Cost','Other Costs',
+      'Supplier Delivery Fee','Sold Value'
+    ].map(t => colId(map,t)).filter(Boolean);
+
+    if(wantCols.length === 0) return;
+
+    const idList = wantCols.map(id => `"${id}"`).join(',');
+    const data = await mq(`query{items(ids:${selectedDeal.id}){column_values(ids:[${idList}]){id title text ...on StatusValue{label} ...on LongTextValue{text} ...on NumbersValue{number}}}}`);
+    const cvs = data.data?.items?.[0]?.column_values||[];
+
+    const get = (title) => {
+      const cid = colId(map, title);
+      if(!cid) return '';
+      const cv = cvs.find(c => c.id === cid);
+      if(!cv) return '';
+      return cv.label || cv.number || cv.text || '';
+    };
+
+    // Helper to set field value
+    const setField = (id, val) => {
+      const el = document.getElementById(id);
+      if(!el || !val) return;
+      el.value = val;
+    };
+
+    // Overview fields
+    setField('q-siteaddress', get('Site Address'));
+    setField('q-leadsource', get('Lead Source'));
+    setField('q-proptype', get('Property Type'));
+    setField('q-buildtype', get('Build Type'));
+    setField('q-surveytype', get('Survey Type'));
+    setField('q-surveytime', get('Survey Timeframe'));
+    setField('q-access', get('Access Notes'));
+    setField('q-worksdesc', get('Description of Works'));
+    setField('q-internalnotes', get('Internal Notes'));
+    setField('q-requirements', get('Customer Requirements'));
+    setField('q-builder', get('Builder Contact'));
+    setField('q-fitdays', get('Fit Days'));
+
+    // VAT
+    const vat = get('VAT Rate');
+    if(vat){
+      const vatMap = {'20% Standard':'0.2','0% New build':'0','5% Reduced':'0.05'};
+      const vatEl = document.getElementById('q-vat');
+      if(vatEl && vatMap[vat]) vatEl.value = vatMap[vat];
+    }
+    // Payment terms
+    const pt = get('Payment Terms');
+    if(pt){ const ptEl=document.getElementById('q-payment'); if(ptEl) ptEl.value=pt; }
+
+    // Profit checker fields
+    const productType = get('Product Type');
+    if(productType){
+      const ptEl = document.getElementById('pc-product');
+      if(ptEl){
+        const ptMap = {'Aluminium':'alu','Al-Clad':'alu','UPVC':'upvc','Timber-Alt':'timber','Timber':'timber','Composite Door':'comp','Steel / Steel-Look':'alu','Curtain Walling':'alu','Rooflights':'alu'};
+        if(ptMap[productType]) ptEl.value = ptMap[productType];
+      }
+    }
+
+    const soldVal = get('Sold Value');
+    if(soldVal) setField('pc-sold', soldVal);
+    setField('pc-fitdays', get('Fit Days PC'));
+    setField('pc-loadout', get('Load Out Days'));
+    setField('pc-lifting', get('Lifting Days'));
+    setField('pc-transport', get('Transport Cost'));
+    setField('pc-cill-m', get('Cill Metres'));
+    setField('pc-comp650', get('Comp TP650 Metres'));
+    setField('pc-comp652', get('Comp TP652 Metres'));
+    setField('pc-scaffolding', get('Scaffolding Cost'));
+    setField('pc-building', get('Building Works Cost'));
+    setField('pc-other-cost', get('Other Costs'));
+    setField('pc-delivery', get('Supplier Delivery Fee'));
+
+    // Site distance
+    const dist = get('Site Distance');
+    if(dist){
+      const distMap = {'0-25 miles':'fuel0','26-50 miles':'fuel30','51-79 miles':'fuel60','80-100 miles':'fuel90','100+ miles':'fuel120'};
+      const distEl = document.getElementById('pc-distance');
+      if(distEl && distMap[dist]) distEl.value = distMap[dist];
+    }
+
+    // Frame/glass supplier lines — update first frame and glass line if they exist
+    const fs1 = get('Frame Supplier 1');
+    const flp1 = get('Frame List Price 1');
+    const fd1 = get('Frame Discount 1');
+    const fsc1 = get('Frame Surcharge 1');
+    if(frameLines.length > 0){
+      const f = frameLines[0];
+      if(fs1){ f.supplier=fs1; const sel=document.querySelector(`#${f.id} select`); if(sel)sel.value=fs1; }
+      if(flp1){ f.listPrice=parseFloat(flp1)||0; const inp=document.querySelector(`#${f.id} input[type="number"]`); if(inp)inp.value=flp1; }
+    }
+    const gs1 = get('Glass Supplier 1');
+    const gm1 = get('Glass M2 1');
+    const gp1 = get('Glass Price Per M2 1');
+    if(glasLines.length > 0){
+      const g = glasLines[0];
+      if(gs1){ g.supplier=gs1; const sel=document.querySelector(`#${g.id} select`); if(sel)sel.value=gs1; }
+      if(gm1){ g.sqm=parseFloat(gm1)||0; }
+      if(gp1){ g.pricePerSqm=parseFloat(gp1)||0; }
+    }
+
+    // Recalculate profit checker
+    calcProfit();
+
+    // Update info strip with loaded address
+    const loadedAddr = get('Site Address');
+    if(loadedAddr) document.getElementById('di-address').textContent = loadedAddr;
+
+    console.log('Deal fields loaded from Monday');
+  }catch(e){ console.warn('Could not load deal fields:', e); }
+}
+
+// ── Save deal fields to Monday ────────────────────────────────
+async function saveDealToMonday(){
+  if(!selectedDeal) return;
+  const btn = document.getElementById('save-monday-btn');
+  const statusEl = document.getElementById('save-monday-status');
+  btn.disabled=true; btn.textContent='Saving...';
+  statusEl.style.display='none';
+  try{
+    const map = await getDealColumns();
+
+    // Helper to add column value mutation if column exists
+    const mutations = [];
+    const addMut = (title, value) => {
+      const id = colId(map, title);
+      const type = colType(map, title);
+      if(!id) return;
+      const val = colVal(type, value);
+      if(val === null || val === '') return;
+      mutations.push(`mutation{change_column_value(board_id:${DEALS_BOARD},item_id:${selectedDeal.id},column_id:"${id}",value:${JSON.stringify(val)}){id}}`);
+    };
+
+    // Overview
+    addMut('Site Address', document.getElementById('q-siteaddress')?.value);
+    addMut('Lead Source', document.getElementById('q-leadsource')?.value);
+    addMut('Property Type', document.getElementById('q-proptype')?.value);
+    addMut('Build Type', document.getElementById('q-buildtype')?.value);
+    addMut('Survey Type', document.getElementById('q-surveytype')?.value);
+    addMut('Survey Timeframe', document.getElementById('q-surveytime')?.value);
+    addMut('Access Notes', document.getElementById('q-access')?.value);
+    addMut('Description of Works', document.getElementById('q-worksdesc')?.value);
+    addMut('Internal Notes', document.getElementById('q-internalnotes')?.value);
+    addMut('Customer Requirements', document.getElementById('q-requirements')?.value);
+    addMut('Builder Contact', document.getElementById('q-builder')?.value);
+    addMut('Fit Days', document.getElementById('q-fitdays')?.value);
+
+    // VAT rate label
+    const vatEl = document.getElementById('q-vat');
+    if(vatEl){
+      const vatLabels = {'0.2':'20% Standard','0':'0% New build','0.05':'5% Reduced'};
+      addMut('VAT Rate', vatLabels[vatEl.value]||'20% Standard');
+    }
+    // Payment terms
+    addMut('Payment Terms', document.getElementById('q-payment')?.value);
+
+    // Profit checker
+    const pcProd = document.getElementById('pc-product');
+    if(pcProd){
+      const prodLabels = {'alu':'Aluminium','upvc':'UPVC','timber':'Timber-Alt','comp':'Composite Door'};
+      addMut('Product Type', prodLabels[pcProd.value]||'Aluminium');
+    }
+    addMut('Sold Value', document.getElementById('pc-sold')?.value);
+    addMut('Fit Days PC', document.getElementById('pc-fitdays')?.value);
+    addMut('Load Out Days', document.getElementById('pc-loadout')?.value);
+    addMut('Lifting Days', document.getElementById('pc-lifting')?.value);
+    addMut('Transport Cost', document.getElementById('pc-transport')?.value);
+    addMut('Cill Metres', document.getElementById('pc-cill-m')?.value);
+    addMut('Comp TP650 Metres', document.getElementById('pc-comp650')?.value);
+    addMut('Comp TP652 Metres', document.getElementById('pc-comp652')?.value);
+    addMut('Scaffolding Cost', document.getElementById('pc-scaffolding')?.value);
+    addMut('Building Works Cost', document.getElementById('pc-building')?.value);
+    addMut('Other Costs', document.getElementById('pc-other-cost')?.value);
+    addMut('Supplier Delivery Fee', document.getElementById('pc-delivery')?.value);
+
+    // Site distance
+    const distEl = document.getElementById('pc-distance');
+    if(distEl){
+      const distLabels = {'fuel0':'0-25 miles','fuel30':'26-50 miles','fuel60':'51-79 miles','fuel90':'80-100 miles','fuel120':'100+ miles'};
+      addMut('Site Distance', distLabels[distEl.value]||'0-25 miles');
+    }
+
+    // Frame supplier 1
+    if(frameLines.length > 0){
+      const f = frameLines[0];
+      addMut('Frame Supplier 1', f.supplier);
+      addMut('Frame List Price 1', f.listPrice||0);
+      addMut('Frame Discount 1', f.discount||0);
+      addMut('Frame Surcharge 1', f.surcharge||0);
+    }
+    // Glass supplier 1
+    if(glasLines.length > 0){
+      const g = glasLines[0];
+      addMut('Glass Supplier 1', g.supplier);
+      addMut('Glass M2 1', g.sqm||0);
+      addMut('Glass Price Per M2 1', g.pricePerSqm||0);
+    }
+
+    // Run all mutations sequentially
+    let saved = 0;
+    for(const mut of mutations){
+      try{ await mq(mut); saved++; }
+      catch(e){ console.warn('Could not save column:', e.message); }
+    }
+
+    // Update selectedDeal address
+    selectedDeal.address = document.getElementById('q-siteaddress')?.value || selectedDeal.address;
+    document.getElementById('di-address').textContent = selectedDeal.address || '—';
+
+    btn.textContent = '✓ Saved to Monday';
+    btn.style.background = '#10b981';
+    statusEl.textContent = '✓ ' + saved + ' field(s) saved to Monday';
+    statusEl.style.color = '#059669';
+    statusEl.style.display = 'block';
+    setTimeout(function(){
+      btn.disabled=false;
+      btn.textContent='💾 Save all changes to Monday';
+      btn.style.background='#059669';
+      statusEl.style.display='none';
+    }, 3000);
+
+  }catch(err){
+    statusEl.textContent = '✗ ' + err.message;
+    statusEl.style.color = '#dc2626';
+    statusEl.style.display = 'block';
+    btn.disabled=false;
+    btn.textContent='💾 Save all changes to Monday';
+    btn.style.background='#059669';
+  }
+}
 
 // ── Book appointment ──────────────────────────────────────────
 async function bookAppointment(){
