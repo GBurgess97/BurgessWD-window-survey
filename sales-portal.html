@@ -1469,7 +1469,10 @@ function openDeal(id){
   const dqPhone=document.getElementById('dq-client-phone');if(dqPhone)dqPhone.value=selectedDeal.phone||'';
   const dqEmail=document.getElementById('dq-client-email');if(dqEmail)dqEmail.value=selectedDeal.email||'';
   const dqAddr=document.getElementById('dq-client-address');if(dqAddr)dqAddr.value=selectedDeal.address||'';
-  navTo('deal');
+  // Deal panel is shown by openDealNew — no page navigation needed
+  // Refresh column cache for Monday sync
+  dealColMap = {};
+  // Load saved fields from Monday
   // Load files after navigation so a failure can't block deal opening
   setTimeout(function(){ loadMondayFiles(); }, 300);
 }
@@ -3821,6 +3824,8 @@ function closeSidebar(){
 const _origNavTo = navTo;
 window.navTo = function(section){
   closeSidebar();
+  // 'deal' was used in old layout — map to 'deals'
+  if(section === 'deal') section = 'deals';
   // Hide all pages
   ['appts','deals','contacts','me'].forEach(function(s){
     var el = document.getElementById('page-'+s);
@@ -3828,7 +3833,7 @@ window.navTo = function(section){
   });
   // Show target
   var target = document.getElementById('page-'+section);
-  if(target) target.style.display = (section === 'deals') ? 'flex' : (section === 'appts' || section === 'me') ? 'flex' : 'flex';
+  if(target) target.style.display = 'flex';
   // Update nav
   document.querySelectorAll('.sb-item').forEach(function(el){ el.classList.remove('active'); });
   var navEl = document.getElementById('nav-'+section);
