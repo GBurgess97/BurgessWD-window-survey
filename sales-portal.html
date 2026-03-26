@@ -442,6 +442,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       </div>
 
 
+    
+      <div style="border-top:1px solid #e5e5e5;margin-top:16px;padding-top:16px">
+        <button onclick="saveOverviewToMonday()" class="btn-primary" id="save-btn-overview" style="margin-bottom:4px">💾 Save &amp; upload to Monday</button>
+      <div style="font-size:11px;color:#64748b;margin-top:4px">Saves description of works, notes, job details as a Monday update</div>
+        <div id="save-status-overview" style="font-size:12px;text-align:center;margin-top:6px;display:none"></div>
+      </div>
     </div>
 
     <!-- ═══ PRODUCTS TAB ═══ -->
@@ -450,6 +456,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div id="products-list"></div>
       <button class="add-prod-btn" onclick="addProduct()">+ Add product / item</button>
 
+    
+      <div style="border-top:1px solid #e5e5e5;margin-top:16px;padding-top:16px">
+        <button onclick="saveProductsToMonday()" class="btn-primary" id="save-btn-products" style="margin-bottom:4px">💾 Save &amp; upload to Monday</button>
+      <div style="font-size:11px;color:#64748b;margin-top:4px">Generates a product schedule PDF and uploads to Monday</div>
+        <div id="save-status-products" style="font-size:12px;text-align:center;margin-top:6px;display:none"></div>
+      </div>
     </div>
 
     <!-- ═══ SITE SURVEY TAB ═══ -->
@@ -468,6 +480,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <!-- Per-opening survey entries -->
       <div id="survey-list"></div>
       <button class="add-prod-btn" onclick="addSurveyEntry()">+ Add opening / location</button>
+    
+      <div style="border-top:1px solid #e5e5e5;margin-top:16px;padding-top:16px">
+        <button onclick="saveSurveyToMonday()" class="btn-primary" id="save-btn-survey" style="margin-bottom:4px">💾 Save &amp; upload to Monday</button>
+      <div style="font-size:11px;color:#64748b;margin-top:4px">Generates the surveyor report PDF with all measurements and photos</div>
+        <div id="save-status-survey" style="font-size:12px;text-align:center;margin-top:6px;display:none"></div>
+      </div>
     </div>
 
     <!-- ═══ FILES TAB ═══ -->
@@ -538,6 +556,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           <div class="grade-lbl" id="grade-lbl">of recommended price</div>
           <div class="grade-detail" id="grade-detail"></div>
         </div>
+      </div>
+    
+      <div style="border-top:1px solid #e5e5e5;margin-top:16px;padding-top:16px">
+        <button onclick="saveProfitToMonday()" class="btn-primary" id="save-btn-profit" style="margin-bottom:4px">💾 Save &amp; upload to Monday</button>
+      <div style="font-size:11px;color:#64748b;margin-top:4px">Saves profit calculation summary as a Monday update</div>
+        <div id="save-status-profit" style="font-size:12px;text-align:center;margin-top:6px;display:none"></div>
       </div>
     </div>
 
@@ -1660,6 +1684,303 @@ async function generateAndUploadQuote() {
   } catch(err) {
     statusEl.textContent = '✗ ' + err.message; statusEl.style.color = '#dc2626'; statusEl.style.display = 'block';
     btn.disabled = false; btn.textContent = '☁️ Upload to Monday deal';
+  }
+}
+
+
+// ── Tab save helpers ──────────────────────────────────────────────────────
+function setSaveStatus(tab, msg, ok) {
+  const el = document.getElementById('save-status-' + tab);
+  const btn = document.getElementById('save-btn-' + tab);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = ok ? '#059669' : '#dc2626';
+  el.style.display = 'block';
+  if (btn) { btn.disabled = false; btn.textContent = '💾 Save & upload to Monday'; }
+  if (ok) setTimeout(() => el.style.display = 'none', 4000);
+}
+
+function setSaveBusy(tab) {
+  const btn = document.getElementById('save-btn-' + tab);
+  if (btn) { btn.disabled = true; btn.textContent = 'Uploading...'; }
+  const el = document.getElementById('save-status-' + tab);
+  if (el) el.style.display = 'none';
+}
+
+async function postMondayUpdate(text) {
+  if (!selectedDeal) throw new Error('No deal open');
+  const safe = text.split(String.fromCharCode(34)).join(String.fromCharCode(92,34)).split(String.fromCharCode(10)).join(String.fromCharCode(92,110));
+  await mq(`mutation{create_update(item_id:${selectedDeal.id},body:"${safe}"){id}}`);
+  await mq(`mutation{create_update(item_id:${selectedDeal.id},body:"${safe}"){id}}`);
+}
+
+async function uploadPDFToMonday(blob, fileName) {
+  if (!selectedDeal) throw new Error('No deal open');
+  const colData = await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
+  const cols = colData.data?.boards?.[0]?.columns || [];
+  const filesCol = cols.find(c => c.title === 'Files') || cols.find(c => c.type === 'file');
+  if (!filesCol) throw new Error('No Files column found on deals board');
+  await uploadFile(selectedDeal.id, filesCol.id, fileName, blob);
+}
+
+// ── Overview: save notes + job details as Monday update ───────────────────
+async function saveOverviewToMonday() {
+  if (!selectedDeal) { alert('No deal open.'); return; }
+  setSaveBusy('overview');
+  try {
+    const parts = [
+      '📋 Overview update by ' + currentUser + ' — ' + new Date().toLocaleDateString('en-GB'),
+      '',
+      '📍 Site: ' + (document.getElementById('q-siteaddress').value || '—'),
+      'Lead source: ' + (document.getElementById('q-leadsource').value || '—'),
+      'Appt type: ' + (document.getElementById('q-appttype').value || '—'),
+      'Property: ' + document.getElementById('q-proptype').value + ' | ' + document.getElementById('q-buildtype').value,
+      'Survey: ' + document.getElementById('q-surveytype').value + ' | ' + document.getElementById('q-surveytime').value,
+      'VAT: ' + document.getElementById('q-vat').options[document.getElementById('q-vat').selectedIndex].text,
+      'Payment: ' + document.getElementById('q-payment').value,
+      'Fit days: ' + document.getElementById('q-fitdays').value,
+      'Access: ' + (document.getElementById('q-access').value || 'None'),
+      'Builder: ' + (document.getElementById('q-builder').value || 'None'),
+    ];
+    const works = document.getElementById('q-worksdesc').value;
+    const internal = document.getElementById('q-internalnotes').value;
+    const reqs = document.getElementById('q-requirements').value;
+    if (works) parts.push('', 'Works: ' + works);
+    if (internal) parts.push('Internal notes: ' + internal);
+    if (reqs) parts.push('Requirements: ' + reqs);
+    await postMondayUpdate(parts.join('\n'));
+    setSaveStatus('overview', '✓ Overview saved to Monday', true);
+  } catch(err) {
+    setSaveStatus('overview', '✗ ' + err.message, false);
+  }
+}
+
+// ── Products: generate product schedule PDF and upload ────────────────────
+async function saveProductsToMonday() {
+  if (!selectedDeal) { alert('No deal open.'); return; }
+  if (products.length === 0) { alert('Add at least one product first.'); return; }
+  setSaveBusy('products');
+  try {
+    const blob = generateProductSchedulePDF();
+    const safeName = selectedDeal.name.replace(/[^a-z0-9]/gi,'_');
+    const dateStr = new Date().toISOString().slice(0,10).replace(/-/g,'');
+    await uploadPDFToMonday(blob, safeName + '_ProductSchedule_' + dateStr + '.pdf');
+    // Also post a short update
+    const summary = products.map((p,i) => `${i+1}. ${p.qty}x ${p.type||'?'} — ${p.system||'?'} — ${p.width&&p.height?p.width+'x'+p.height+'mm':'TBC'} — ${p.colour||'?'}`).join('\n');
+    await postMondayUpdate('🪟 Product schedule updated by ' + currentUser + ' (' + products.length + ' items):\n\n' + summary);
+    setSaveStatus('products', '✓ Product schedule PDF uploaded to Monday', true);
+  } catch(err) {
+    setSaveStatus('products', '✗ ' + err.message, false);
+  }
+}
+
+function generateProductSchedulePDF() {
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  const name = selectedDeal?.name || '—';
+  const dateStr = new Date().toLocaleDateString('en-GB');
+  // Header
+  doc.setFillColor(30,58,95); doc.rect(0,0,210,28,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(18); doc.setFont('helvetica','bold');
+  doc.text('Burgess Windows & Doors', 14, 12);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('PRODUCT SCHEDULE', 14, 20);
+  doc.setFontSize(9); doc.setTextColor(147,197,253);
+  doc.text(name + '  |  ' + currentUser + '  |  ' + dateStr, 140, 12, {align:'right'});
+  let y = 36;
+  doc.setTextColor(30,30,30); doc.setFontSize(9); doc.setFont('helvetica','normal');
+  // Table
+  doc.autoTable({
+    startY: y,
+    head: [['#','Type','System','W mm','H mm','Cill','Glazing','Glass','Colour','Hinge','Location','Notes']],
+    body: products.map((p,i) => [
+      i+1, p.type||'—', p.system||'—', p.width||'TBC', p.height||'TBC',
+      p.cill||'—', p.glazing||'—', (p.glassType||'')+(p.glassFinish==='Obscure'?' Obs':''),
+      p.colour||'—', p.hinge||'—', p.location||'—', p.notes||''
+    ]),
+    styles: {fontSize:7, cellPadding:2},
+    headStyles: {fillColor:[30,58,95], textColor:255, fontStyle:'bold'},
+    alternateRowStyles: {fillColor:[248,250,252]},
+    columnStyles: {0:{cellWidth:6},1:{cellWidth:24},2:{cellWidth:22},3:{cellWidth:10},4:{cellWidth:10},5:{cellWidth:14},6:{cellWidth:14},7:{cellWidth:14},8:{cellWidth:16},9:{cellWidth:12},10:{cellWidth:16},11:{cellWidth:20}}
+  });
+  y = doc.lastAutoTable.finalY + 6;
+  const pc = doc.getNumberOfPages();
+  for (let i=1;i<=pc;i++){doc.setPage(i);doc.setFontSize(7);doc.setTextColor(150,150,150);doc.text('Burgess W&D — Product Schedule — '+name+' — '+dateStr+' — Page '+i+' of '+pc,14,290);}
+  return doc.output('blob');
+}
+
+// ── Site survey: generate surveyor report PDF and upload ──────────────────
+async function saveSurveyToMonday() {
+  if (!selectedDeal) { alert('No deal open.'); return; }
+  setSaveBusy('survey');
+  try {
+    const blob = generateSurveyReportPDF();
+    const safeName = selectedDeal.name.replace(/[^a-z0-9]/gi,'_');
+    const dateStr = new Date().toISOString().slice(0,10).replace(/-/g,'');
+    await uploadPDFToMonday(blob, safeName + '_SiteSurveyReport_' + dateStr + '.pdf');
+    await postMondayUpdate('📐 Site survey report uploaded by ' + currentUser + ' — ' + new Date().toLocaleDateString('en-GB') + '\n' + surveyEntries.length + ' opening(s) recorded. ' + sitePhotos.length + ' site photo(s).');
+    setSaveStatus('survey', '✓ Survey report PDF uploaded to Monday', true);
+  } catch(err) {
+    setSaveStatus('survey', '✗ ' + err.message, false);
+  }
+}
+
+function generateSurveyReportPDF() {
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  const name = selectedDeal?.name || '—';
+  const address = document.getElementById('q-siteaddress').value || selectedDeal?.address || '';
+  const dateStr = new Date().toLocaleDateString('en-GB');
+  // Header
+  doc.setFillColor(30,58,95); doc.rect(0,0,210,32,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(18); doc.setFont('helvetica','bold');
+  doc.text('Burgess Windows & Doors', 14, 13);
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  doc.text('SITE SURVEY REPORT', 14, 21);
+  doc.setFontSize(9); doc.setTextColor(147,197,253);
+  doc.text(dateStr, 196, 13, {align:'right'});
+  doc.setTextColor(30,30,30); let y = 40;
+  // Customer details
+  doc.setFontSize(9); doc.setFont('helvetica','bold');
+  doc.text('Customer: ' + name, 14, y); doc.text('Salesperson: ' + currentUser, 110, y); y += 5;
+  if (address) { doc.setFont('helvetica','normal'); doc.text('Address: ' + address, 14, y); y += 5; }
+  const apptEl = document.getElementById('di-appt');
+  if (apptEl && apptEl.textContent && apptEl.textContent !== '—') {
+    doc.text('Appointment: ' + apptEl.textContent, 14, y); y += 5;
+  }
+  doc.setDrawColor(226,232,240); doc.line(10,y,200,y); y += 6;
+  // Project info
+  doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(30,58,95);
+  doc.text('Project Details', 14, y); y += 5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(30,30,30);
+  const details = [
+    ['Property type', document.getElementById('q-proptype').value],
+    ['Build type', document.getElementById('q-buildtype').value],
+    ['Survey type', document.getElementById('q-surveytype').value],
+    ['Fit days', document.getElementById('q-fitdays').value],
+    ['Access', document.getElementById('q-access').value || 'None'],
+  ];
+  details.forEach(([l,v]) => { doc.text(l+':', 14, y); doc.text(v||'—', 70, y); y += 5; });
+  const notes = document.getElementById('q-internalnotes').value;
+  if (notes) {
+    y += 2;
+    doc.setFont('helvetica','bold'); doc.text('Internal notes:', 14, y); y += 4;
+    doc.setFont('helvetica','normal');
+    const nl = doc.splitTextToSize(notes, 182);
+    doc.text(nl, 14, y); y += nl.length * 4 + 4;
+  }
+  doc.setDrawColor(226,232,240); doc.line(10,y,200,y); y += 6;
+  // Survey entries
+  if (surveyEntries.length > 0) {
+    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,58,95);
+    doc.text('Opening Measurements — ' + surveyEntries.length + ' location(s)', 14, y); y += 6;
+    surveyEntries.forEach((sv, idx) => {
+      if (y > 240) { doc.addPage(); y = 20; }
+      doc.setFillColor(30,58,95); doc.rect(10,y-3,190,10,'F');
+      doc.setTextColor(255,255,255); doc.setFontSize(10); doc.setFont('helvetica','bold');
+      doc.text('Opening ' + (idx+1) + ': ' + (sv.location||'Unnamed'), 14, y+4); y += 12;
+      doc.setTextColor(30,30,30); doc.setFontSize(9); doc.setFont('helvetica','normal');
+      const svDetails = [
+        ['Type', sv.type||'—'],
+        ['Width', sv.width ? sv.width+'mm' : 'TBC'],
+        ['Height', sv.height ? sv.height+'mm' : 'TBC'],
+        ['Reveal depth', sv.depth ? sv.depth+'mm' : 'TBC'],
+        ['Cill condition', sv.cillCondition||'—'],
+        ['Lintel', sv.lintel||'—'],
+      ];
+      svDetails.forEach(([l,v]) => { doc.text(l+':', 14, y); doc.text(v, 70, y); y += 5; });
+      if (sv.notes) {
+        doc.setFont('helvetica','bold'); doc.text('Notes:', 14, y); y += 4;
+        doc.setFont('helvetica','normal');
+        const snl = doc.splitTextToSize(sv.notes, 182);
+        doc.text(snl, 14, y); y += snl.length * 4 + 2;
+      }
+      // Sketch
+      try {
+        const c = canvases[sv.id];
+        if (c) {
+          const isEmpty = !c.ctx.getImageData(0,0,c.canvas.width,c.canvas.height).data.some(v=>v!==0);
+          if (!isEmpty) {
+            if (y > 220) { doc.addPage(); y = 20; }
+            doc.setFont('helvetica','bold'); doc.text('Sketch:', 14, y); y += 4;
+            doc.addImage(c.canvas.toDataURL(), 'PNG', 14, y, 90, 36); y += 40;
+          }
+        }
+      } catch(e) {}
+      // Photos
+      if (sv.photos && sv.photos.length > 0) {
+        if (y > 215) { doc.addPage(); y = 20; }
+        doc.setFont('helvetica','bold'); doc.text('Photos:', 14, y); y += 4;
+        doc.setFont('helvetica','normal');
+        let px = 14;
+        sv.photos.slice(0,4).forEach(photo => {
+          try {
+            if (px + 50 > 200) { px = 14; y += 42; }
+            if (y > 220) { doc.addPage(); y = 20; px = 14; }
+            doc.addImage(photo.dataUrl, 'JPEG', px, y, 44, 36); px += 50;
+          } catch(e) {}
+        });
+        y += 40;
+      }
+      doc.setDrawColor(226,232,240); doc.line(10,y,200,y); y += 6;
+    });
+  }
+  // Site overview photos
+  if (sitePhotos.length > 0) {
+    if (y > 200) { doc.addPage(); y = 20; }
+    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,58,95);
+    doc.text('Site Overview Photos', 14, y); y += 6;
+    let px = 14;
+    sitePhotos.slice(0,9).forEach(photo => {
+      try {
+        if (px + 62 > 200) { px = 14; y += 52; }
+        if (y > 220) { doc.addPage(); y = 20; px = 14; }
+        doc.addImage(photo.dataUrl, 'JPEG', px, y, 56, 42); px += 62;
+      } catch(e) {}
+    });
+  }
+  const pc = doc.getNumberOfPages();
+  for (let i=1;i<=pc;i++){doc.setPage(i);doc.setFontSize(7);doc.setTextColor(150,150,150);doc.text('Burgess W&D — Site Survey — '+name+' — '+dateStr+' — Page '+i+' of '+pc,14,290);}
+  return doc.output('blob');
+}
+
+// ── Profit: save summary as Monday update ─────────────────────────────────
+async function saveProfitToMonday() {
+  if (!selectedDeal) { alert('No deal open.'); return; }
+  setSaveBusy('profit');
+  try {
+    const frame = parseFloat(document.getElementById('pc-frame').value) || 0;
+    const discount = parseFloat(document.getElementById('pc-discount').value) || 0;
+    const surcharge = parseFloat(document.getElementById('pc-surcharge').value) || 0;
+    const glass = parseFloat(document.getElementById('pc-glass').value) || 0;
+    const fitDays = parseFloat(document.getElementById('pc-fitdays').value) || 0;
+    const dayRate = parseFloat(document.getElementById('pc-dayrate').value) || 550;
+    const delivery = parseFloat(document.getElementById('pc-delivery').value) || 0;
+    const sold = parseFloat(document.getElementById('pc-sold').value) || 0;
+    const margin = parseFloat(document.getElementById('pc-product').value) || 0.4;
+    const frameCost = frame*(1-(discount/100))+surcharge;
+    const fitCost = fitDays*dayRate;
+    const totalCost = frameCost+glass+fitCost+delivery;
+    const recommended = totalCost>0 ? totalCost/(1-margin) : 0;
+    const pct = sold>0&&recommended>0 ? ((sold/recommended)*100).toFixed(1)+'%' : '—';
+    const grade = sold>=recommended?'Excellent':sold>=recommended*0.9?'Good':sold>=recommended*0.75?'Below target':'Significantly under';
+    const lines = [
+      '💰 Profit check by ' + currentUser + ' — ' + new Date().toLocaleDateString('en-GB'),
+      '',
+      'Frame cost: £' + frameCost.toFixed(0),
+      'Glass cost: £' + glass.toFixed(0),
+      'Fit cost: £' + fitCost.toFixed(0) + ' (' + fitDays + ' days @ £' + dayRate + '/day)',
+      'Delivery: £' + delivery.toFixed(0),
+      'Total cost: £' + totalCost.toFixed(0),
+      'Recommended min. price: £' + recommended.toFixed(0),
+      '',
+      'Quoted price: £' + sold.toLocaleString(),
+      'vs recommended: ' + pct + ' — ' + grade,
+    ];
+    await postMondayUpdate(lines.join('\n'));
+    setSaveStatus('profit', '✓ Profit summary saved to Monday', true);
+  } catch(err) {
+    setSaveStatus('profit', '✗ ' + err.message, false);
   }
 }
 
