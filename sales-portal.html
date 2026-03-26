@@ -833,63 +833,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
     </div>
 
     
-      <div class="section">
-        <div class="sec-title">📄 Quote builder</div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:12px">Customer details are pre-filled from the deal. Add line items, adjust pricing and generate a branded PDF.</div>
-        <!-- Intro text -->
-        <div class="field">
-          <label>Intro / cover text</label>
-          <textarea id="dq-intro" style="min-height:90px">At Burgess Windows and Doors, we are proud to work with some of the UK and Europe's leading manufacturers of high-performance glazing systems. Following our discussions, please find enclosed your quotation for consideration. I trust I have interpreted your requirements correctly.</textarea>
-        </div>
-      </div>
-      <!-- Line items -->
-      <div class="section">
-        <div class="sec-title">📋 Line items</div>
-        <div id="dq-items-list"></div>
-        <button onclick="addDealQuoteItem()" class="add-prod-btn" style="margin-top:6px">+ Add line item</button>
-      </div>
-      <!-- Pricing -->
-      <div class="section">
-        <div class="sec-title">💰 Pricing & terms</div>
-        <div class="row2">
-          <div class="field"><label>Discount / adjustment (£)</label><input type="number" id="dq-discount" value="0" placeholder="0.00" oninput="updateQuoteTotals()"></div>
-          <div class="field"><label>Discount label</label><input type="text" id="dq-discount-label" value="Discount" placeholder="e.g. Promotional discount"></div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>VAT rate</label>
-            <select id="dq-vat" onchange="updateQuoteTotals()">
-              <option value="0.2">20% Standard VAT</option>
-              <option value="0">0% Net Zero (New Build)</option>
-              <option value="0.05">5% Reduced VAT</option>
-            </select>
-          </div>
-          <div class="field"><label>Payment terms</label>
-            <select id="dq-payment-terms">
-              <option value="std">25% deposit | 25% after survey | 40% on delivery | 10% on completion</option>
-              <option value="100">100% on order</option>
-              <option value="5050">50% deposit | 50% on completion</option>
-              <option value="2575">25% deposit | 75% on completion</option>
-              <option value="custom">Custom</option>
-            </select>
-          </div>
-        </div>
-        <div class="field" id="dq-custom-terms-wrap" style="display:none">
-          <label>Custom payment terms</label>
-          <input type="text" id="dq-custom-terms" placeholder="Describe your payment terms...">
-        </div>
-        <!-- Totals -->
-        <div style="background:#1e3a5f;border-radius:10px;padding:14px;margin-top:10px">
-          <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:6px"><span>Subtotal</span><span id="dq-subtotal">£0.00</span></div>
-          <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:6px;display:none" id="dq-discount-row"><span id="dq-discount-row-label">Discount</span><span id="dq-discount-display">-£0.00</span></div>
-          <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:8px"><span id="dq-vat-label">VAT (20%)</span><span id="dq-vat-display">£0.00</span></div>
-          <div style="display:flex;justify-content:space-between;color:#fff;font-size:16px;font-weight:700;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px"><span>Total</span><span id="dq-total">£0.00</span></div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
-        <button onclick="generateAndDownloadDealQuote()" class="submit-btn">⬇️ Download PDF</button>
-        <button onclick="generateAndUploadDealQuote()" class="submit-btn" style="background:#059669">☁️ Save to Monday</button>
-      <div id="dq-upload-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
-              </div>
+      
               <!-- SUBMIT TAB -->
               <div class="tab-pane" id="tab-submit">
                 <div class="section">
