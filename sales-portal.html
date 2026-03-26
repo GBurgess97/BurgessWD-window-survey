@@ -319,6 +319,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
     <!-- OVERVIEW TAB -->
     <div class="qtab-panel active" id="qtp-overview">
+      <!-- Save bar -->
+      <div style="background:#f0fdf4;border:1px solid #6ee7b7;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:160px">
+          <div style="font-size:13px;font-weight:600;color:#065f46">Save all fields to Monday</div>
+          <div style="font-size:11px;color:#059669;margin-top:2px">Fill in the fields below then tap save</div>
+        </div>
+        <button onclick="saveDealToMonday()" id="save-monday-btn" style="padding:10px 20px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0">💾 Save to Monday</button>
+      </div>
+      <div id="save-monday-status" style="font-size:12px;margin-bottom:10px;display:none;padding:8px;background:#f0fdf4;border:1px solid #6ee7b7;border-radius:7px;color:#059669;text-align:center"></div>
       <div class="section">
         <div class="sec-title">📍 Site details</div>
         <div class="field"><label>Site address</label><input type="text" id="q-siteaddress" placeholder="Full site address"></div>
@@ -380,14 +389,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           <textarea id="q-requirements" placeholder="Colours, finishes, hardware, budget range..."></textarea>
         </div>
       </div>
-      <!-- SAVE TO MONDAY -->
-      <div style="margin-bottom:16px">
-        <button onclick="saveDealToMonday()" id="save-monday-btn" style="width:100%;padding:13px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">
-          💾 Save all changes to Monday
-        </button>
-        <div id="save-monday-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
-      </div>
-
       <!-- APPOINTMENT & STAGE -->
       <div class="section">
         <div class="sec-title">📅 Book appointment</div>
@@ -529,10 +530,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           <div class="grade-lbl" id="grade-lbl">of recommended sale value</div>
           <div class="grade-detail" id="grade-detail"></div>
         </div>
-        <button onclick="saveProfitReport()" id="profit-report-btn" style="width:100%;padding:12px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+          <button onclick="saveProfitToMonday()" id="save-profit-btn" data-label="💾 Save pricing to Monday" data-color="#1e3a5f" style="padding:11px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">💾 Save pricing to Monday</button>
+          <button onclick="saveProfitReport()" id="profit-report-btn" style="width:100%;padding:12px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px">
           💾 Save profit report to Monday (PDF)
         </button>
+        </div>
+        <div id="save-profit-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
         <div id="profit-report-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
+      </div>
+      <!-- SAVE ALL TO MONDAY -->
+      <div style="padding:4px 0 8px">
+        <button onclick="saveDealToMonday()" id="save-monday-btn" style="width:100%;padding:14px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.01em">
+          ✅ Update Monday — save all fields
+        </button>
+        <div style="font-size:11px;color:#64748b;text-align:center;margin-top:5px">Saves all overview fields, notes and profit checker data to Monday</div>
+        <div id="save-monday-status" style="font-size:12px;margin-top:6px;display:none;text-align:center;font-weight:600"></div>
       </div>
     </div>
 
@@ -1288,135 +1301,114 @@ async function loadDealFromMonday(){
   }catch(e){ console.warn('Could not load deal fields:', e); }
 }
 
-// ── Save deal fields to Monday ────────────────────────────────
+// ── Shared save helpers ───────────────────────────────────────
+async function buildColVals(fields){
+  const map = await getDealColumns();
+  const colVals = {};
+  fields.forEach(function(f){
+    const title=f[0], value=f[1];
+    const id = colId(map,title);
+    const type = colType(map,title);
+    if(!id) return;
+    if(value===null||value===undefined||value==='') return;
+    const str = String(value).trim();
+    if(str==='') return;
+    if(type==='color'||type==='status'){
+      colVals[id] = JSON.stringify({label:str});
+    } else if(type==='long_text'){
+      colVals[id] = JSON.stringify({text:str});
+    } else if(type==='numeric'||type==='numbers'){
+      const n=parseFloat(str);
+      if(!isNaN(n)) colVals[id]=String(n);
+    } else {
+      colVals[id]=str;
+    }
+  });
+  return colVals;
+}
+
+async function runSave(colVals, btnId, statusId){
+  const btn=document.getElementById(btnId);
+  const statusEl=document.getElementById(statusId);
+  if(!btn) return;
+  btn.disabled=true; btn.textContent='Saving...';
+  if(statusEl) statusEl.style.display='none';
+  try{
+    if(Object.keys(colVals).length===0) throw new Error('No fields to save');
+    const cvStr=JSON.stringify(JSON.stringify(colVals));
+    await mq('mutation{change_multiple_column_values(board_id:'+DEALS_BOARD+',item_id:'+selectedDeal.id+',column_values:'+cvStr+'){id}}');
+    btn.textContent='✓ Saved!'; btn.style.background='#10b981';
+    if(statusEl){statusEl.textContent='✓ '+Object.keys(colVals).length+' field(s) saved';statusEl.style.color='#059669';statusEl.style.display='block';}
+    const origLabel=btn.dataset.label||'Save';
+    const origColor=btn.dataset.color||'#059669';
+    setTimeout(function(){btn.disabled=false;btn.textContent=origLabel;btn.style.background=origColor;if(statusEl)statusEl.style.display='none';},3000);
+  }catch(err){
+    if(statusEl){statusEl.textContent='✗ '+err.message;statusEl.style.color='#dc2626';statusEl.style.display='block';}
+    btn.disabled=false;
+    btn.textContent=btn.dataset.label||'Save';
+    btn.style.background=btn.dataset.color||'#059669';
+  }
+}
+
+// ── Save overview / site details to Monday ────────────────────
 async function saveDealToMonday(){
   if(!selectedDeal) return;
-  const btn = document.getElementById('save-monday-btn');
-  const statusEl = document.getElementById('save-monday-status');
-  btn.disabled=true; btn.textContent='Saving...';
-  statusEl.style.display='none';
-  try{
-    const map = await getDealColumns();
-    const colVals = {};
+  const vatEl=document.getElementById('q-vat');
+  const vatLabels={'0.2':'20% Standard','0':'0% New build','0.05':'5% Reduced'};
+  const colVals=await buildColVals([
+    ['Site Address', document.getElementById('q-siteaddress')?.value],
+    ['Lead Source', document.getElementById('q-leadsource')?.value],
+    ['Property Type', document.getElementById('q-proptype')?.value],
+    ['Build Type', document.getElementById('q-buildtype')?.value],
+    ['Survey Type', document.getElementById('q-surveytype')?.value],
+    ['Survey Timeframe', document.getElementById('q-surveytime')?.value],
+    ['Access Notes', document.getElementById('q-access')?.value],
+    ['Description of Works', document.getElementById('q-worksdesc')?.value],
+    ['Internal Notes', document.getElementById('q-internalnotes')?.value],
+    ['Customer Requirements', document.getElementById('q-requirements')?.value],
+    ['Builder Contact', document.getElementById('q-builder')?.value],
+    ['Fit Days', document.getElementById('q-fitdays')?.value],
+    ['VAT Rate', vatEl?vatLabels[vatEl.value]:null],
+    ['Payment Terms', document.getElementById('q-payment')?.value],
+  ]);
+  const addr=document.getElementById('q-siteaddress')?.value;
+  if(addr){selectedDeal.address=addr;document.getElementById('di-address').textContent=addr;}
+  await runSave(colVals,'save-monday-btn','save-monday-status');
+}
 
-    // Helper: add to column values object with correct format per type
-    const add = function(title, value){
-      const id = colId(map, title);
-      const type = colType(map, title);
-      if(!id) return;
-      if(value === null || value === undefined || value === '') return;
-      const str = String(value).trim();
-      if(str === '') return;
-      if(type === 'color' || type === 'status'){
-        colVals[id] = JSON.stringify({label: str});
-      } else if(type === 'long_text'){
-        colVals[id] = JSON.stringify({text: str});
-      } else if(type === 'numeric' || type === 'numbers'){
-        const n = parseFloat(str);
-        if(!isNaN(n)) colVals[id] = String(n);
-      } else {
-        // text, email, phone etc — plain string
-        colVals[id] = str;
-      }
-    };
-
-    // Overview
-    add('Site Address', document.getElementById('q-siteaddress')?.value);
-    add('Lead Source', document.getElementById('q-leadsource')?.value);
-    add('Property Type', document.getElementById('q-proptype')?.value);
-    add('Build Type', document.getElementById('q-buildtype')?.value);
-    add('Survey Type', document.getElementById('q-surveytype')?.value);
-    add('Survey Timeframe', document.getElementById('q-surveytime')?.value);
-    add('Access Notes', document.getElementById('q-access')?.value);
-    add('Description of Works', document.getElementById('q-worksdesc')?.value);
-    add('Internal Notes', document.getElementById('q-internalnotes')?.value);
-    add('Customer Requirements', document.getElementById('q-requirements')?.value);
-    add('Builder Contact', document.getElementById('q-builder')?.value);
-    add('Fit Days', document.getElementById('q-fitdays')?.value);
-
-    // VAT
-    const vatEl = document.getElementById('q-vat');
-    if(vatEl){
-      const vatLabels = {'0.2':'20% Standard','0':'0% New build','0.05':'5% Reduced'};
-      add('VAT Rate', vatLabels[vatEl.value]||'20% Standard');
-    }
-    add('Payment Terms', document.getElementById('q-payment')?.value);
-
-    // Profit checker
-    const pcProd = document.getElementById('pc-product');
-    if(pcProd){
-      const prodLabels = {'alu':'Aluminium','upvc':'UPVC','timber':'Timber-Alt','comp':'Composite Door'};
-      add('Product Type', prodLabels[pcProd.value]||'Aluminium');
-    }
-    add('Sold Value', document.getElementById('pc-sold')?.value);
-    add('Fit Days PC', document.getElementById('pc-fitdays')?.value);
-    add('Load Out Days', document.getElementById('pc-loadout')?.value);
-    add('Lifting Days', document.getElementById('pc-lifting')?.value);
-    add('Transport Cost', document.getElementById('pc-transport')?.value);
-    add('Cill Metres', document.getElementById('pc-cill-m')?.value);
-    add('Comp TP650 Metres', document.getElementById('pc-comp650')?.value);
-    add('Comp TP652 Metres', document.getElementById('pc-comp652')?.value);
-    add('Scaffolding Cost', document.getElementById('pc-scaffolding')?.value);
-    add('Building Works Cost', document.getElementById('pc-building')?.value);
-    add('Other Costs', document.getElementById('pc-other-cost')?.value);
-    add('Supplier Delivery Fee', document.getElementById('pc-delivery')?.value);
-
-    // Site distance
-    const distEl = document.getElementById('pc-distance');
-    if(distEl){
-      const distLabels = {'fuel0':'0-25 miles','fuel30':'26-50 miles','fuel60':'51-79 miles','fuel90':'80-100 miles','fuel120':'100+ miles'};
-      add('Site Distance', distLabels[distEl.value]||'0-25 miles');
-    }
-
-    // Frame supplier 1
-    if(frameLines.length > 0){
-      const f = frameLines[0];
-      add('Frame Supplier 1', f.supplier);
-      add('Frame List Price 1', f.listPrice||0);
-      add('Frame Discount 1', f.discount||0);
-      add('Frame Surcharge 1', f.surcharge||0);
-    }
-    // Glass supplier 1
-    if(glasLines.length > 0){
-      const g = glasLines[0];
-      add('Glass Supplier 1', g.supplier);
-      add('Glass M2 1', g.sqm||0);
-      add('Glass Price Per M2 1', g.pricePerSqm||0);
-    }
-
-    if(Object.keys(colVals).length === 0){
-      throw new Error('No fields to save');
-    }
-
-    // Use change_multiple_column_values — one API call for everything
-    const cvStr = JSON.stringify(JSON.stringify(colVals));
-    await mq(`mutation{change_multiple_column_values(board_id:${DEALS_BOARD},item_id:${selectedDeal.id},column_values:${cvStr}){id}}`);
-
-    // Update local state
-    selectedDeal.address = document.getElementById('q-siteaddress')?.value || selectedDeal.address;
-    document.getElementById('di-address').textContent = selectedDeal.address || '—';
-
-    const saved = Object.keys(colVals).length;
-    btn.textContent = '✓ Saved to Monday';
-    btn.style.background = '#10b981';
-    statusEl.textContent = '✓ ' + saved + ' field(s) saved';
-    statusEl.style.color = '#059669';
-    statusEl.style.display = 'block';
-    setTimeout(function(){
-      btn.disabled=false;
-      btn.textContent='💾 Save all changes to Monday';
-      btn.style.background='#059669';
-      statusEl.style.display='none';
-    }, 3000);
-
-  }catch(err){
-    statusEl.textContent = '✗ ' + err.message;
-    statusEl.style.color = '#dc2626';
-    statusEl.style.display = 'block';
-    btn.disabled=false;
-    btn.textContent='💾 Save all changes to Monday';
-    btn.style.background='#059669';
+// ── Save profit checker to Monday ────────────────────────────
+async function saveProfitToMonday(){
+  if(!selectedDeal) return;
+  const pcProd=document.getElementById('pc-product');
+  const prodLabels={'alu':'Aluminium','upvc':'UPVC','timber':'Timber-Alt','comp':'Composite Door'};
+  const distEl=document.getElementById('pc-distance');
+  const distLabels={'fuel0':'0-25 miles','fuel30':'26-50 miles','fuel60':'51-79 miles','fuel90':'80-100 miles','fuel120':'100+ miles'};
+  const fields=[
+    ['Product Type', pcProd?prodLabels[pcProd.value]:null],
+    ['Sold Value', document.getElementById('pc-sold')?.value],
+    ['Fit Days PC', document.getElementById('pc-fitdays')?.value],
+    ['Load Out Days', document.getElementById('pc-loadout')?.value],
+    ['Lifting Days', document.getElementById('pc-lifting')?.value],
+    ['Transport Cost', document.getElementById('pc-transport')?.value],
+    ['Cill Metres', document.getElementById('pc-cill-m')?.value],
+    ['Comp TP650 Metres', document.getElementById('pc-comp650')?.value],
+    ['Comp TP652 Metres', document.getElementById('pc-comp652')?.value],
+    ['Scaffolding Cost', document.getElementById('pc-scaffolding')?.value],
+    ['Building Works Cost', document.getElementById('pc-building')?.value],
+    ['Other Costs', document.getElementById('pc-other-cost')?.value],
+    ['Supplier Delivery Fee', document.getElementById('pc-delivery')?.value],
+    ['Site Distance', distEl?distLabels[distEl.value]:null],
+  ];
+  if(frameLines.length>0){
+    const f=frameLines[0];
+    fields.push(['Frame Supplier 1',f.supplier],['Frame List Price 1',f.listPrice||0],['Frame Discount 1',f.discount||0],['Frame Surcharge 1',f.surcharge||0]);
   }
+  if(glasLines.length>0){
+    const g=glasLines[0];
+    fields.push(['Glass Supplier 1',g.supplier],['Glass M2 1',g.sqm||0],['Glass Price Per M2 1',g.pricePerSqm||0]);
+  }
+  const colVals=await buildColVals(fields);
+  await runSave(colVals,'save-profit-btn','save-profit-status');
 }
 
 
