@@ -596,7 +596,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
 
                 <!-- Profit checker expand -->
                 <button class="expand-btn" id="profit-expand-btn" onclick="toggleProfitChecker()">
-                  <span>💰 Profit checker</span>
+                  <span>💰 Open profit checker &amp; pricing</span>
                   <span class="arrow">▼</span>
                 </button>
                 <div class="expand-panel" id="profit-expand-panel">
@@ -715,9 +715,16 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
               </div><!-- end tab-overview -->
               <!-- PRODUCTS TAB -->
               <div class="tab-pane" id="tab-products">
-                <div style="font-size:12px;color:#64748b;margin-bottom:12px">Add each window, door or product. All sizes in mm. Use the canvas to sketch the design.</div>
-      <div id="products-list"></div>
-      <button class="add-prod-btn" onclick="addProduct()">+ Add product / item</button>
+                <div id="products-empty" style="text-align:center;padding:32px 16px;color:var(--text-3)">
+                  <div style="font-size:32px;margin-bottom:10px">🪟</div>
+                  <div style="font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:4px">No products yet</div>
+                  <div style="font-size:12px;margin-bottom:16px">Add each window, door or product. All sizes in mm.</div>
+                  <button class="btn btn-navy" style="width:auto;padding:10px 20px" onclick="addProduct()">+ Add first product</button>
+                </div>
+                <div id="products-list"></div>
+                <div id="products-add-row" style="display:none">
+                  <button class="add-prod-btn" onclick="addProduct()">+ Add another product / item</button>
+                </div>
 
       <div style="margin-top:16px;padding-top:16px;border-top:1px solid #e5e5e5">
         <button onclick="generateSiteReport()" id="site-report-btn" style="width:100%;padding:13px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">
@@ -1442,6 +1449,15 @@ function openDeal(id){
   // Update header
   const dhn=document.getElementById('di-name');if(dhn)dhn.textContent=selectedDeal.name||'—';
   const dhs=document.getElementById('di-stage');if(dhs){dhs.textContent=selectedDeal.stage||'—';}
+  // Hide appt pill if no appointment
+  const diappt=document.getElementById('di-appt');
+  if(diappt){
+    if(selectedDeal.apptDate){
+      let apptStr=fmtDate(selectedDeal.apptDate);
+      if(selectedDeal.apptTime)apptStr+=' '+fmtTime(selectedDeal.apptTime);
+      diappt.textContent=apptStr; diappt.style.display='';
+    } else { diappt.style.display='none'; }
+  }
   // Info strip
   const dia=document.getElementById('di-address');if(dia)dia.textContent=selectedDeal.address||'—';
   const dip=document.getElementById('di-phone');if(dip)dip.textContent=selectedDeal.phone||'—';
@@ -2084,6 +2100,11 @@ function calcProfit() {
 
 // Initialise with one frame and one glass line on deal open
 function initProfitChecker() {
+  // Reset products empty state
+  const emptyEl=document.getElementById('products-empty');
+  const addRow=document.getElementById('products-add-row');
+  if(emptyEl) emptyEl.style.display='block';
+  if(addRow) addRow.style.display='none';
   frameLines = []; glasLines = []; frameLineCount = 0; glassLineCount = 0;
   document.getElementById('pc-frame-lines').innerHTML = '';
   document.getElementById('pc-glass-lines').innerHTML = '';
