@@ -1297,97 +1297,109 @@ async function saveDealToMonday(){
   statusEl.style.display='none';
   try{
     const map = await getDealColumns();
+    const colVals = {};
 
-    // Helper to add column value mutation if column exists
-    const mutations = [];
-    const addMut = (title, value) => {
+    // Helper: add to column values object with correct format per type
+    const add = function(title, value){
       const id = colId(map, title);
       const type = colType(map, title);
       if(!id) return;
-      const val = colVal(type, value);
-      if(val === null || val === '') return;
-      mutations.push(`mutation{change_column_value(board_id:${DEALS_BOARD},item_id:${selectedDeal.id},column_id:"${id}",value:${JSON.stringify(val)}){id}}`);
+      if(value === null || value === undefined || value === '') return;
+      const str = String(value).trim();
+      if(str === '') return;
+      if(type === 'color' || type === 'status'){
+        colVals[id] = JSON.stringify({label: str});
+      } else if(type === 'long_text'){
+        colVals[id] = JSON.stringify({text: str});
+      } else if(type === 'numeric' || type === 'numbers'){
+        const n = parseFloat(str);
+        if(!isNaN(n)) colVals[id] = String(n);
+      } else {
+        // text, email, phone etc — plain string
+        colVals[id] = str;
+      }
     };
 
     // Overview
-    addMut('Site Address', document.getElementById('q-siteaddress')?.value);
-    addMut('Lead Source', document.getElementById('q-leadsource')?.value);
-    addMut('Property Type', document.getElementById('q-proptype')?.value);
-    addMut('Build Type', document.getElementById('q-buildtype')?.value);
-    addMut('Survey Type', document.getElementById('q-surveytype')?.value);
-    addMut('Survey Timeframe', document.getElementById('q-surveytime')?.value);
-    addMut('Access Notes', document.getElementById('q-access')?.value);
-    addMut('Description of Works', document.getElementById('q-worksdesc')?.value);
-    addMut('Internal Notes', document.getElementById('q-internalnotes')?.value);
-    addMut('Customer Requirements', document.getElementById('q-requirements')?.value);
-    addMut('Builder Contact', document.getElementById('q-builder')?.value);
-    addMut('Fit Days', document.getElementById('q-fitdays')?.value);
+    add('Site Address', document.getElementById('q-siteaddress')?.value);
+    add('Lead Source', document.getElementById('q-leadsource')?.value);
+    add('Property Type', document.getElementById('q-proptype')?.value);
+    add('Build Type', document.getElementById('q-buildtype')?.value);
+    add('Survey Type', document.getElementById('q-surveytype')?.value);
+    add('Survey Timeframe', document.getElementById('q-surveytime')?.value);
+    add('Access Notes', document.getElementById('q-access')?.value);
+    add('Description of Works', document.getElementById('q-worksdesc')?.value);
+    add('Internal Notes', document.getElementById('q-internalnotes')?.value);
+    add('Customer Requirements', document.getElementById('q-requirements')?.value);
+    add('Builder Contact', document.getElementById('q-builder')?.value);
+    add('Fit Days', document.getElementById('q-fitdays')?.value);
 
-    // VAT rate label
+    // VAT
     const vatEl = document.getElementById('q-vat');
     if(vatEl){
       const vatLabels = {'0.2':'20% Standard','0':'0% New build','0.05':'5% Reduced'};
-      addMut('VAT Rate', vatLabels[vatEl.value]||'20% Standard');
+      add('VAT Rate', vatLabels[vatEl.value]||'20% Standard');
     }
-    // Payment terms
-    addMut('Payment Terms', document.getElementById('q-payment')?.value);
+    add('Payment Terms', document.getElementById('q-payment')?.value);
 
     // Profit checker
     const pcProd = document.getElementById('pc-product');
     if(pcProd){
       const prodLabels = {'alu':'Aluminium','upvc':'UPVC','timber':'Timber-Alt','comp':'Composite Door'};
-      addMut('Product Type', prodLabels[pcProd.value]||'Aluminium');
+      add('Product Type', prodLabels[pcProd.value]||'Aluminium');
     }
-    addMut('Sold Value', document.getElementById('pc-sold')?.value);
-    addMut('Fit Days PC', document.getElementById('pc-fitdays')?.value);
-    addMut('Load Out Days', document.getElementById('pc-loadout')?.value);
-    addMut('Lifting Days', document.getElementById('pc-lifting')?.value);
-    addMut('Transport Cost', document.getElementById('pc-transport')?.value);
-    addMut('Cill Metres', document.getElementById('pc-cill-m')?.value);
-    addMut('Comp TP650 Metres', document.getElementById('pc-comp650')?.value);
-    addMut('Comp TP652 Metres', document.getElementById('pc-comp652')?.value);
-    addMut('Scaffolding Cost', document.getElementById('pc-scaffolding')?.value);
-    addMut('Building Works Cost', document.getElementById('pc-building')?.value);
-    addMut('Other Costs', document.getElementById('pc-other-cost')?.value);
-    addMut('Supplier Delivery Fee', document.getElementById('pc-delivery')?.value);
+    add('Sold Value', document.getElementById('pc-sold')?.value);
+    add('Fit Days PC', document.getElementById('pc-fitdays')?.value);
+    add('Load Out Days', document.getElementById('pc-loadout')?.value);
+    add('Lifting Days', document.getElementById('pc-lifting')?.value);
+    add('Transport Cost', document.getElementById('pc-transport')?.value);
+    add('Cill Metres', document.getElementById('pc-cill-m')?.value);
+    add('Comp TP650 Metres', document.getElementById('pc-comp650')?.value);
+    add('Comp TP652 Metres', document.getElementById('pc-comp652')?.value);
+    add('Scaffolding Cost', document.getElementById('pc-scaffolding')?.value);
+    add('Building Works Cost', document.getElementById('pc-building')?.value);
+    add('Other Costs', document.getElementById('pc-other-cost')?.value);
+    add('Supplier Delivery Fee', document.getElementById('pc-delivery')?.value);
 
     // Site distance
     const distEl = document.getElementById('pc-distance');
     if(distEl){
       const distLabels = {'fuel0':'0-25 miles','fuel30':'26-50 miles','fuel60':'51-79 miles','fuel90':'80-100 miles','fuel120':'100+ miles'};
-      addMut('Site Distance', distLabels[distEl.value]||'0-25 miles');
+      add('Site Distance', distLabels[distEl.value]||'0-25 miles');
     }
 
     // Frame supplier 1
     if(frameLines.length > 0){
       const f = frameLines[0];
-      addMut('Frame Supplier 1', f.supplier);
-      addMut('Frame List Price 1', f.listPrice||0);
-      addMut('Frame Discount 1', f.discount||0);
-      addMut('Frame Surcharge 1', f.surcharge||0);
+      add('Frame Supplier 1', f.supplier);
+      add('Frame List Price 1', f.listPrice||0);
+      add('Frame Discount 1', f.discount||0);
+      add('Frame Surcharge 1', f.surcharge||0);
     }
     // Glass supplier 1
     if(glasLines.length > 0){
       const g = glasLines[0];
-      addMut('Glass Supplier 1', g.supplier);
-      addMut('Glass M2 1', g.sqm||0);
-      addMut('Glass Price Per M2 1', g.pricePerSqm||0);
+      add('Glass Supplier 1', g.supplier);
+      add('Glass M2 1', g.sqm||0);
+      add('Glass Price Per M2 1', g.pricePerSqm||0);
     }
 
-    // Run all mutations sequentially
-    let saved = 0;
-    for(const mut of mutations){
-      try{ await mq(mut); saved++; }
-      catch(e){ console.warn('Could not save column:', e.message); }
+    if(Object.keys(colVals).length === 0){
+      throw new Error('No fields to save');
     }
 
-    // Update selectedDeal address
+    // Use change_multiple_column_values — one API call for everything
+    const cvStr = JSON.stringify(JSON.stringify(colVals));
+    await mq(`mutation{change_multiple_column_values(board_id:${DEALS_BOARD},item_id:${selectedDeal.id},column_values:${cvStr}){id}}`);
+
+    // Update local state
     selectedDeal.address = document.getElementById('q-siteaddress')?.value || selectedDeal.address;
     document.getElementById('di-address').textContent = selectedDeal.address || '—';
 
+    const saved = Object.keys(colVals).length;
     btn.textContent = '✓ Saved to Monday';
     btn.style.background = '#10b981';
-    statusEl.textContent = '✓ ' + saved + ' field(s) saved to Monday';
+    statusEl.textContent = '✓ ' + saved + ' field(s) saved';
     statusEl.style.color = '#059669';
     statusEl.style.display = 'block';
     setTimeout(function(){
@@ -1406,6 +1418,7 @@ async function saveDealToMonday(){
     btn.style.background='#059669';
   }
 }
+
 
 // ── Book appointment ──────────────────────────────────────────
 async function bookAppointment(){
