@@ -145,7 +145,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
 .tab-btn.on{color:var(--navy);border-bottom-color:var(--navy)}
 
 /* Tab content */
-.tab-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:0;-webkit-overflow-scrolling:touch}
+.tab-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:0;-webkit-overflow-scrolling:touch;min-height:0}
 .tab-pane{display:none;padding:14px}
 .tab-pane.on{display:block}
 
@@ -461,8 +461,9 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
             </div>
 
             <!-- Tab body -->
+            <div class="tab-body">
 <!-- OVERVIEW TAB -->
-              <div class="tab-pane on" id="tab-overview" style="padding:14px">
+              <div class="tab-pane on" id="tab-overview">
                 <div class="section">
                   <div class="sec-title">📍 Site details</div>
                   <div class="field"><label>Site address</label>
@@ -713,7 +714,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
 
               </div><!-- end tab-overview -->
               <!-- PRODUCTS TAB -->
-              <div class="tab-pane" id="tab-products" style="padding:14px">
+              <div class="tab-pane" id="tab-products">
                 <div style="font-size:12px;color:#64748b;margin-bottom:12px">Add each window, door or product. All sizes in mm. Use the canvas to sketch the design.</div>
       <div id="products-list"></div>
       <button class="add-prod-btn" onclick="addProduct()">+ Add product / item</button>
@@ -727,7 +728,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
     
               </div>
               <!-- PHOTOS TAB -->
-              <div class="tab-pane" id="tab-photos" style="padding:14px">
+              <div class="tab-pane" id="tab-photos">
                 <div class="section">
         <div class="sec-title">📸 Site photos</div>
         <div style="font-size:12px;color:#64748b;margin-bottom:10px">Upload photos of existing windows, doors, site access and any relevant details.</div>
@@ -738,7 +739,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
     
               </div>
               <!-- FILES TAB -->
-              <div class="tab-pane" id="tab-files" style="padding:14px">
+              <div class="tab-pane" id="tab-files">
                 <div class="section">
         <div class="sec-title">📁 Project files</div>
         <div style="font-size:12px;color:#64748b;margin-bottom:10px">Upload spec sheets, brochures, drawings or any other files relating to this project.</div>
@@ -755,7 +756,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
     
               </div>
               <!-- QUOTE TAB -->
-              <div class="tab-pane" id="tab-quote" style="padding:14px">
+              <div class="tab-pane" id="tab-quote">
                 <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:var(--r-sm);padding:10px 13px;font-size:12px;color:#92400e;margin-bottom:12px">
                   ✅ Client details are pre-filled. Add line items and generate the quote PDF.
                 </div>
@@ -883,7 +884,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
       <div id="dq-upload-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
               </div>
               <!-- SUBMIT TAB -->
-              <div class="tab-pane" id="tab-submit" style="padding:14px">
+              <div class="tab-pane" id="tab-submit">
                 <div class="section">
         <div class="sec-title">✅ Submit</div>
         <div style="font-size:13px;color:#64748b;margin-bottom:12px">
@@ -904,6 +905,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
           <div id="progress-steps"></div>
         </div>
       </div>
+            </div><!-- end tab-body -->
     
               </div>
 
@@ -939,6 +941,9 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
               <div class="empty-sub">to view details</div>
             </div>
             <div class="col-scroll" id="contact-detail-inner" style="display:none;">
+              <div style="padding:10px 16px;background:var(--navy);display:flex;align-items:center;gap:10px">
+                <span onclick="closeContact()" style="font-size:11px;color:rgba(255,255,255,.5);cursor:pointer;padding:4px 0">← Back</span>
+              </div>
               <div class="cd-head" id="contact-detail-head">
                 <div style="display:flex;flex-direction:column;width:100%">
                   <div class="dh-back" onclick="closeContact()" style="color:rgba(255,255,255,.5);font-size:11px;cursor:pointer;margin-bottom:8px">← Back to contacts</div>
@@ -1395,17 +1400,16 @@ function openContact(id){
   document.getElementById('cd-address').textContent=selectedContact.address||'—';
   document.getElementById('cd-type').textContent=selectedContact.clientType||'—';
   document.getElementById('cd-comments').textContent=selectedContact.comments||'—';
-  document.getElementById('create-deal-btn').disabled=false;
-  document.getElementById('create-deal-btn').textContent='+ Create deal from this contact';
-  document.getElementById('create-deal-btn').style.background='#1e3a5f';
-  document.getElementById('create-deal-status').style.display='none';
+  var cdb=document.getElementById('create-deal-btn');
+  if(cdb){cdb.disabled=false;cdb.textContent='+ Create deal from this contact';cdb.style.background='#1e3a5f';}
+  var cds=document.getElementById('create-deal-status');if(cds)cds.style.display='none';
   const linked=allDeals.filter(d=>d.name.toLowerCase().includes(selectedContact.name.split(' ')[0].toLowerCase()));
   const dealsEl=document.getElementById('cd-deals');
   dealsEl.innerHTML=linked.length>0?linked.map(d=>`<div class="list-row" style="padding:10px 0" onclick="openDeal('${d.id}')">
     <div class="row-main"><div class="row-name">${d.name}</div><div class="row-meta">${d.apptDate?fmtDate(d.apptDate):'No appointment'}</div></div>
     <span class="badge ${sBadge(d.stage)}">${d.stage||'—'}</span><div class="row-arrow">›</div>
   </div>`).join(''):'<div style="font-size:12px;color:#94a3b8">No linked deals found.</div>';
-  navTo('contact-detail');
+  // panel shown by openContactById
 }
 
 async function createDealFromContact(){
@@ -3899,6 +3903,17 @@ function openDealNew(id){
   openDeal(id);
 }
 
+function closeContact(){
+  var listCol = document.getElementById('contacts-list-col');
+  var detailCol = document.getElementById('contact-detail-col');
+  var emptyState = document.getElementById('contact-empty-state');
+  var detailInner = document.getElementById('contact-detail-inner');
+  if(listCol){ listCol.style.display='flex'; }
+  if(emptyState) emptyState.style.display = 'flex';
+  if(detailInner) detailInner.style.display = 'none';
+  document.querySelectorAll('#contacts-list .list-row').forEach(function(r){r.classList.remove('sel');});
+}
+
 function closeDeal(){
   var listCol = document.getElementById('deals-list-col');
   var detailCol = document.getElementById('deal-detail-col');
@@ -3931,28 +3946,7 @@ function toggleProfitChecker(){
   }
 }
 
-// Override openContact for new layout
-var _origOpenContact = openContact;
-window.openContact = function(contact){
-  var detailCol = document.getElementById('contact-detail-col');
-  if(detailCol) detailCol.style.display = 'flex';
-  // Hide empty state, show detail
-  var emptyState = document.getElementById('contact-empty-state');
-  var detailInner = document.getElementById('contact-detail-inner');
-  if(emptyState) emptyState.style.display = 'none';
-  if(detailInner) detailInner.style.display = 'block';
-  if(window.innerWidth < 768){
-    var listCol = document.getElementById('contacts-list-col');
-    if(listCol) listCol.style.display = 'none';
-  }
-  // Highlight selected row
-  document.querySelectorAll('#contacts-list .list-row').forEach(function(r){r.classList.remove('sel');});
-  var rows = document.querySelectorAll('#contacts-list .list-row');
-  rows.forEach(function(r){
-    if(r.dataset.idx !== undefined && allContacts[parseInt(r.dataset.idx)] === contact) r.classList.add('sel');
-  });
-  _origOpenContact(contact);
-};
+// openContact override removed — handled by openContactById above
 
 // Override initApp to use new layout
 var _origInitApp = initApp;
@@ -4020,7 +4014,8 @@ window.renderDeals = function(){
 window.renderContacts = function(){
   var search = (document.getElementById('contacts-search')?.value||'').toLowerCase();
   var filtered = allContacts.filter(function(c){
-    return !search || (c.name||'').toLowerCase().includes(search) || (c.email||'').toLowerCase().includes(search);
+    return !search || (c.name||'').toLowerCase().includes(search) ||
+      (c.phone||'').includes(search) || (c.email||'').toLowerCase().includes(search);
   });
   var sub = document.getElementById('contacts-sub');
   if(sub) sub.textContent = filtered.length + ' contact' + (filtered.length!==1?'s':'');
@@ -4030,15 +4025,46 @@ window.renderContacts = function(){
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">No contacts found</div></div>';
     return;
   }
+  var typeCls = {'Client':'b-client','Architect':'b-pricing','Contractor':'b-prospect','Developer':'b-quotesent','Other':'b-unsuccessful'};
   list.innerHTML = filtered.map(function(c){
-    var initials = (c.name||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
-    return '<div class="list-row" data-idx="'+allContacts.indexOf(c)+'" onclick="openContact(allContacts[this.dataset.idx])">' +
-      '<div class="row-top" style="gap:10px"><div style="width:34px;height:34px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+initials+'</div>' +
-      '<div style="flex:1;min-width:0"><div class="row-name">'+escHtml(c.name||'—')+'</div>' +
-      '<div class="row-meta">'+escHtml(c.phone||c.email||'—')+'</div></div>' +
-      '<span class="badge b-client">'+escHtml(c.clientType||'Client')+'</span></div></div>';
+    var initials = (c.name||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+    var badge = typeCls[c.clientType]||'b-client';
+    return '<div class="list-row" data-cid="'+c.id+'" onclick="openContactById(this.dataset.cid)">' +
+      '<div class="row-top" style="gap:10px">' +
+      '<div style="width:36px;height:36px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">'+initials+'</div>' +
+      '<div style="flex:1;min-width:0">' +
+      '<div class="row-name">'+escHtml(c.name||'—')+'</div>' +
+      '<div class="row-meta">'+escHtml(c.phone||c.email||c.address||'—')+'</div>' +
+      '</div>' +
+      '<span class="badge '+badge+'">'+escHtml(c.clientType||'Client')+'</span>' +
+      '</div></div>';
   }).join('');
 };
+
+// New contact opener for new layout — passes id, handles panel show/hide
+function openContactById(id){
+  // Show detail panel
+  var detailCol = document.getElementById('contact-detail-col');
+  var emptyState = document.getElementById('contact-empty-state');
+  var detailInner = document.getElementById('contact-detail-inner');
+  if(detailCol) detailCol.style.display = 'flex';
+  if(emptyState) emptyState.style.display = 'none';
+  if(detailInner) detailInner.style.display = 'block';
+  // Hide list on mobile
+  if(window.innerWidth < 900){
+    var listCol = document.getElementById('contacts-list-col');
+    if(listCol) listCol.style.display = 'none';
+  }
+  // Highlight row
+  document.querySelectorAll('#contacts-list .list-row').forEach(function(r){r.classList.remove('sel');});
+  // Find and highlight the clicked row
+  var rows = document.querySelectorAll('#contacts-list .list-row');
+  rows.forEach(function(r){
+    if(r.dataset.cid === id) r.classList.add('sel');
+  });
+  // Call original openContact with id
+  openContact(id);
+}
 
 function escHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
