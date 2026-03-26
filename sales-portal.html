@@ -367,6 +367,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <button class="qtab" onclick="showQTab('products',this)">🪟 Products</button>
       <button class="qtab" onclick="showQTab('survey',this)">📐 Site survey</button>
       <button class="qtab" onclick="showQTab('files',this)">📁 Files</button>
+      <button class="qtab" onclick="showQTab('profit',this)">💰 Profit</button>
+      <button class="qtab" onclick="showQTab('quotation',this)">📄 Quotation</button>
       <button class="qtab" onclick="showQTab('submit',this)">✅ Submit</button>
     </div>
 
@@ -439,6 +441,55 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         </div>
       </div>
 
+
+    </div>
+
+    <!-- ═══ PRODUCTS TAB ═══ -->
+    <div class="qtab-panel" id="qtp-products">
+      <div style="font-size:12px;color:#64748b;margin-bottom:12px">Add each window, door or unit. All sizes in mm. Specify full product details for the order pack.</div>
+      <div id="products-list"></div>
+      <button class="add-prod-btn" onclick="addProduct()">+ Add product / item</button>
+
+    </div>
+
+    <!-- ═══ SITE SURVEY TAB ═══ -->
+    <div class="qtab-panel" id="qtp-survey">
+      <div style="font-size:12px;color:#64748b;margin-bottom:14px">Capture site measurements, opening details, sketches and photos for each location. This becomes the surveyor's reference.</div>
+
+      <!-- Site overview photos -->
+      <div class="section">
+        <div class="sec-title">📸 Site overview photos</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:10px">Overall site photos — access, elevation, existing windows/doors.</div>
+        <div class="upload-zone" onclick="document.getElementById('photo-input').click()">📷 Tap to upload site photos</div>
+        <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
+        <div class="photo-grid" id="photo-grid"></div>
+      </div>
+
+      <!-- Per-opening survey entries -->
+      <div id="survey-list"></div>
+      <button class="add-prod-btn" onclick="addSurveyEntry()">+ Add opening / location</button>
+    </div>
+
+    <!-- ═══ FILES TAB ═══ -->
+    <div class="qtab-panel" id="qtp-files">
+      <!-- Upload new files -->
+      <div class="section">
+        <div class="sec-title">📎 Upload files</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:10px">Spec sheets, drawings, brochures — uploaded to this deal in Monday.</div>
+        <div class="upload-zone" onclick="document.getElementById('files-input').click()">📎 Tap to upload files</div>
+        <input type="file" id="files-input" multiple style="display:none" onchange="handleFiles(event)">
+        <div id="files-list" style="margin-top:10px"></div>
+      </div>
+      <!-- Files from Monday -->
+      <div class="section">
+        <div class="sec-title">📁 Files on Monday</div>
+        <div id="monday-files-loading" style="font-size:12px;color:#888">Loading...</div>
+        <div id="monday-files-list"></div>
+      </div>
+    </div>
+
+    <!-- ═══ PROFIT TAB ═══ -->
+    <div class="qtab-panel" id="qtp-profit">
       <!-- Profit checker -->
       <div class="section">
         <div class="sec-title">💰 Profit checker</div>
@@ -490,55 +541,75 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       </div>
     </div>
 
-    <!-- ═══ PRODUCTS TAB ═══ -->
-    <div class="qtab-panel" id="qtp-products">
-      <div style="font-size:12px;color:#64748b;margin-bottom:12px">Add each window, door or unit. All sizes in mm. Specify full product details for the order pack.</div>
-      <div id="products-list"></div>
-      <button class="add-prod-btn" onclick="addProduct()">+ Add product / item</button>
-      <div style="margin-top:14px">
-        <div class="field"><label>Total quoted price (£ ex VAT)</label>
-          <input type="number" id="q-price" placeholder="0.00" style="font-size:18px;font-weight:600">
+    <!-- ═══ QUOTATION TAB ═══ -->
+    <div class="qtab-panel" id="qtp-quotation">
+      <div class="section">
+        <div class="sec-title">👤 Client details</div>
+        <div class="row2">
+          <div class="field"><label>Client name</label><input type="text" id="qt-client-name" placeholder="e.g. Sally Evans"></div>
+          <div class="field"><label>Phone</label><input type="tel" id="qt-client-phone" placeholder=""></div>
         </div>
-        <div class="field"><label>Quote valid (days)</label>
-          <input type="number" id="q-validity" value="30" min="1">
+        <div class="field"><label>Address</label><textarea id="qt-client-address" placeholder="Full address including postcode" style="min-height:60px"></textarea></div>
+        <div class="field"><label>Email</label><input type="email" id="qt-client-email" placeholder="email@example.com"></div>
+      </div>
+      <div class="section">
+        <div class="sec-title">📝 Introduction</div>
+        <div class="field"><label>Intro text (shown before line items)</label>
+          <textarea id="qt-intro" style="min-height:80px">At Burgess Windows and Doors, we are proud to work with some of the UK and Europe&#39;s leading manufacturers of high-performance glazing systems. Following our discussions, please find enclosed your quotation for consideration. I trust I have interpreted your requirements correctly.</textarea>
         </div>
       </div>
-    </div>
-
-    <!-- ═══ SITE SURVEY TAB ═══ -->
-    <div class="qtab-panel" id="qtp-survey">
-      <div style="font-size:12px;color:#64748b;margin-bottom:14px">Capture site measurements, opening details, sketches and photos for each location. This becomes the surveyor's reference.</div>
-
-      <!-- Site overview photos -->
       <div class="section">
-        <div class="sec-title">📸 Site overview photos</div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:10px">Overall site photos — access, elevation, existing windows/doors.</div>
-        <div class="upload-zone" onclick="document.getElementById('photo-input').click()">📷 Tap to upload site photos</div>
-        <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
-        <div class="photo-grid" id="photo-grid"></div>
+        <div class="sec-title">📋 Line items</div>
+        <div id="qt-items-list"></div>
+        <button onclick="addQuoteItem()" class="add-prod-btn">+ Add line item</button>
       </div>
-
-      <!-- Per-opening survey entries -->
-      <div id="survey-list"></div>
-      <button class="add-prod-btn" onclick="addSurveyEntry()">+ Add opening / location</button>
-    </div>
-
-    <!-- ═══ FILES TAB ═══ -->
-    <div class="qtab-panel" id="qtp-files">
-      <!-- Upload new files -->
       <div class="section">
-        <div class="sec-title">📎 Upload files</div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:10px">Spec sheets, drawings, brochures — uploaded to this deal in Monday.</div>
-        <div class="upload-zone" onclick="document.getElementById('files-input').click()">📎 Tap to upload files</div>
-        <input type="file" id="files-input" multiple style="display:none" onchange="handleFiles(event)">
-        <div id="files-list" style="margin-top:10px"></div>
+        <div class="sec-title">💰 Pricing &amp; terms</div>
+        <div class="row2">
+          <div class="field"><label>Discount / adjustment (£)</label><input type="number" id="qt-discount" value="0" placeholder="0.00" oninput="updateQuoteTotals()"></div>
+          <div class="field"><label>Discount label</label><input type="text" id="qt-discount-label" placeholder="e.g. Promotional discount" value="Discount"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>VAT rate</label>
+            <select id="qt-vat" onchange="updateQuoteTotals()">
+              <option value="0.2">20% Standard VAT</option>
+              <option value="0">0% Net Zero (New Build)</option>
+              <option value="0.05">5% Reduced VAT</option>
+            </select>
+          </div>
+          <div class="field"><label>Payment terms</label>
+            <select id="qt-payment-terms">
+              <option value="25/25/40/10">25% deposit | 25% after survey | 40% on delivery | 10% on completion</option>
+              <option value="100">100% on order</option>
+              <option value="50/50">50% deposit | 50% on completion</option>
+              <option value="25/75">25% deposit | 75% on completion</option>
+              <option value="custom">Custom (enter below)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" id="qt-custom-terms-wrap" style="display:none">
+          <label>Custom payment terms</label>
+          <input type="text" id="qt-custom-terms" placeholder="Describe your payment terms...">
+        </div>
+        <!-- Live totals -->
+        <div style="background:#1e3a5f;border-radius:10px;padding:14px;margin-top:10px">
+          <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:6px">
+            <span>Subtotal</span><span id="qt-subtotal">£0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:6px" id="qt-discount-row">
+            <span id="qt-discount-row-label">Discount</span><span id="qt-discount-display">−£0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;color:#93c5fd;font-size:13px;margin-bottom:8px">
+            <span id="qt-vat-label">VAT (20%)</span><span id="qt-vat-display">£0.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;color:#fff;font-size:16px;font-weight:700;border-top:1px solid rgba(255,255,255,.2);padding-top:8px">
+            <span>Total</span><span id="qt-total">£0.00</span>
+          </div>
+        </div>
       </div>
-      <!-- Files from Monday -->
-      <div class="section">
-        <div class="sec-title">📁 Files on Monday</div>
-        <div id="monday-files-loading" style="font-size:12px;color:#888">Loading...</div>
-        <div id="monday-files-list"></div>
-      </div>
+      <button onclick="generateAndDownloadQuote()" class="btn-primary">⬇️ Download quote PDF</button>
+      <button onclick="generateAndUploadQuote()" class="btn-primary btn-outline">☁️ Upload to Monday deal</button>
+      <div id="qt-upload-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
     </div>
 
     <!-- ═══ SUBMIT TAB ═══ -->
@@ -871,6 +942,13 @@ function openDeal(id){
   document.getElementById('progress-box').style.display='none';
   // Show first tab
   showQTab('overview',document.querySelector('.qtab'));
+  // Pre-fill quotation client details from deal
+  document.getElementById('qt-client-name').value = selectedDeal.name || '';
+  document.getElementById('qt-client-phone').value = selectedDeal.phone || '';
+  document.getElementById('qt-client-address').value = selectedDeal.address || '';
+  quoteItems = []; quoteItemCount = 0;
+  document.getElementById('qt-items-list').innerHTML = '';
+  updateQuoteTotals();
   navTo('deal');
 }
 
@@ -1369,6 +1447,219 @@ async function submitQuote(){
     document.getElementById('progress-title').textContent='Submission failed';
     document.getElementById('progress-title').style.color='#dc2626';
     btn.disabled=false;btn.textContent='🏆 Mark as Won & generate PDFs';
+  }
+}
+
+
+// ── Quotation builder ─────────────────────────────────────────────────────
+let quoteItems = [], quoteItemCount = 0;
+
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'qt-payment-terms') {
+    document.getElementById('qt-custom-terms-wrap').style.display = e.target.value === 'custom' ? 'block' : 'none';
+  }
+});
+
+function addQuoteItem() {
+  quoteItemCount++;
+  const id = 'qi' + quoteItemCount;
+  quoteItems.push({id, name:'', description:'', price:0, qty:1});
+  const div = document.createElement('div');
+  div.id = id;
+  div.style.cssText = 'background:#fff;border:1px solid #e0e0e0;border-radius:9px;padding:13px;margin-bottom:8px;position:relative';
+  div.innerHTML = `<button onclick="removeQuoteItem('${id}')" style="position:absolute;top:8px;right:8px;background:#fef2f2;border:none;color:#dc2626;width:24px;height:24px;border-radius:5px;font-size:14px;cursor:pointer">×</button>
+    <div style="font-size:10px;font-weight:700;color:#1e3a5f;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Item ${quoteItemCount}</div>
+    <div class="row2" style="margin-bottom:8px">
+      <div class="field" style="margin:0"><label>Name / product</label><input type="text" placeholder="e.g. Aluminium casement windows" oninput="updQI('${id}','name',this.value)"></div>
+      <div class="row2" style="margin:0">
+        <div class="field" style="margin:0"><label>Unit price (£)</label><input type="number" placeholder="0.00" oninput="updQI('${id}','price',+this.value);updateQuoteTotals()"></div>
+        <div class="field" style="margin:0"><label>Qty</label><input type="number" value="1" min="1" oninput="updQI('${id}','qty',+this.value);updateQuoteTotals()"></div>
+      </div>
+    </div>
+    <div class="field" style="margin:0"><label>Description</label><textarea placeholder="Full description of supply and installation..." style="min-height:70px" oninput="updQI('${id}','description',this.value)"></textarea></div>`;
+  document.getElementById('qt-items-list').appendChild(div);
+  updateQuoteTotals();
+}
+
+function removeQuoteItem(id) {
+  quoteItems = quoteItems.filter(i => i.id !== id);
+  document.getElementById(id)?.remove();
+  updateQuoteTotals();
+}
+
+function updQI(id, field, value) {
+  const i = quoteItems.find(i => i.id === id);
+  if (i) i[field] = value;
+}
+
+function updateQuoteTotals() {
+  const subtotal = quoteItems.reduce((s, i) => s + (i.price||0) * (i.qty||1), 0);
+  const discount = parseFloat(document.getElementById('qt-discount').value) || 0;
+  const vatRate = parseFloat(document.getElementById('qt-vat').value) || 0;
+  const afterDiscount = subtotal - discount;
+  const vatAmt = afterDiscount * vatRate;
+  const total = afterDiscount + vatAmt;
+  const vatSel = document.getElementById('qt-vat');
+  const vatText = vatSel.options[vatSel.selectedIndex].text;
+  document.getElementById('qt-subtotal').textContent = '£' + subtotal.toLocaleString('en-GB', {minimumFractionDigits:2});
+  document.getElementById('qt-discount-display').textContent = '−£' + discount.toLocaleString('en-GB', {minimumFractionDigits:2});
+  document.getElementById('qt-discount-row-label').textContent = document.getElementById('qt-discount-label').value || 'Discount';
+  document.getElementById('qt-vat-label').textContent = vatText;
+  document.getElementById('qt-vat-display').textContent = '£' + vatAmt.toLocaleString('en-GB', {minimumFractionDigits:2});
+  document.getElementById('qt-total').textContent = '£' + total.toLocaleString('en-GB', {minimumFractionDigits:2});
+  document.getElementById('qt-discount-row').style.display = discount > 0 ? 'flex' : 'none';
+}
+
+function buildQuotePDF() {
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  const clientName = document.getElementById('qt-client-name').value || '—';
+  const clientAddress = document.getElementById('qt-client-address').value || '';
+  const clientPhone = document.getElementById('qt-client-phone').value || '';
+  const clientEmail = document.getElementById('qt-client-email').value || '';
+  const intro = document.getElementById('qt-intro').value || '';
+  const discount = parseFloat(document.getElementById('qt-discount').value) || 0;
+  const discountLabel = document.getElementById('qt-discount-label').value || 'Discount';
+  const vatRate = parseFloat(document.getElementById('qt-vat').value) || 0;
+  const vatSel = document.getElementById('qt-vat');
+  const vatText = vatSel.options[vatSel.selectedIndex].text;
+  const ptSel = document.getElementById('qt-payment-terms');
+  const paymentTerms = ptSel.value === 'custom' ? document.getElementById('qt-custom-terms').value : ptSel.options[ptSel.selectedIndex].text;
+  const dateStr = new Date().toLocaleDateString('en-GB');
+  const refNum = 'BWD-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*9000)+1000);
+  const subtotal = quoteItems.reduce((s,i) => s+(i.price||0)*(i.qty||1), 0);
+  const afterDiscount = subtotal - discount;
+  const vatAmt = afterDiscount * vatRate;
+  const total = afterDiscount + vatAmt;
+
+  // Header
+  doc.setFillColor(255,255,255); doc.rect(0,0,210,297,'F');
+  doc.setFillColor(30,58,95); doc.rect(0,0,210,32,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(20); doc.setFont('helvetica','bold');
+  doc.text('Burgess Windows & Doors', 14, 13);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('Premium Window & Door Specialists', 14, 20);
+  doc.text('Tel: 01280 815493  |  info@burgesswd.co.uk', 14, 26);
+  doc.setFontSize(12); doc.setFont('helvetica','bold');
+  doc.text('QUOTATION', 160, 13);
+  doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Ref: ' + refNum, 160, 19);
+  doc.text('Date: ' + dateStr, 160, 25);
+
+  // Client & company info
+  doc.setTextColor(30,30,30); let y = 42;
+  doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(100,116,139);
+  doc.text('PREPARED FOR', 14, y); doc.text('FROM', 116, y); y += 5;
+  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(30,30,30);
+  doc.text(clientName, 14, y); doc.text('Burgess Windows and Doors Ltd', 116, y); y += 5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  if (clientAddress) { const al = doc.splitTextToSize(clientAddress, 84); doc.text(al, 14, y); }
+  doc.text('Unit 2, Ballmoor', 116, y); y += 4;
+  doc.text('Buckingham Industrial Park', 116, y); y += 4;
+  doc.text('Buckingham, MK18 1RT', 116, y); y += 4;
+  if (clientPhone) doc.text('T: ' + clientPhone, 14, y+4);
+  if (clientEmail) doc.text('E: ' + clientEmail, 14, y+9);
+  y += 18;
+  doc.setDrawColor(226,232,240); doc.line(10,y,200,y); y += 8;
+
+  // Intro
+  if (intro) {
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(60,60,60);
+    const il = doc.splitTextToSize(intro, 182);
+    doc.text(il, 14, y); y += il.length * 4.5 + 8;
+    doc.setDrawColor(226,232,240); doc.line(10,y,200,y); y += 8;
+  }
+
+  // Line items table
+  if (quoteItems.length > 0) {
+    doc.autoTable({
+      startY: y,
+      head: [['Item', 'Description', 'Unit price', 'Qty', 'Total']],
+      body: quoteItems.map(i => [
+        i.name || '—',
+        i.description || '',
+        '£' + (i.price||0).toLocaleString('en-GB', {minimumFractionDigits:2}),
+        String(i.qty||1),
+        '£' + ((i.price||0)*(i.qty||1)).toLocaleString('en-GB', {minimumFractionDigits:2})
+      ]),
+      styles: {fontSize:8.5, cellPadding:3, textColor:[60,60,60]},
+      headStyles: {fillColor:[30,58,95], textColor:255, fontStyle:'bold'},
+      columnStyles: {0:{cellWidth:32}, 1:{cellWidth:90}, 2:{cellWidth:22}, 3:{cellWidth:12}, 4:{cellWidth:22}},
+      alternateRowStyles: {fillColor:[248,250,252]}
+    });
+    y = doc.lastAutoTable.finalY + 8;
+  }
+
+  // Totals
+  const totX = 126, totW = 70;
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+  doc.text('Subtotal', totX, y); doc.text('£'+subtotal.toLocaleString('en-GB',{minimumFractionDigits:2}), totX+totW, y, {align:'right'});
+  y += 5;
+  if (discount > 0) {
+    doc.text(discountLabel, totX, y); doc.text('−£'+discount.toLocaleString('en-GB',{minimumFractionDigits:2}), totX+totW, y, {align:'right'}); y += 5;
+  }
+  doc.text(vatText, totX, y); doc.text('£'+vatAmt.toLocaleString('en-GB',{minimumFractionDigits:2}), totX+totW, y, {align:'right'}); y += 3;
+  doc.setDrawColor(200,200,200); doc.line(totX, y, totX+totW, y); y += 5;
+  doc.setFillColor(30,58,95); doc.rect(totX-2, y-4, totW+4, 10, 'F');
+  doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  doc.text('TOTAL', totX, y+3); doc.text('£'+total.toLocaleString('en-GB',{minimumFractionDigits:2}), totX+totW, y+3, {align:'right'});
+  y += 14;
+
+  // Payment terms + T&Cs
+  if (y < 250) {
+    doc.setDrawColor(226,232,240); doc.line(10,y,200,y); y += 6;
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+    doc.text('Payment Terms', 14, y); y += 4;
+    doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
+    const ptLines = doc.splitTextToSize(paymentTerms, 182);
+    doc.text(ptLines, 14, y); y += ptLines.length * 4 + 5;
+    doc.setFont('helvetica','italic'); doc.setFontSize(8);
+    doc.text('This quotation is valid for 14 days. Subject to survey and our standard terms and conditions.', 14, y); y += 5;
+    doc.setFont('helvetica','normal');
+    doc.text('We look forward to hearing from you.', 14, y); y += 4;
+    doc.setFont('helvetica','bold'); doc.text('Burgess Windows and Doors', 14, y);
+  }
+
+  // Page numbers
+  const pc = doc.getNumberOfPages();
+  for (let i = 1; i <= pc; i++) {
+    doc.setPage(i); doc.setFillColor(30,58,95); doc.rect(0,285,210,12,'F');
+    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(147,197,253);
+    doc.text('Burgess Windows & Doors  |  Ref: ' + refNum + '  |  ' + dateStr + '  |  Page ' + i + ' of ' + pc, 105, 292, {align:'center'});
+  }
+  return doc;
+}
+
+async function generateAndDownloadQuote() {
+  if (quoteItems.length === 0) { alert('Please add at least one line item.'); return; }
+  const doc = buildQuotePDF();
+  const safeName = (document.getElementById('qt-client-name').value || 'Quote').replace(/[^a-z0-9]/gi,'_');
+  doc.save('BWD_Quote_' + safeName + '_' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '.pdf');
+}
+
+async function generateAndUploadQuote() {
+  if (quoteItems.length === 0) { alert('Please add at least one line item.'); return; }
+  if (!selectedDeal) { alert('Please open a deal first, then come back here to upload.'); return; }
+  const statusEl = document.getElementById('qt-upload-status');
+  const btn = event.target; btn.disabled = true; btn.textContent = 'Uploading...';
+  statusEl.style.display = 'none';
+  try {
+    const doc = buildQuotePDF();
+    const blob = doc.output('blob');
+    const base64 = await new Promise((res,rej) => {const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Read failed'));r.readAsDataURL(blob);});
+    const colData = await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
+    const cols = colData.data?.boards?.[0]?.columns || [];
+    const filesCol = cols.find(c=>c.title==='Files') || cols.find(c=>c.type==='file');
+    if (!filesCol) throw new Error('No Files column found');
+    const safeName = (document.getElementById('qt-client-name').value || 'Quote').replace(/[^a-z0-9]/gi,'_');
+    const fileName = 'BWD_Quote_' + safeName + '_' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '.pdf';
+    await fetch(UPLOAD, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({itemId:String(selectedDeal.id), columnId:filesCol.id, fileName, fileBase64:base64})});
+    statusEl.textContent = '✓ Uploaded to: ' + selectedDeal.name;
+    statusEl.style.color = '#059669'; statusEl.style.display = 'block';
+    btn.textContent = '✓ Uploaded'; btn.style.background = '#10b981';
+  } catch(err) {
+    statusEl.textContent = '✗ ' + err.message; statusEl.style.color = '#dc2626'; statusEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = '☁️ Upload to Monday deal';
   }
 }
 
