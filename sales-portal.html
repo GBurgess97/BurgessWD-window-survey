@@ -121,7 +121,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
 .b-site{background:var(--green-bg);color:var(--green)}
 
 /* ── Deal detail panel ───────────────────────── */
-.deal-panel{display:flex;flex-direction:column;flex:1;min-width:0;height:100%;overflow:hidden}
+.deal-panel{display:flex;flex-direction:column;flex:1;min-width:0;height:100%;overflow:hidden;min-height:0}
 .deal-header{background:var(--navy);padding:14px 18px 13px;flex-shrink:0}
 .dh-back{font-size:11px;color:rgba(255,255,255,.45);cursor:pointer;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;padding:4px 0}
 .dh-back:hover{color:rgba(255,255,255,.7)}
@@ -145,12 +145,12 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
 .tab-btn.on{color:var(--navy);border-bottom-color:var(--navy)}
 
 /* Tab content */
-.tab-body{flex:1;overflow-y:auto;padding:0}
-.tab-pane{display:none;padding:16px}
+.tab-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:0;-webkit-overflow-scrolling:touch}
+.tab-pane{display:none;padding:14px}
 .tab-pane.on{display:block}
 
 /* ── Form elements ────────────────────────────── */
-.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);overflow:visible}
 .sec-title{font-size:10px;font-weight:700;color:var(--navy);margin-bottom:12px;text-transform:uppercase;letter-spacing:.07em}
 .field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
 .field:last-child{margin-bottom:0}
@@ -461,128 +461,145 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
             </div>
 
             <!-- Tab body -->
-            <div class="tab-body">
+<!-- OVERVIEW TAB -->
+              <div class="tab-pane on" id="tab-overview" style="padding:14px">
+                <div class="section">
+                  <div class="sec-title">📍 Site details</div>
+                  <div class="field"><label>Site address</label>
+                    <input type="text" id="q-siteaddress" placeholder="Full site address">
+                  </div>
+                  <div class="row2">
+                    <div class="field"><label>Lead source</label>
+                      <select id="q-leadsource">
+                        <option value="">Select...</option>
+                        <option>Website</option><option>Phone</option><option>Walk in</option>
+                        <option>Internorm</option><option>VELFAC</option><option>Evolution</option>
+                        <option>Manufacturer referral</option><option>Customer referral</option>
+                        <option>Social media</option><option>Other</option>
+                      </select>
+                    </div>
+                    <div class="field"><label>Builder contact</label>
+                      <input type="text" id="q-builder" placeholder="Builder name / number">
+                    </div>
+                  </div>
+                  <div class="row2">
+                    <div class="field"><label>Property type</label>
+                      <select id="q-proptype">
+                        <option>Residential</option><option>Commercial</option>
+                        <option>New build</option><option>Listed building</option><option>Other</option>
+                      </select>
+                    </div>
+                    <div class="field"><label>Build type</label>
+                      <select id="q-buildtype">
+                        <option>Refurbishment</option><option>New build</option>
+                        <option>New openings</option><option>Refurb + new openings</option><option>Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row2">
+                    <div class="field"><label>Survey type</label>
+                      <select id="q-surveytype">
+                        <option>Site survey</option><option>Virtual survey</option>
+                      </select>
+                    </div>
+                    <div class="field"><label>Survey timeframe</label>
+                      <select id="q-surveytime">
+                        <option>ASAP</option><option>4–6 weeks</option>
+                        <option>6–8 weeks</option><option>Fast track</option><option>On hold</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row2">
+                    <div class="field"><label>Fit days</label>
+                      <input type="number" id="q-fitdays" placeholder="0" min="0">
+                    </div>
+                    <div class="field"><label>VAT rate</label>
+                      <select id="q-vat">
+                        <option value="0.2">20% Standard</option>
+                        <option value="0">0% New build</option>
+                        <option value="0.05">5% Reduced</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row2">
+                    <div class="field"><label>Payment terms</label>
+                      <select id="q-payment">
+                        <option>100% on order</option><option>25/50/25</option>
+                        <option>25/25/40/10</option><option>50/50</option>
+                      </select>
+                    </div>
+                    <div class="field"><label>Access notes</label>
+                      <input type="text" id="q-access" placeholder="Parking, scaffolding...">
+                    </div>
+                  </div>
 
-                            <!-- OVERVIEW TAB -->
-              <div class="tab-pane on" id="tab-overview">
-                <!-- Save bar -->
-      <div style="background:#f0fdf4;border:1px solid #6ee7b7;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:160px">
-          <div style="font-size:13px;font-weight:600;color:#065f46">Save all fields to Monday</div>
-          <div style="font-size:11px;color:#059669;margin-top:2px">Fill in the fields below then tap save</div>
-        </div>
-        <button onclick="saveDealToMonday()" id="save-monday-btn" style="padding:10px 20px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0">💾 Save to Monday</button>
-      </div>
-      <div id="save-monday-status" style="font-size:12px;margin-bottom:10px;display:none;padding:8px;background:#f0fdf4;border:1px solid #6ee7b7;border-radius:7px;color:#059669;text-align:center"></div>
-      <div class="section">
-        <div class="sec-title">📍 Site details</div>
-        <div class="field"><label>Site address</label><input type="text" id="q-siteaddress" placeholder="Full site address"></div>
-        <div class="row2">
-          <div class="field"><label>Appointment type</label>
-            <select id="q-appttype" onchange="updateApptType()">
-              <option value="">Select...</option>
-              <option>Virtual</option><option>Site</option><option>Phone</option><option>Showroom</option>
-            </select>
-          </div>
-          <div class="field"><label>Lead source</label>
-            <select id="q-leadsource">
-              <option value="">Select...</option>
-              <option>Website</option><option>Phone</option><option>Walk in</option>
-              <option>Internorm</option><option>VELFAC</option><option>Evolution</option>
-              <option>Manufacturer referral</option><option>Customer referral</option>
-              <option>Social media</option><option>Other</option>
-            </select>
-          </div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>Property type</label>
-            <select id="q-proptype"><option>Residential</option><option>Commercial</option><option>New build</option><option>Listed building</option><option>Other</option></select>
-          </div>
-          <div class="field"><label>Build type</label>
-            <select id="q-buildtype"><option>Refurbishment</option><option>New build</option><option>New openings</option><option>Refurb + new openings</option><option>Other</option></select>
-          </div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>Survey type</label>
-            <select id="q-surveytype"><option>Site survey</option><option>Virtual survey</option></select>
-          </div>
-          <div class="field"><label>Survey timeframe</label>
-            <select id="q-surveytime"><option>ASAP</option><option>4–6 weeks</option><option>6–8 weeks</option><option>Fast track</option><option>On hold</option></select>
-          </div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>VAT rate</label>
-            <select id="q-vat"><option value="0.2">20% Standard</option><option value="0">0% New build</option><option value="0.05">5% Reduced</option></select>
-          </div>
-          <div class="field"><label>Payment terms</label>
-            <select id="q-payment"><option>100% on order</option><option>25/50/25</option><option>25/25/40/10</option><option>50/50</option></select>
-          </div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>Fit days</label><input type="number" id="q-fitdays" min="0" value="1" step="0.5"></div>
-          <div class="field"><label>Access / logistics</label><input type="text" id="q-access" placeholder="Scaffolding, lifting etc."></div>
-        </div>
-      </div>
-      <div class="section">
-        <div class="sec-title">📝 Notes</div>
-        <div class="field"><label>Description of works (for customer quote)</label>
-          <textarea id="q-worksdesc" placeholder="Supply and installation of..." style="min-height:100px"></textarea>
-        </div>
-        <div class="field"><label>Internal notes</label>
-          <textarea id="q-internalnotes" placeholder="Internal observations, access issues..."></textarea>
-        </div>
-        <div class="field"><label>Customer requirements & preferences</label>
-          <textarea id="q-requirements" placeholder="Colours, finishes, hardware, budget range..."></textarea>
-        </div>
-      </div>
-      <!-- APPOINTMENT & STAGE -->
-      <div class="section">
-        <div class="sec-title">📅 Book appointment</div>
-        <div class="row2">
-          <div class="field"><label>Date</label>
-            <input type="date" id="q-appt-date">
-          </div>
-          <div class="field"><label>Time</label>
-            <input type="time" id="q-appt-time">
-          </div>
-        </div>
-        <div class="field"><label>Appointment type</label>
-          <select id="q-appttype">
-            <option value="">Select...</option>
-            <option>Virtual</option><option>Site</option><option>Phone</option><option>Showroom</option>
-          </select>
-        </div>
-        <button onclick="bookAppointment()" id="book-appt-btn" style="width:100%;padding:12px;background:#0ea5e9;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px">
-          📅 Confirm appointment &amp; set stage to Appointment
-        </button>
-        <div id="book-appt-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
-      </div>
+<div class="section">
+                  <div class="sec-title">📝 Notes</div>
+                  <div class="field"><label>Description of works</label>
+                    <textarea id="q-worksdesc" placeholder="Describe the scope of work..."></textarea>
+                  </div>
+                  <div class="field"><label>Internal notes</label>
+                    <textarea id="q-internalnotes" placeholder="Notes for internal use only..."></textarea>
+                  </div>
+                  <div class="field"><label>Customer requirements</label>
+                    <textarea id="q-requirements" placeholder="Specific requirements, preferences, finishes, hardware..."></textarea>
+                  </div>
+                </div>
 
-      <div class="section">
-        <div class="sec-title">🏷️ Deal stage</div>
-        <div class="stage-btns">
-          <button class="stage-btn" onclick="updateStage('New')">New</button>
-          <button class="stage-btn" onclick="updateStage('Appointment')">Appointment</button>
-          <button class="stage-btn" onclick="updateStage('Pricing')">Pricing</button>
-          <button class="stage-btn" onclick="updateStage('Quote Sent')">Quote Sent</button>
-          <button class="stage-btn" onclick="updateStage('Prospect')">Prospect</button>
-          <button class="stage-btn" onclick="updateStage('Won')">Won</button>
-          <button class="stage-btn" onclick="updateStage('Lost')">Lost</button>
-          <button class="stage-btn" onclick="updateStage('Unsuccessful tender')">Unsuccessful tender</button>
-        </div>
-        <div class="stage-saved" id="stage-saved">✓ Stage updated in Monday</div>
-      </div>
+                <!-- Save to Monday -->
+                <button onclick="saveDealToMonday()" id="save-monday-btn" data-label="💾 Save site details to Monday" data-color="var(--green)" class="btn btn-green">
+                  💾 Save site details to Monday
+                </button>
+                <div id="save-monday-status" class="status-msg"></div>
 
-      <!-- Profit checker -->
-      
+                <div class="divider"></div>
 
-                <!-- PROFIT CHECKER EXPANDABLE -->
+                <!-- Book appointment -->
+                <div class="section">
+                  <div class="sec-title">📅 Book appointment</div>
+                  <div class="row2">
+                    <div class="field"><label>Date</label>
+                      <input type="date" id="q-appt-date">
+                    </div>
+                    <div class="field"><label>Time</label>
+                      <input type="time" id="q-appt-time">
+                    </div>
+                  </div>
+                  <div class="field"><label>Appointment type</label>
+                    <select id="q-appttype">
+                      <option value="">Select...</option>
+                      <option>Virtual</option><option>Site</option><option>Phone</option><option>Showroom</option>
+                    </select>
+                  </div>
+                  <button onclick="bookAppointment()" id="book-appt-btn" data-label="📅 Confirm appointment" data-color="#0369a1" class="btn" style="background:#0369a1;color:#fff;margin-top:4px">
+                    📅 Confirm &amp; set stage to Appointment
+                  </button>
+                  <div id="book-appt-status" class="status-msg"></div>
+                </div>
+
+                <!-- Deal stage -->
+                <div class="section">
+                  <div class="sec-title">🏷️ Deal stage</div>
+                  <div class="stage-btns" id="stage-btns">
+                    <button class="stage-btn" onclick="updateStage('New')">New</button>
+                    <button class="stage-btn" onclick="updateStage('Appointment')">Appointment</button>
+                    <button class="stage-btn" onclick="updateStage('Pricing')">Pricing</button>
+                    <button class="stage-btn" onclick="updateStage('Quote Sent')">Quote Sent</button>
+                    <button class="stage-btn" onclick="updateStage('Prospect')">Prospect</button>
+                    <button class="stage-btn" onclick="updateStage('Won')">Won</button>
+                    <button class="stage-btn" onclick="updateStage('Lost')">Lost</button>
+                    <button class="stage-btn" onclick="updateStage('Unsuccessful tender')">Unsuccessful tender</button>
+                  </div>
+                  <div class="stage-saved" id="stage-saved">✓ Stage updated</div>
+                </div>
+
+                <!-- Profit checker expand -->
                 <button class="expand-btn" id="profit-expand-btn" onclick="toggleProfitChecker()">
                   <span>💰 Profit checker</span>
                   <span class="arrow">▼</span>
                 </button>
                 <div class="expand-panel" id="profit-expand-panel">
-                  <div class="section">
+<div class="section">
         <div class="sec-title">💰 Profit checker — Salesman estimate</div>
         <div class="row2">
           <div class="field"><label>Product type</label>
@@ -692,22 +709,11 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
         </div>
         <div id="save-profit-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
         <div id="profit-report-status" style="font-size:12px;margin-top:6px;display:none;text-align:center"></div>
-      </div>
-                </div>
+                </div><!-- end expand-panel -->
 
-                
-      <!-- SAVE ALL TO MONDAY -->
-      <div style="padding:4px 0 8px">
-        <button onclick="saveDealToMonday()" id="save-monday-btn" style="width:100%;padding:14px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:0.01em">
-          ✅ Update Monday — save all fields
-        </button>
-        <div style="font-size:11px;color:#64748b;text-align:center;margin-top:5px">Saves all overview fields, notes and profit checker data to Monday</div>
-        <div id="save-monday-status" style="font-size:12px;margin-top:6px;display:none;text-align:center;font-weight:600"></div>
-      </div>
-    </div>
-              </div>
+              </div><!-- end tab-overview -->
               <!-- PRODUCTS TAB -->
-              <div class="tab-pane" id="tab-products">
+              <div class="tab-pane" id="tab-products" style="padding:14px">
                 <div style="font-size:12px;color:#64748b;margin-bottom:12px">Add each window, door or product. All sizes in mm. Use the canvas to sketch the design.</div>
       <div id="products-list"></div>
       <button class="add-prod-btn" onclick="addProduct()">+ Add product / item</button>
@@ -721,7 +727,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
     
               </div>
               <!-- PHOTOS TAB -->
-              <div class="tab-pane" id="tab-photos">
+              <div class="tab-pane" id="tab-photos" style="padding:14px">
                 <div class="section">
         <div class="sec-title">📸 Site photos</div>
         <div style="font-size:12px;color:#64748b;margin-bottom:10px">Upload photos of existing windows, doors, site access and any relevant details.</div>
@@ -732,7 +738,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
     
               </div>
               <!-- FILES TAB -->
-              <div class="tab-pane" id="tab-files">
+              <div class="tab-pane" id="tab-files" style="padding:14px">
                 <div class="section">
         <div class="sec-title">📁 Project files</div>
         <div style="font-size:12px;color:#64748b;margin-bottom:10px">Upload spec sheets, brochures, drawings or any other files relating to this project.</div>
@@ -749,11 +755,10 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
     
               </div>
               <!-- QUOTE TAB -->
-              <div class="tab-pane" id="tab-quote">
-                <div style="padding:14px 16px;background:#fffbeb;border-bottom:1px solid #fcd34d;font-size:12px;color:#92400e">
-        ✅ Client details are pre-filled from this deal. Add line items, adjust pricing and generate the PDF.
-      </div>
-      <div style="padding:16px">
+              <div class="tab-pane" id="tab-quote" style="padding:14px">
+                <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:var(--r-sm);padding:10px 13px;font-size:12px;color:#92400e;margin-bottom:12px">
+                  ✅ Client details are pre-filled. Add line items and generate the quote PDF.
+                </div>
         <!-- Intro text -->
         <div class="section">
           <div class="sec-title">📝 Quote introduction</div>
@@ -875,12 +880,10 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
         <button onclick="generateAndDownloadDealQuote()" class="submit-btn">⬇️ Download PDF</button>
         <button onclick="generateAndUploadDealQuote()" class="submit-btn" style="background:#059669">☁️ Save to Monday</button>
-      </div>
       <div id="dq-upload-status" style="font-size:12px;margin-top:8px;display:none;text-align:center"></div>
-    
               </div>
               <!-- SUBMIT TAB -->
-              <div class="tab-pane" id="tab-submit">
+              <div class="tab-pane" id="tab-submit" style="padding:14px">
                 <div class="section">
         <div class="sec-title">✅ Submit</div>
         <div style="font-size:13px;color:#64748b;margin-bottom:12px">
@@ -912,8 +915,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
       <!-- CONTACTS PAGE -->
       <div class="col-panel" id="page-contacts" style="display:none;flex:1;">
         <!-- Contacts list -->
-        <div style="display:flex;height:100%;overflow:hidden;">
-          <div class="col-panel list-col" id="contacts-list-col" style="width:280px;min-width:280px;">
+        <div style="display:flex;flex:1;height:100%;overflow:hidden;min-height:0;">
+          <div class="col-panel list-col" id="contacts-list-col" style="width:280px;min-width:240px;flex-shrink:0;">
             <div class="col-head">
               <div class="col-head-top">
                 <div>
@@ -937,10 +940,15 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
             </div>
             <div class="col-scroll" id="contact-detail-inner" style="display:none;">
               <div class="cd-head" id="contact-detail-head">
-                <div class="cd-av" id="cd-av">?</div>
-                <div>
-                  <div class="cd-name" id="cd-title">—</div>
-                  <div class="cd-type" id="cd-type">—</div>
+                <div style="display:flex;flex-direction:column;width:100%">
+                  <div class="dh-back" onclick="closeContact()" style="color:rgba(255,255,255,.5);font-size:11px;cursor:pointer;margin-bottom:8px">← Back to contacts</div>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div class="cd-av" id="cd-av">?</div>
+                    <div>
+                      <div class="cd-name" id="cd-title">—</div>
+                      <div class="cd-type" id="cd-type">—</div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div style="padding:14px">
@@ -1230,8 +1238,9 @@ async function loadDeals(){
     const cd=await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
     boardCols=cd.data?.boards?.[0]?.columns||[];
     const gc=t=>boardCols.find(c=>c.title===t)?.id||'';
-    const spId=gc('Sales Person'),stageId=gc('Stage'),addrId=gc('Address')||gc('Location');
+    const spId=gc('Sales Person'),stageId=gc('Stage'),addrId=gc('Site Address')||gc('Address')||gc('Location');
     const phoneId=gc('Phone'),emailId=gc('Email'),apptId=gc('Appointment'),apptTypeId=gc('Appointment Type');
+    const leadSourceId=gc('Lead Source'),soldValueId=gc('Sold Value');
     const data=await mq(`query{boards(ids:${DEALS_BOARD}){items_page(limit:300){items{id name column_values{id text ...on StatusValue{label} ...on DateValue{date time}}}}}}`);
     const items=data.data?.boards?.[0]?.items_page?.items||[];
     const cv=(item,id)=>item.column_values.find(c=>c.id===id)||{};
@@ -1246,6 +1255,9 @@ async function loadDeals(){
         apptDate:cv(item,apptId).date||'',
         apptTime:cv(item,apptId).time||'',
         apptType:cv(item,apptTypeId).label||cv(item,apptTypeId).text||'',
+        leadSource:cv(item,leadSourceId).text||'',
+        soldValue:cv(item,soldValueId).text||cv(item,soldValueId).number||'',
+        salesperson:cv(item,spId).text||'',
         spId,stageId,addrId,phoneId,emailId,apptId,apptTypeId
       }));
     renderDeals();renderStats();renderAppointments();
@@ -1423,13 +1435,17 @@ async function createDealFromContact(){
 // ── Deal detail ───────────────────────────────────────────────
 function openDeal(id){
   selectedDeal=allDeals.find(d=>d.id===id);if(!selectedDeal)return;
-  document.getElementById('deal-title').textContent=selectedDeal.name;
-  const badge=document.getElementById('deal-stage-badge');badge.textContent=selectedDeal.stage||'—';badge.className='badge '+sBadge(selectedDeal.stage);
-  document.getElementById('di-name').textContent=selectedDeal.name||'—';
-  document.getElementById('di-phone').textContent=selectedDeal.phone||'—';
-  document.getElementById('di-email').textContent=selectedDeal.email||'—';
-  document.getElementById('di-address').textContent=selectedDeal.address||'—';
-  document.getElementById('q-siteaddress').value=selectedDeal.address||'';
+  // Update header
+  const dhn=document.getElementById('di-name');if(dhn)dhn.textContent=selectedDeal.name||'—';
+  const dhs=document.getElementById('di-stage');if(dhs){dhs.textContent=selectedDeal.stage||'—';}
+  // Info strip
+  const dia=document.getElementById('di-address');if(dia)dia.textContent=selectedDeal.address||'—';
+  const dip=document.getElementById('di-phone');if(dip)dip.textContent=selectedDeal.phone||'—';
+  const die=document.getElementById('di-email');if(die)die.textContent=selectedDeal.email||'—';
+  const dils=document.getElementById('di-leadsource');if(dils)dils.textContent=selectedDeal.leadSource||'—';
+  const dinm=document.getElementById('di-meta');if(dinm)dinm.textContent=(selectedDeal.salesperson||currentUser)+' · '+(selectedDeal.stage||'—');
+  // Site address field
+  const qsa=document.getElementById('q-siteaddress');if(qsa)qsa.value=selectedDeal.address||'';
     let apptStr='';
     if(selectedDeal.apptDate){apptStr=fmtDate(selectedDeal.apptDate);if(selectedDeal.apptTime)apptStr+=' at '+fmtTime(selectedDeal.apptTime);if(selectedDeal.apptType)apptStr+=' ('+selectedDeal.apptType+')';}
   document.getElementById('di-appt').textContent=apptStr;
@@ -1443,8 +1459,8 @@ function openDeal(id){
   document.getElementById('progress-box').style.display='none';
   const ss=document.getElementById('stage-saved');if(ss)ss.style.display='none';
   const as=document.getElementById('appt-saved');if(as)as.style.display='none';
-  document.getElementById('deal-back-btn').onclick=()=>navTo('deals');
-  showQTab('overview',document.querySelector('.qtab'));
+  const dbb=document.getElementById('deal-back-btn');if(dbb)dbb.onclick=()=>navTo('deals');
+  const firstTab=document.querySelector('.tab-btn');if(firstTab){firstTab.classList.add('on');} showTab('overview',firstTab);
   // Reset quote items when opening new deal
   dealQuoteItems=[];dealQuoteItemCount=0;
   const dqList=document.getElementById('dq-items-list');if(dqList)dqList.innerHTML='';
@@ -3854,36 +3870,48 @@ window.showTab = function(tabName, btn){
 window.showQTab = window.showTab;
 
 function openDealNew(id){
-  // Show detail column
   var listCol = document.getElementById('deals-list-col');
   var detailCol = document.getElementById('deal-detail-col');
-  // On narrow screens hide list, show detail
-  if(window.innerWidth < 768){
-    if(listCol) listCol.style.display = 'none';
-  }
+  if(window.innerWidth < 900){ if(listCol) listCol.style.display = 'none'; }
   if(detailCol) detailCol.style.display = 'flex';
-  // Mark selected in list
+  // Mark selected
   document.querySelectorAll('#deals-list .list-row').forEach(function(r){ r.classList.remove('sel'); });
   var row = document.querySelector('#deals-list .list-row[data-id="'+id+'"]');
   if(row) row.classList.add('sel');
-  // Reset profit checker expand state
+  // Reset profit expand
   var ep = document.getElementById('profit-expand-panel');
   var eb = document.getElementById('profit-expand-btn');
   if(ep) ep.classList.remove('open');
   if(eb) eb.classList.remove('open');
-  // Show first tab
+  // Reset all tab buttons, activate first
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('on'); });
+  document.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('on'); });
   var firstTab = document.querySelector('.tab-btn');
-  showTab('overview', firstTab);
-  // Call original openDeal
+  if(firstTab) firstTab.classList.add('on');
+  var overviewPane = document.getElementById('tab-overview');
+  if(overviewPane) overviewPane.classList.add('on');
+  // Open deal
   openDeal(id);
 }
 
 function closeDeal(){
   var listCol = document.getElementById('deals-list-col');
   var detailCol = document.getElementById('deal-detail-col');
-  if(listCol) listCol.style.display = 'flex';
+  if(listCol){ listCol.style.display='flex'; listCol.style.removeProperty('display'); }
   if(detailCol) detailCol.style.display = 'none';
   document.querySelectorAll('#deals-list .list-row').forEach(function(r){ r.classList.remove('sel'); });
+  selectedDeal = null;
+}
+
+function closeContact(){
+  var listCol = document.getElementById('contacts-list-col');
+  var detailCol = document.getElementById('contact-detail-col');
+  if(listCol) listCol.style.display = 'flex';
+  var emptyState = document.getElementById('contact-empty-state');
+  var detailInner = document.getElementById('contact-detail-inner');
+  if(emptyState) emptyState.style.display = 'flex';
+  if(detailInner) detailInner.style.display = 'none';
+  document.querySelectorAll('#contacts-list .list-row').forEach(function(r){ r.classList.remove('sel'); });
 }
 
 function toggleProfitChecker(){
@@ -4075,4 +4103,8 @@ function getBadgeClass(stage){
 })();
 </script>
 </body>
-</html>
+</html>              <!-- SAVE TO MONDAY -->
+              <button onclick="saveDealToMonday()" id="save-monday-btn" data-label="💾 Save site details to Monday" data-color="var(--green)" class="btn btn-green" style="margin-bottom:10px">💾 Save site details to Monday</button>
+              <div id="save-monday-status" class="status-msg"></div>
+
+              
