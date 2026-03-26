@@ -415,11 +415,11 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
             </div>
             <input class="search-box" id="deals-search" placeholder="Search deals…" oninput="renderDeals()">
             <div class="filter-strip" id="deals-filters">
-              <span class="chip on" onclick="setDF('',this)">All</span>
-              <span class="chip" onclick="setDF('Appointment',this)">Appt</span>
-              <span class="chip" onclick="setDF('Pricing',this)">Pricing</span>
-              <span class="chip" onclick="setDF('Quote Sent',this)">Quoted</span>
-              <span class="chip" onclick="setDF('Won',this)">Won</span>
+              <span class="chip deals-chip on" onclick="setDF('all',this)">All</span>
+              <span class="chip deals-chip" onclick="setDF('Appointment',this)">Appt</span>
+              <span class="chip deals-chip" onclick="setDF('Pricing',this)">Pricing</span>
+              <span class="chip deals-chip" onclick="setDF('Quote Sent',this)">Quoted</span>
+              <span class="chip deals-chip" onclick="setDF('Won',this)">Won</span>
             </div>
           </div>
           <div class="col-scroll" id="deals-list">
@@ -929,8 +929,13 @@ body{font-family:'DM Sans',-apple-system,sans-serif;font-size:14px;color:var(--t
             </div>
           </div>
           <!-- Contact detail -->
-          <div class="col-panel" id="contact-detail-col" style="flex:1;display:none;">
-            <div class="col-scroll" id="contact-detail-inner">
+          <div class="col-panel" id="contact-detail-col" style="flex:1;display:flex;">
+            <div id="contact-empty-state" class="empty-state" style="flex:1">
+              <div class="empty-icon">👤</div>
+              <div class="empty-title">Select a contact</div>
+              <div class="empty-sub">to view details</div>
+            </div>
+            <div class="col-scroll" id="contact-detail-inner" style="display:none;">
               <div class="cd-head" id="contact-detail-head">
                 <div class="cd-av" id="cd-av">?</div>
                 <div>
@@ -1293,7 +1298,12 @@ function renderStats(){
   allDeals.forEach(d=>{if(c[d.stage]!==undefined)c[d.stage]++;else if(['Quote Sent','Prospect'].includes(d.stage))c.Pricing++;});
   el.innerHTML=[['#6366f1',c.New,'New'],['#0ea5e9',c.Appointment,'Appt'],['#8b5cf6',c.Pricing,'Pricing'],['#059669',c.Won,'Won'],['#1e3a5f',allDeals.length,'Total']].map(([col,val,lbl])=>`<div class="stat-box"><div class="stat-val" style="color:${col}">${val}</div><div class="stat-lbl">${lbl}</div></div>`).join('');
 }
-function setDF(f,btn){dealsFilter=f;document.querySelectorAll('#page-deals .ftab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderDeals();}
+function setDF(f,btn){
+  dealsFilter=f||'all';
+  document.querySelectorAll('.deals-chip').forEach(function(t){t.classList.remove('on');});
+  if(btn) btn.classList.add('on');
+  renderDeals();
+}
 
 // ── Appointments ──────────────────────────────────────────────
 function renderAppointments(){
@@ -3893,10 +3903,21 @@ var _origOpenContact = openContact;
 window.openContact = function(contact){
   var detailCol = document.getElementById('contact-detail-col');
   if(detailCol) detailCol.style.display = 'flex';
+  // Hide empty state, show detail
+  var emptyState = document.getElementById('contact-empty-state');
+  var detailInner = document.getElementById('contact-detail-inner');
+  if(emptyState) emptyState.style.display = 'none';
+  if(detailInner) detailInner.style.display = 'block';
   if(window.innerWidth < 768){
     var listCol = document.getElementById('contacts-list-col');
     if(listCol) listCol.style.display = 'none';
   }
+  // Highlight selected row
+  document.querySelectorAll('#contacts-list .list-row').forEach(function(r){r.classList.remove('sel');});
+  var rows = document.querySelectorAll('#contacts-list .list-row');
+  rows.forEach(function(r){
+    if(r.dataset.idx !== undefined && allContacts[parseInt(r.dataset.idx)] === contact) r.classList.add('sel');
+  });
   _origOpenContact(contact);
 };
 
@@ -3936,10 +3957,10 @@ window.signOut = function(){
 var _origRenderDeals = renderDeals;
 window.renderDeals = function(){
   var search = (document.getElementById('deals-search')?.value||'').toLowerCase();
-  var filter = currentDealFilter||'';
+  var filter = typeof dealsFilter !== 'undefined' ? dealsFilter : 'all';
   var filtered = allDeals.filter(function(d){
     var matchSearch = !search || (d.name||'').toLowerCase().includes(search) || (d.address||'').toLowerCase().includes(search);
-    var matchFilter = !filter || (d.stage||'')=== filter;
+    var matchFilter = !filter || filter === 'all' || (d.stage||'') === filter;
     return matchSearch && matchFilter;
   });
   var sub = document.getElementById('deals-sub');
@@ -4001,7 +4022,13 @@ window.renderAppointments = function(){
   if(loadEl) loadEl.style.display='none';
   if(!todayEl||!upcomingEl) return;
   var today = new Date().toISOString().slice(0,10);
-  var withAppt = allDeals.filter(function(d){return d.apptDate;}).sort(function(a,b){return(a.apptDate+a.apptTime||'')>(b.apptDate+b.apptTime||'')?1:-1;});
+  if(!allDeals || allDeals.length === 0){
+    if(loadEl) loadEl.style.display = 'none';
+    if(todayEl) todayEl.innerHTML = '<div class="empty-state" style="padding:20px 0"><div class="empty-sub">No appointments yet</div></div>';
+    if(sub) sub.textContent = 'No appointments';
+    return;
+  }
+  var withAppt = allDeals.filter(function(d){return d.apptDate;}).sort(function(a,b){return(a.apptDate+(a.apptTime||''))>(b.apptDate+(b.apptTime||''))?1:-1;});
   var todayDeals = withAppt.filter(function(d){return d.apptDate===today;});
   var upcomingDeals = withAppt.filter(function(d){return d.apptDate>today;}).slice(0,10);
   if(sub) sub.textContent = todayDeals.length+' today · '+upcomingDeals.length+' upcoming';
