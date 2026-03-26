@@ -1156,11 +1156,30 @@ let dealColMap = {}; // title -> id map, populated on first load
 async function getDealColumns(){
   if(Object.keys(dealColMap).length > 0) return dealColMap;
   try{
-    const data = await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type}}}`);
+    const data = await mq(`query{boards(ids:${DEALS_BOARD}){columns{id title type settings_str}}}`);
     const cols = data.data?.boards?.[0]?.columns||[];
-    cols.forEach(c => { dealColMap[c.title] = {id:c.id, type:c.type}; });
+    cols.forEach(c => {
+      let labels = null;
+      if(c.settings_str){
+        try{
+          const s = JSON.parse(c.settings_str);
+          if(s.labels) labels = s.labels; // {0:"label1", 1:"label2"...}
+        }catch(e){}
+      }
+      dealColMap[c.title] = {id:c.id, type:c.type, labels:labels};
+    });
   }catch(e){ console.warn('Could not load deal columns:', e); }
   return dealColMap;
+}
+
+function getExactLabel(map, title, value){
+  // Find the exact label from Monday settings that matches our value (case-insensitive)
+  const col = map[title];
+  if(!col || !col.labels) return value; // fall back to raw value
+  const valLower = String(value).toLowerCase().trim();
+  const entries = Object.entries(col.labels);
+  const match = entries.find(function(e){ return String(e[1]).toLowerCase().trim() === valLower; });
+  return match ? match[1] : value; // return exact Monday label text
 }
 
 function colId(map, title){ return map[title]?.id || null; }
@@ -1314,9 +1333,12 @@ async function buildColVals(fields){
     const str = String(value).trim();
     if(str==='') return;
     if(type==='color'||type==='status'){
-      colVals[id] = JSON.stringify({label:str});
-    } else if(type==='long_text'){
-      colVals[id] = JSON.stringify({text:str});
+      // Get exact label text from Monday settings to avoid case/space mismatches
+      const exactLabel = getExactLabel(map, title, str);
+      colVals[id] = JSON.stringify({label:exactLabel});
+    } else if(type==='long_text'||type==='text'){
+      // Long text needs {text:} wrapper, plain text just needs the string
+      colVals[id] = type==='long_text' ? JSON.stringify({text:str}) : str;
     } else if(type==='numeric'||type==='numbers'){
       const n=parseFloat(str);
       if(!isNaN(n)) colVals[id]=String(n);
@@ -1333,21 +1355,32 @@ async function runSave(colVals, btnId, statusId){
   if(!btn) return;
   btn.disabled=true; btn.textContent='Saving...';
   if(statusEl) statusEl.style.display='none';
-  try{
-    if(Object.keys(colVals).length===0) throw new Error('No fields to save');
-    const cvStr=JSON.stringify(JSON.stringify(colVals));
-    await mq('mutation{change_multiple_column_values(board_id:'+DEALS_BOARD+',item_id:'+selectedDeal.id+',column_values:'+cvStr+'){id}}');
-    btn.textContent='✓ Saved!'; btn.style.background='#10b981';
-    if(statusEl){statusEl.textContent='✓ '+Object.keys(colVals).length+' field(s) saved';statusEl.style.color='#059669';statusEl.style.display='block';}
-    const origLabel=btn.dataset.label||'Save';
-    const origColor=btn.dataset.color||'#059669';
-    setTimeout(function(){btn.disabled=false;btn.textContent=origLabel;btn.style.background=origColor;if(statusEl)statusEl.style.display='none';},3000);
-  }catch(err){
-    if(statusEl){statusEl.textContent='✗ '+err.message;statusEl.style.color='#dc2626';statusEl.style.display='block';}
-    btn.disabled=false;
-    btn.textContent=btn.dataset.label||'Save';
-    btn.style.background=btn.dataset.color||'#059669';
+  const entries=Object.entries(colVals);
+  if(entries.length===0){
+    btn.disabled=false; btn.textContent=btn.dataset.label||'Save';
+    return;
   }
+  let saved=0, failed=[];
+  // Save each column individually so one bad label doesn't block the rest
+  for(const [colId, val] of entries){
+    try{
+      const cvStr=JSON.stringify(JSON.stringify({[colId]:val}));
+      await mq('mutation{change_multiple_column_values(board_id:'+DEALS_BOARD+',item_id:'+selectedDeal.id+',column_values:'+cvStr+'){id}}');
+      saved++;
+    }catch(e){
+      failed.push(colId);
+      console.warn('Could not save column '+colId+':', e.message);
+    }
+  }
+  const origLabel=btn.dataset.label||'Save';
+  const origColor=btn.dataset.color||'#059669';
+  btn.textContent='✓ Saved!'; btn.style.background='#10b981';
+  if(statusEl){
+    statusEl.textContent='✓ '+saved+' saved'+(failed.length?' ('+failed.length+' skipped)':'');
+    statusEl.style.color= failed.length?'#d97706':'#059669';
+    statusEl.style.display='block';
+  }
+  setTimeout(function(){btn.disabled=false;btn.textContent=origLabel;btn.style.background=origColor;if(statusEl)statusEl.style.display='none';},3000);
 }
 
 // ── Save overview / site details to Monday ────────────────────
