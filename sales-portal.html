@@ -627,7 +627,7 @@ function renderDeals(){
   if(dealsFilter!=='all')deals=deals.filter(d=>d.stage===dealsFilter);
   if(search)deals=deals.filter(d=>d.name.toLowerCase().includes(search)||(d.address||'').toLowerCase().includes(search));
   const el=document.getElementById('deals-list');if(!el)return;
-  if(deals.length===0){el.innerHTML='<div class="empty"><div style="font-size:32px;margin-bottom:8px">\u1f4bc</div>No deals found</div>';return;}
+  if(deals.length===0){el.innerHTML='<div class="empty"><div style="font-size:32px;margin-bottom:8px">💼</div>No deals found</div>';return;}
   el.innerHTML=deals.map(d=>{
     const init=d.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
     const apptStr=d.apptDate?fmtDate(d.apptDate)+(d.apptTime?' at '+fmtTime(d.apptTime):''):'';
@@ -674,7 +674,7 @@ function renderAppointments(){
       </div>
       <div class="appt-info">
         <div class="appt-name">${d.name}</div>
-        ${d.apptTime?`<div class="appt-time">\u1f550 ${fmtTime(d.apptTime)}</div>`:''}
+        ${d.apptTime?`<div class="appt-time">🕐 ${fmtTime(d.apptTime)}</div>`:''}
         ${d.apptType?`<span class="badge ${apptTypeBadge(d.apptType)}" style="display:inline-block;margin-bottom:4px">${d.apptType}</span>`:''}
         <div class="appt-meta">${d.address||d.phone||''}</div>
         <span class="badge ${sBadge(d.stage)}" style="display:inline-block;margin-top:4px">${d.stage}</span>
@@ -684,7 +684,7 @@ function renderAppointments(){
   const te=document.getElementById('appts-today'),ue=document.getElementById('appts-upcoming');
   te.innerHTML=todayA.length>0?`<div style="font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">Today</div>`+todayA.map(d=>html(d,true)).join(''):`<div style="background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:16px;text-align:center;color:#94a3b8;font-size:13px;margin-bottom:10px">No appointments today</div>`;
   ue.innerHTML=upcomingA.length>0?`<div style="font-size:12px;font-weight:600;color:#1e3a5f;margin-bottom:8px;margin-top:14px;text-transform:uppercase;letter-spacing:0.06em">Upcoming</div>`+upcomingA.map(d=>html(d,false)).join(''):'';
-  if(!todayA.length&&!upcomingA.length)ue.innerHTML='<div class="empty"><div style="font-size:32px;margin-bottom:8px">\u1f4c5</div>No upcoming appointments</div>';
+  if(!todayA.length&&!upcomingA.length)ue.innerHTML='<div class="empty"><div style="font-size:32px;margin-bottom:8px">📅</div>No upcoming appointments</div>';
 }
 
 // \u2500\u2500 Contacts \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -710,7 +710,7 @@ function renderContacts(){
   if(contactsFilter!=='all')contacts=contacts.filter(c=>c.clientType===contactsFilter);
   if(search)contacts=contacts.filter(c=>c.name.toLowerCase().includes(search)||(c.address||'').toLowerCase().includes(search));
   const el=document.getElementById('contacts-list');if(!el)return;
-  if(contacts.length===0){el.innerHTML='<div class="empty"><div style="font-size:32px;margin-bottom:8px">\u1f465</div>No contacts found</div>';return;}
+  if(contacts.length===0){el.innerHTML='<div class="empty"><div style="font-size:32px;margin-bottom:8px">👥</div>No contacts found</div>';return;}
   const typeCls={'Client':'b-client','Architect':'b-pricing','Contractor':'b-prospect'};
   el.innerHTML=contacts.map(c=>{
     const init=c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
@@ -942,14 +942,14 @@ function addProduct(){
           <div class="canvas-toolbar">
             <button class="tool-btn active" id="${id}-tool-pen" onclick="setTool('${id}','pen')">\u270f\ufe0f Pen</button>
             <button class="tool-btn" id="${id}-tool-erase" onclick="setTool('${id}','erase')">\u2b1c Eraser</button>
-            <button class="tool-btn" onclick="clearCanvas('${id}')">\u1f5d1\ufe0f Clear</button>
+            <button class="tool-btn" onclick="clearCanvas('${id}')">🗑\ufe0f Clear</button>
             ${SWATCHES.map(c=>`<div class="color-swatch${c==='#1a1a1a'?' active':''}" style="background:${c}" onclick="setColor('${id}','${c}',this)"></div>`).join('')}
           </div>
         </div>
       </div>
       <div class="sub-section">
         <div class="sub-title">Item photos</div>
-        <div class="upload-zone" onclick="document.getElementById('${id}-photos').click()">\u1f4f7 Add photos for this item</div>
+        <div class="upload-zone" onclick="document.getElementById('${id}-photos').click()">📷 Add photos for this item</div>
         <input type="file" id="${id}-photos" accept="image/*" multiple style="display:none" onchange="handleItemPhotos('${id}',event)">
         <div class="photo-grid" id="${id}-photo-grid"></div>
       </div>
@@ -1019,7 +1019,7 @@ function handleFiles(e){
 function renderFilesList(){
   document.getElementById('files-list').innerHTML=projectFiles.map((f,i)=>`
     <div style="display:flex;align-items:center;gap:10px;padding:8px;background:#f8fafc;border:1px solid #e5e5e5;border-radius:7px;margin-bottom:6px">
-      <span style="font-size:20px">${f.type?.includes('pdf')?'\u1f4c4':'\u1f4ce'}</span>
+      <span style="font-size:20px">${f.type?.includes('pdf')?'📄':'📎'}</span>
       <span style="flex:1;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</span>
       <button onclick="projectFiles.splice(${i},1);renderFilesList()" style="background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;border:none;border-radius:5px;padding:3px 8px;font-size:12px;cursor:pointer">Remove</button>
     </div>`).join('');
@@ -1039,7 +1039,7 @@ async function loadMondayFiles(){
       const ext=(a.file_extension||'').toLowerCase().replace('.','');
       const url=a.public_url||'';
       if(imgExts.includes(ext))return`<div style="margin-bottom:8px"><img src="${url}" style="width:100%;border-radius:8px;cursor:pointer" onclick="window.open('${url}','_blank')"><div style="font-size:11px;color:#64748b;margin-top:4px">${a.name}</div></div>`;
-      return`<div style="display:flex;align-items:center;gap:10px;padding:8px;background:#f8fafc;border:1px solid #e5e5e5;border-radius:7px;margin-bottom:6px"><span style="font-size:20px">\u1f4c4</span><span style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.name}</span><a href="${url}" target="_blank" style="background:#1e3a5f;color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;text-decoration:none">Open</a></div>`;
+      return`<div style="display:flex;align-items:center;gap:10px;padding:8px;background:#f8fafc;border:1px solid #e5e5e5;border-radius:7px;margin-bottom:6px"><span style="font-size:20px">📄</span><span style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.name}</span><a href="${url}" target="_blank" style="background:#1e3a5f;color:#fff;padding:4px 10px;border-radius:5px;font-size:11px;text-decoration:none">Open</a></div>`;
     }).join('');
   }catch(e){if(loadEl)loadEl.textContent='Could not load files.';}
 }
@@ -1280,7 +1280,7 @@ async function submitQuote(){
     setStep(6,'active');
     if(!isWon){await updateStage('Quote Sent');}
     const pv=document.getElementById('pc-sold').value;
-    const note=`\u1f4bc Sales visit by ${currentUser} on ${new Date().toLocaleDateString('en-GB')}.\\n\\nProducts: ${products.length} item(s)\\n${pv?'Quoted: \u00a3'+parseFloat(pv).toLocaleString():''}\\n${isWon?'\\n\u2705 WON \u2014 Surveyor Order Pack generated and uploaded.':''}\\n\\nCustomer quote PDF uploaded.`;
+    const note=`💼 Sales visit by ${currentUser} on ${new Date().toLocaleDateString('en-GB')}.\\n\\nProducts: ${products.length} item(s)\\n${pv?'Quoted: \u00a3'+parseFloat(pv).toLocaleString():''}\\n${isWon?'\\n\u2705 WON \u2014 Surveyor Order Pack generated and uploaded.':''}\\n\\nCustomer quote PDF uploaded.`;
     await mq(`mutation{create_update(item_id:${selectedDeal.id},body:"${note.replace(/"/g,'\\"')}"){id}}`);
     setStep(6,'done');
     document.getElementById('progress-title').textContent=isWon?'\u2713 Won! Quote + Surveyor Order Pack submitted!':'\u2713 Quote submitted!';
